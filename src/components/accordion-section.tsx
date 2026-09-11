@@ -61,7 +61,7 @@ export function AccordionSection({
       ref={ref}
       name="home-section"
       open={defaultOpen}
-      className="group border-b border-rule"
+      className="group/accordion border-b border-rule"
     >
       <summary
         /*
@@ -73,7 +73,7 @@ export function AccordionSection({
       >
         <span
           aria-hidden
-          className="h-[14px] w-[14px] shrink-0 bg-accent transition-transform duration-200 group-open:rotate-45"
+          className="h-[14px] w-[14px] shrink-0 bg-accent transition-transform duration-200 group-open/accordion:rotate-45"
         />
 
         <h2 className="font-serif text-[30px] leading-none font-semibold lowercase">
@@ -90,7 +90,7 @@ export function AccordionSection({
           <Link
             href={href}
             onClick={(e) => e.stopPropagation()}
-            className="hidden font-mono text-[11px] font-medium tracking-[0.12em] text-accent lowercase transition-opacity group-open:inline hover:opacity-70"
+            className="hidden font-mono text-[11px] font-medium tracking-[0.12em] text-accent lowercase transition-opacity group-open/accordion:inline hover:opacity-70"
           >
             {hrefLabel ?? "view all"} →
           </Link>
@@ -106,7 +106,7 @@ export function AccordionSection({
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="shrink-0 text-ink-muted transition-transform duration-200 group-open:-rotate-180"
+          className="shrink-0 text-ink-muted transition-transform duration-200 group-open/accordion:-rotate-180"
         >
           <path d="M6 9l6 6 6-6" />
         </svg>

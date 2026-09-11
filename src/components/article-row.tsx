@@ -11,7 +11,7 @@ export function ArticleRow({ article }: { article: ArticleMeta }) {
         The rail is the left border; the dot is an ::before-style span pinned
         onto it. No bottom rule — the continuous rail is what separates rows.
       */
-      className="group relative flex items-start gap-5 border-l-2 border-rule-strong py-5 pl-7"
+      className="group/row relative flex items-start gap-5 border-l-2 border-rule-strong py-5 pl-7"
     >
       {/*
         The ring is drawn in the page ground rather than left transparent, so
@@ -38,7 +38,7 @@ export function ArticleRow({ article }: { article: ArticleMeta }) {
           {article.title}
           <span
             aria-hidden
-            className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-accent transition-transform duration-200 group-hover:scale-x-100"
+            className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-accent transition-transform duration-200 group-hover/row:scale-x-100"
           />
         </h3>
         <span className="tabular font-mono text-[11px] text-ink-muted">

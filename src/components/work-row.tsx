@@ -16,7 +16,7 @@ export function WorkRow({
   return (
     <Link
       href={`/work/${project.slug}`}
-      className="group block border-b border-rule py-5 transition-colors"
+      className="group/row block border-b border-rule py-5 transition-colors"
     >
       <div className="flex items-baseline gap-4 sm:gap-6">
         <span className="tabular font-mono text-[11px] text-ink-faint">
@@ -33,7 +33,7 @@ export function WorkRow({
               {project.title}
               <span
                 aria-hidden
-                className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-accent transition-transform duration-200 group-hover:scale-x-100"
+                className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-accent transition-transform duration-200 group-hover/row:scale-x-100"
               />
             </h3>
             <span className="tabular font-mono text-[11px] text-ink-muted">
