@@ -10,7 +10,7 @@ export const site = {
   thesis:
     "I design the system before I choose the stack. That is the part that transfers.",
   location: "New Cairo, Egypt",
-  email: "baytreeeg99@gmail.com",
+  email: "omar@khashab.horusbyte.com",
   /*
     TODO: replace with the real number.
 
