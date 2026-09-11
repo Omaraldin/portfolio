@@ -1,0 +1,21 @@
+{
+  "intro": "The long version of the argument the matrix makes in one glance.",
+  "sections": [
+    {
+      "title": "The short version",
+      "paragraphs": [
+        "I design the system before I choose the stack. That is the part that transfers.",
+        "I started building things at ten, which meant I picked up the habit of learning a technology because a problem needed it, rather than because it was next on a syllabus. That is still how I work.",
+        "The result is a range that looks scattered on a CV: firmware and Flutter, scrapers and Shopify, games and reverse engineering. What connects them is not the tools. It is that each one was a system with a source of truth, a failure mode, and a data path that had to be designed before anything could be written."
+      ]
+    },
+    {
+      "title": "On being a generalist",
+      "paragraphs": [
+        "The fair version of the worry is this: someone who has touched ten things may know none of them deeply, and may leave when the job turns out to be one thing.",
+        "My answer is that the depth is on a different axis. An offline sync conflict, a dropped MQTT uplink, and a rate-limited scraper are the same question in different clothes — what is authoritative, and what happens when two sources disagree. I have answered that question in enough shapes that the framework is the easy part.",
+        "I take unfamiliar projects deliberately, because that is the fastest way to find out where my model of a problem is wrong."
+      ]
+    }
+  ]
+}

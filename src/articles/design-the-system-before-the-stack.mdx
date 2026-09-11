@@ -1,0 +1,60 @@
+---
+title: "Design the system before the stack"
+description: "Why the architecture question is the transferable one, and the framework question mostly is not."
+date: "2026-06-14"
+tags: ["architecture", "systems"]
+related: ["iot-telemetry-platform", "offline-first-mobile-app"]
+draft: true
+---
+
+PLACEHOLDER — this article is a structural sample so the writing pipeline can be
+built and reviewed. It is marked as a draft, so it appears while developing and
+is excluded from the production build. Replace it with real writing.
+
+## The question that actually transfers
+
+Every project starts with two questions, and people usually ask them in the
+wrong order. The loud one is *what should we build this in*. The quiet one is
+*what has to be true for this to work*.
+
+The second question survives a change of framework. The first one does not.
+
+## What that looks like in practice
+
+Take a telemetry system. Before the stack matters at all, the shape of the
+problem is already fixed by things no framework decides:
+
+- Readings arrive from devices with an unreliable uplink.
+- Losing a reading is worse than delivering it late.
+- Operators need to see state, not history, most of the time.
+
+Those three constraints imply buffering at the edge, an append-only ingest path,
+and a read model separate from the write path. That design holds whether the
+service is written in Node, Go, or Elixir.
+
+```ts
+// The shape the constraints imply, before any framework is chosen.
+type Reading = {
+  deviceId: string;
+  recordedAt: number; // device clock, not server clock
+  metric: string;
+  value: number;
+};
+```
+
+Note `recordedAt` comes from the device. That single decision is what makes
+late-arriving data correct rather than confusing — and it is a modelling
+decision, not a technology one.
+
+## The generalist objection
+
+The worry about someone who has worked across many domains is that they know a
+little of everything and not enough of anything.
+
+That worry is fair when the breadth is a list of frameworks. It is not fair when
+the breadth is a set of problems: an offline sync conflict, a dropped MQTT
+uplink, and a rate-limited scraper are all the same question wearing different
+clothes. *What is the source of truth, and what happens when two of them
+disagree?*
+
+Learn that once and the framework is a weekend.

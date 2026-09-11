@@ -1,0 +1,242 @@
+[
+  {
+    "handle": "general",
+    "label": "General",
+    "title": "Software Engineer",
+    "summary": "Software engineer who designs the system before choosing the stack. Shipped production work across embedded, web, mobile, and desktop, and comfortable picking up an unfamiliar technology when the architecture calls for it.",
+    "sections": [
+      {
+        "kind": "derived",
+        "source": "experience",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "projects",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "skills",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "education",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "certifications",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "languages",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "community",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "awards",
+        "visible": true
+      }
+    ]
+  },
+  {
+    "handle": "backend",
+    "label": "Backend",
+    "title": "Backend Engineer",
+    "summary": "Backend engineer focused on API design, data modelling, and systems that stay correct under failure. Built ingest pipelines, sync layers, and queue-driven services in NestJS and Node.",
+    "sections": [
+      {
+        "kind": "derived",
+        "source": "experience",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "projects",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "skills",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "education",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "certifications",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "languages",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "community",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "awards",
+        "visible": true
+      }
+    ]
+  },
+  {
+    "handle": "mobile",
+    "label": "Mobile",
+    "title": "Mobile Engineer",
+    "summary": "Mobile engineer building offline-first Flutter applications backed by APIs I design myself. Comfortable owning the full path from local storage and sync to the server that serves it.",
+    "sections": [
+      {
+        "kind": "derived",
+        "source": "experience",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "projects",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "skills",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "education",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "certifications",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "languages",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "community",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "awards",
+        "visible": true
+      }
+    ]
+  },
+  {
+    "handle": "embedded",
+    "label": "Embedded",
+    "title": "Embedded Software Engineer",
+    "summary": "Embedded and IoT engineer with an electronics background, bridging firmware and the services it talks to. Built telemetry systems end to end, from sensor node to dashboard.",
+    "sections": [
+      {
+        "kind": "derived",
+        "source": "experience",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "projects",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "skills",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "education",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "certifications",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "languages",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "community",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "awards",
+        "visible": true
+      }
+    ]
+  },
+  {
+    "handle": "fullstack",
+    "label": "Full-stack",
+    "title": "Full-Stack Engineer",
+    "summary": "Full-stack engineer shipping complete products: schema, API, and interface. Work spans Next.js and React on the front, NestJS and PostgreSQL behind it.",
+    "sections": [
+      {
+        "kind": "derived",
+        "source": "experience",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "projects",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "skills",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "education",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "certifications",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "languages",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "community",
+        "visible": true
+      },
+      {
+        "kind": "derived",
+        "source": "awards",
+        "visible": true
+      }
+    ]
+  }
+]

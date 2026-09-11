@@ -3,22 +3,38 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "//sync-pdf-worker": "pdf.js loads its worker over HTTP, so it has to be a real file under /public. Copying it on every dev and build keeps it in step with the installed package instead of drifting as a checked-in copy.",
+    "sync-pdf-worker": "node -e \"const fs=require('node:fs');fs.mkdirSync('public/vendor',{recursive:true});fs.copyFileSync('node_modules/pdfjs-dist/build/pdf.worker.min.mjs','public/vendor/pdf.worker.min.mjs')\"",
+    "dev": "bun run sync-pdf-worker && next dev",
+    "build": "bun run sync-pdf-worker && next build",
+    "start": "next start",
+    "//check-cv": "Extracts each CV PDF and checks what an applicant tracking system would see. Needs a running server.",
+    "check-cv": "node scripts/check-cv-pdf.mjs"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.6.0",
+    "gray-matter": "^4.0.3",
     "next": "16.3.0",
+    "next-mdx-remote": "^6.0.0",
+    "pdfjs-dist": "^6.2.108",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "rehype-pretty-code": "^0.14.5",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "shiki": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "rehype-stringify": "^10.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "unified": "^11.0.5"
   },
   "packageManager": "bun@1.3.14",
   "ignoreScripts": [

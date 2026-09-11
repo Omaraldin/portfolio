@@ -1,0 +1,24 @@
+[
+  {
+    "slug": "google-data-analytics",
+    "name": "Google Data Analytics Professional Certificate",
+    "issuer": "Google",
+    "issued": "2024-08",
+    "expires": "",
+    "credentialId": "",
+    "url": "",
+    "document": "",
+    "featured": true
+  },
+  {
+    "slug": "meta-backend-developer",
+    "name": "Back-End Developer Professional Certificate",
+    "issuer": "Meta",
+    "issued": "2024-02",
+    "expires": "",
+    "credentialId": "",
+    "url": "",
+    "document": "",
+    "featured": true
+  }
+]

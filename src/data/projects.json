@@ -1,0 +1,234 @@
+[
+  {
+    "slug": "iot-telemetry-platform",
+    "title": "IoT Telemetry Platform",
+    "summary": "End-to-end pipeline carrying sensor readings from ESP32 nodes to a live dashboard.",
+    "sections": [
+      {
+        "title": "Problem",
+        "body": "Readings were collected by hand from devices in the field, so problems were only discovered days after they happened."
+      },
+      {
+        "title": "Approach",
+        "body": "Firmware batches readings and publishes over MQTT with a store-and-forward buffer for dropouts. An ingest service normalises and writes to a time-series store; the dashboard subscribes to a websocket channel fed by the same pipeline."
+      },
+      {
+        "title": "Outcome",
+        "body": "Operators see device state within seconds, and the buffer means a lost uplink no longer means lost data."
+      }
+    ],
+    "metrics": [
+      {
+        "value": "< 2s",
+        "label": "Ingest to dashboard"
+      },
+      {
+        "value": "40+",
+        "label": "Concurrent nodes"
+      }
+    ],
+    "domains": [
+      "embedded",
+      "backend",
+      "web"
+    ],
+    "capabilities": [
+      "system-design",
+      "realtime",
+      "hardware-integration",
+      "data-flow"
+    ],
+    "stack": [
+      "ESP32",
+      "MQTT",
+      "NestJS",
+      "PostgreSQL",
+      "Next.js"
+    ],
+    "role": "Sole engineer",
+    "timeline": "2025",
+    "links": [],
+    "featured": true,
+    "media": []
+  },
+  {
+    "slug": "offline-first-mobile-app",
+    "title": "Offline-First Mobile App",
+    "summary": "Flutter application that stays usable with no connection and reconciles on reconnect.",
+    "sections": [
+      {
+        "title": "Problem",
+        "body": "Field staff worked in places with no reliable signal, and the existing app was unusable the moment it lost the network."
+      },
+      {
+        "title": "Approach",
+        "body": "Local SQLite is the source of truth. Writes queue as intents and replay on reconnect, with last-write-wins per field and an explicit conflict view for the cases that rule cannot settle."
+      },
+      {
+        "title": "Outcome",
+        "body": "The application works identically offline, and sync conflicts became visible and resolvable instead of silent."
+      }
+    ],
+    "metrics": [
+      {
+        "value": "100%",
+        "label": "Offline feature parity"
+      }
+    ],
+    "domains": [
+      "mobile",
+      "backend"
+    ],
+    "capabilities": [
+      "system-design",
+      "data-flow",
+      "api-design"
+    ],
+    "stack": [
+      "Flutter",
+      "Dart",
+      "SQLite",
+      "NestJS"
+    ],
+    "role": "Mobile and API",
+    "timeline": "2024 — 2025",
+    "links": [],
+    "featured": true,
+    "media": []
+  },
+  {
+    "slug": "data-extraction-pipeline",
+    "title": "Data Extraction Pipeline",
+    "summary": "Scraping and normalisation system for sources that actively resist automation.",
+    "sections": [
+      {
+        "title": "Problem",
+        "body": "The data needed for a client's pricing decisions lived across sites with no APIs, inconsistent markup, and aggressive rate limits."
+      },
+      {
+        "title": "Approach",
+        "body": "Per-source adapters isolate the parts that break, feeding a shared normalisation layer. A scheduler paces requests per host, and a schema check quarantines suspect rows rather than letting them through."
+      },
+      {
+        "title": "Outcome",
+        "body": "A source changing its markup now breaks one adapter instead of the pipeline, and bad data is caught before it reaches the client."
+      }
+    ],
+    "metrics": [
+      {
+        "value": "12k",
+        "label": "Records per run"
+      },
+      {
+        "value": "6",
+        "label": "Sources normalised"
+      }
+    ],
+    "domains": [
+      "automation",
+      "backend"
+    ],
+    "capabilities": [
+      "data-pipelines",
+      "reverse-engineering",
+      "performance"
+    ],
+    "stack": [
+      "Python",
+      "Playwright",
+      "PostgreSQL"
+    ],
+    "role": "Sole engineer",
+    "timeline": "2024",
+    "links": [],
+    "featured": true,
+    "media": []
+  },
+  {
+    "slug": "desktop-inventory-tool",
+    "title": "Desktop Inventory Tool",
+    "summary": "Cross-platform desktop client for stock control on machines with no internet access.",
+    "sections": [
+      {
+        "title": "Problem",
+        "body": "Stock was tracked in a spreadsheet that two people edited on different machines, so the counts disagreed by the end of most weeks."
+      },
+      {
+        "title": "Approach",
+        "body": "A single-binary desktop application over an embedded database, with every mutation written as an append-only entry so a disputed count can be traced back rather than argued about."
+      },
+      {
+        "title": "Outcome",
+        "body": "One source of truth, and a history that explains how each number got there."
+      }
+    ],
+    "role": "Sole engineer",
+    "timeline": "2023",
+    "metrics": [],
+    "domains": [
+      "desktop",
+      "backend"
+    ],
+    "capabilities": [
+      "ui-engineering",
+      "data-flow"
+    ],
+    "stack": [
+      "Electron",
+      "TypeScript",
+      "SQLite"
+    ],
+    "links": [],
+    "media": [],
+    "featured": false
+  },
+  {
+    "slug": "gdgoc-admin-panel",
+    "title": "GDGoC Admin Panel",
+    "summary": "Certificate design, bulk issuance and delivery for Google Developer Groups on Campus chapters.",
+    "sections": [
+      {
+        "title": "Problem",
+        "body": "Chapters issued event certificates by editing a design file once per recipient and mailing each one by hand. The work scaled linearly with attendance, designs drifted between organisers, and a certificate had no way to be checked as genuine after the fact."
+      },
+      {
+        "title": "Approach",
+        "body": "A Go and Fiber API split into domain packages, paired with a React Router SPA. Templates are drawn in a Konva canvas editor and saved as an immutable versioned SceneDefinition, so a batch snapshots the exact design it was issued under. Text layers hold variable keys rather than literals; issuance resolves them per recipient from a spreadsheet import, alongside auto-injected system variables such as the verification URL. Batches hand a job ID to an in-process queue that a worker pool drains, rendering each certificate through a pure-Go rasteriser that handles text, images, gradients and QR codes without CGo, then sending it via the chapter's own SMTP credentials. Auth delegates to an OIDC provider with whitelist-gated registration and per-chapter roles."
+      },
+      {
+        "title": "Outcome",
+        "body": "One design, one recipient sheet and one run replaces the per-certificate loop, and every certificate carries a QR that resolves to a public verification page. The same renderer backs dynamic images, which take their values from URL parameters so share cards and banners come from the same pipeline without creating a batch. Templates and mail templates can be published for reuse across chapters."
+      }
+    ],
+    "metrics": [],
+    "domains": [
+      "web",
+      "backend",
+      "automation"
+    ],
+    "capabilities": [
+      "system-design",
+      "api-design",
+      "ui-engineering",
+      "data-flow",
+      "devops"
+    ],
+    "stack": [
+      "Go",
+      "Fiber",
+      "GORM",
+      "PostgreSQL",
+      "Redis",
+      "React Router v7",
+      "Konva",
+      "TanStack Query",
+      "Tailwind CSS",
+      "Docker"
+    ],
+    "role": "Sole engineer",
+    "timeline": "2026",
+    "links": [],
+    "featured": true,
+    "media": []
+  }
+]
