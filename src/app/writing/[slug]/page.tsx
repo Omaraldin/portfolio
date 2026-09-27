@@ -6,6 +6,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { mdxOptions } from "@/lib/mdx-options";
 import { mdxComponents } from "@/components/mdx-components";
 import { AuthorByline } from "@/components/author-byline";
+import { ReactionBar } from "@/components/reaction-bar";
 import { getArticle, getArticles } from "@/lib/articles";
 import { getProject } from "@/content/projects";
 import { author, site } from "@/content/site";
@@ -170,6 +171,8 @@ export default async function ArticlePage(
           </div>
         </aside>
       ) : null}
+
+      <ReactionBar slug={slug} />
 
       <AuthorByline />
 

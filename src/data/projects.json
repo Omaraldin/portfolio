@@ -18,7 +18,7 @@
       },
       {
         "title": "How it is built",
-        "body": "A monorepo with a **Go + Fiber** API and a **React 19 + React Router v7** single-page app, on **PostgreSQL** and **Redis**, shipped as Docker images to **AWS ECS** via **ECR**.\n\n- **Domain-driven API.** Each area (templates, issuance, mail, verification, dynamic images, chapters, users) is its own package with the same handler → service → repository layering.\n- **Designs as data.** The editor, built on Konva, saves a certificate as a JSON scene. Each save is an immutable version, and a batch snapshots the version it was issued under, so an old certificate always renders exactly as it was issued.\n- **A pure-Go renderer.** Certificates are drawn server-side with `tdewolff/canvas`, handling text, images, gradients, bezier shapes and QR codes with no C dependencies, which keeps the container a small static binary. The same renderer powers certificates and dynamic images.\n- **Batches off the request path.** Issuing a batch hands its ID to an in-process queue that a pool of goroutines drains, sending each email concurrently. Rendering is lazy: a certificate is rasterised the first time it is fetched, then cached, so a big batch never stalls on image work nobody has asked for yet.\n- **Layered variables.** Emails and certificates resolve placeholders in a fixed order: recipient values, then batch-level overrides, then system values such as the certificate ID and verification link.\n- **Auth by Kayan**, a headless identity platform I built, providing OIDC, multi-provider OAuth and role-based access control.\n\nFrontend: Konva, Tiptap, TanStack Query, React Hook Form + Zod, Radix UI, Tailwind CSS. Backend: Fiber, GORM, go-redis, tdewolff/canvas, go-qrcode, gofpdf."
+        "body": "A monorepo with a **Go + Fiber** API and a **React 19 + React Router v7** single-page app, on **PostgreSQL** and **Redis**, shipped as Docker images to **AWS ECS** via **ECR**.\n\n- **Domain-driven API.** Each area (templates, issuance, mail, verification, dynamic images, chapters, users) is its own package with the same handler → service → repository layering.\n- **Designs as data.** The editor, built on Konva, saves a certificate as a JSON scene. Each save is an immutable version, and a batch snapshots the version it was issued under, so an old certificate always renders exactly as it was issued.\n- **A pure-Go renderer.** Certificates are drawn server-side with `tdewolff/canvas`, handling text, images, gradients, bezier shapes and QR codes with no C dependencies, which keeps the container a small static binary. The same renderer powers certificates and dynamic images.\n- **Batches off the request path.** Issuing a batch hands its ID to an in-process queue that a pool of goroutines drains, sending each email concurrently. Rendering is lazy: a certificate is rasterised the first time it is fetched, then cached, so a big batch never stalls on image work nobody has asked for yet.\n- **Layered variables.** Emails and certificates resolve placeholders in a fixed order: recipient values, then batch-level overrides, then system values such as the certificate ID and verification link.\n- **Auth by [Kayan](/work/kayan)**, a headless identity platform I built, providing OIDC, multi-provider OAuth and role-based access control.\n\nFrontend: Konva, Tiptap, TanStack Query, React Hook Form + Zod, Radix UI, Tailwind CSS. Backend: Fiber, GORM, go-redis, tdewolff/canvas, go-qrcode, gofpdf."
       },
       {
         "title": "Results",
@@ -85,6 +85,98 @@
       "alt": "The GDGoC Admin certificate editor: a certificate of appreciation on the canvas, with layers and properties panels either side.",
       "width": 1280,
       "height": 638
+    },
+    "featured": true
+  },
+  {
+    "slug": "kayan",
+    "title": "Kayan",
+    "summary": "A headless identity and access management library for Go: authentication, sessions, authorization, SSO and multi-tenancy, without taking over your router, schema or database.",
+    "sections": [
+      {
+        "title": "The use case",
+        "body": "Almost every backend needs identity: sign-up and login, sessions, roles, maybe single sign-on for a company customer, maybe separate tenants. Kayan is a Go library that provides that whole layer (authentication, sessions, authorization, federation, provisioning, audit and multi-tenancy) as code you import, not a service you run beside your app.\n\nIt is what signs people in to [GDGoC Admin](/work/gdgoc-admin): Google login, whitelist-gated registration and per-chapter roles for the organisers of 20+ chapters."
+      },
+      {
+        "title": "The problem",
+        "body": "Identity libraries tend to force one of two bad trades.\n\n**Frameworks** do everything, but on their terms: you adopt their router, their user table, their session model and often their database. Fitting one into an existing service means reshaping the service around it.\n\n**Toolkits** hand you primitives, such as a JWT library, a hash function or a SAML parser, and leave the assembly to you. That assembly is exactly where authentication bypasses come from: the signature checked over one part of a document while claims are read from another, a token algorithm taken from the token itself, a redirect URL matched by prefix.\n\nKayan takes a third position: **the security decisions live inside the library; the architectural decisions stay in your application.**"
+      },
+      {
+        "title": "What it does",
+        "body": "- **Authentication**: password, magic link, email and SMS one-time codes, TOTP, WebAuthn passkeys, API keys, recovery codes, LDAP, and social login over OIDC, with step-up, rate limiting and lockout.\n- **Sessions**: stateless JWT or revocable database-backed sessions.\n- **Authorization**: role-based access with role inheritance and wildcard permissions (`users:*` matches `users:delete`), attribute-based and relationship-based access.\n- **Federation and provisioning**: acting as an OAuth 2.0 / OpenID Connect provider, SAML 2.0 as both service provider and identity provider, and SCIM 2.0 user provisioning.\n- **Multi-tenancy**: eight ways to work out which tenant a request belongs to, with isolation enforced in the storage layer.\n- **Operations**: audit logging, consent, health checks and OpenTelemetry metrics."
+      },
+      {
+        "title": "How it is built",
+        "body": "Three rules shape the whole API.\n\n- **Headless.** Kayan has no router and never writes an HTTP response. It does own parsing and validation: `ParseAuthorizeRequest` enforces the exact-match `redirect_uri` allowlist and the PKCE policy itself, because a caller who parses the query string by hand has to reimplement both, and that is where open redirects come from.\n- **Secure default, real seam.** Every algorithm, hash, store and clock sits behind an interface with a safe default. RS256 signing can become Ed25519, or a signer whose key never leaves a KMS; bcrypt can become argon2id in one line. PKCE is required unless you explicitly turn it off, and each escape hatch documents what it gives up.\n- **Bring your own schema.** No base struct to embed, no reserved columns, no generics. Your `User` type stays yours. Generics were ruled out on purpose: a type parameter spreads to every manager, strategy and hook, and a service with two identity models would end up with two copies of the library.\n\nThe code is split into eight Go modules (`core`, plus GORM, Redis, OIDC provider, SAML, SCIM, LDAP and a testing kit), so a service that only needs password login compiles no OAuth, SAML or SCIM code. `core` never imports a sibling module, and CI enforces it. Checked-in API baselines flag any accidental change to the public surface."
+      },
+      {
+        "title": "Security by construction",
+        "body": "The defences are built so they cannot be skipped by accident:\n\n- **SAML signature wrapping** is prevented by the types. Verification returns only the element the signature covers; the unverified document is never carried alongside it, so there is nothing unverified to read claims from.\n- **JWT algorithm confusion** is prevented by routing every token parse through one function that pins the expected algorithm, so an attacker cannot re-sign a token as HS256 using the published public key.\n- **Stolen refresh tokens** are caught: spent tokens are kept, not deleted, so a replay is recognised and the whole token family is revoked.\n- **Account enumeration by timing** is closed: a login for an unknown account still pays for a hash comparison, so it takes as long as a real one.\n- **Tenant isolation fails closed**: a scoped query with no tenant in context is an error, never an unscoped read and never a silently empty result.\n\nTesting is adversarial. Security tests are tables of hostile inputs (fourteen malicious `redirect_uri` variants, signature-wrapping layouts, algorithm confusion on every parse path), and each asserts the specific error rather than just \"an error\". Nine fuzz targets cover the parsers that read untrusted bytes, and every security fix was verified by reverting it and watching its test fail."
+      },
+      {
+        "title": "Status and results",
+        "body": "Kayan is open source under Apache 2.0, at **v0.3.0** (September 2026), with eleven runnable example backends and a tested PostgreSQL + Redis production reference. It runs in production as the identity layer for GDGoC Admin.\n\nIt is deliberately honest about being pre-1.0: the README lists its known gaps (for example, no OAuth device flow or dynamic client registration yet) and the public API can still change. Protocol certification and an independent security review are the next milestones."
+      }
+    ],
+    "role": "Creator & maintainer",
+    "timeline": "2025 — 2026",
+    "metrics": [
+      {
+        "value": "8",
+        "label": "Independent Go modules"
+      },
+      {
+        "value": "9",
+        "label": "Fuzz targets on untrusted input"
+      },
+      {
+        "value": "44%",
+        "label": "Of the Go code is tests"
+      },
+      {
+        "value": "20+",
+        "label": "Chapters signing in through it"
+      }
+    ],
+    "domains": [
+      "backend",
+      "security"
+    ],
+    "capabilities": [
+      "system-design",
+      "api-design",
+      "data-flow"
+    ],
+    "stack": [
+      "Go",
+      "OAuth 2.0",
+      "OpenID Connect",
+      "SAML 2.0",
+      "SCIM 2.0",
+      "WebAuthn",
+      "LDAP",
+      "GORM",
+      "PostgreSQL",
+      "Redis",
+      "OpenTelemetry",
+      "GitHub Actions"
+    ],
+    "links": [
+      {
+        "label": "Source on GitHub",
+        "href": "https://github.com/getkayan/kayan"
+      },
+      {
+        "label": "Go package docs",
+        "href": "https://pkg.go.dev/github.com/getkayan/kayan/core"
+      }
+    ],
+    "media": [],
+    "thumbnail": {
+      "src": "/media/kayan/kayan-cover.png",
+      "alt": "The Kayan wordmark in white on green, above the line \"Open-source headless IAM backend library\".",
+      "width": 1038,
+      "height": 649
     },
     "featured": true
   },

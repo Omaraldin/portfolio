@@ -20,6 +20,16 @@ const nextConfig: NextConfig = {
     and two dynamic segments there cannot both match. The handler therefore
     lives at `/cv/<handle>/pdf` and this rewrite exposes it at the nicer URL.
   */
+  /*
+    The reactions API checks a slug against the articles on disk. Pages read
+    those files at build time, but this route reads them per request, inside a
+    serverless function — which only ships files the tracer can see. The
+    directory is read by a computed path, so it is listed here explicitly.
+  */
+  outputFileTracingIncludes: {
+    "/api/reactions/[slug]": ["./src/articles/**/*"],
+  },
+
   async rewrites() {
     return [
       {

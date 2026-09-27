@@ -1,0 +1,197 @@
+---
+title: "Make the wrong thing hard to write: lessons from building Kayan"
+description: "Most authentication bypasses are not clever. They are a check someone forgot. Building an identity library taught me to stop writing checks and start designing shapes where the check cannot be skipped."
+date: "2026-09-27"
+tags: ["security", "go", "api-design"]
+related: ["kayan", "gdgoc-admin"]
+draft: true
+---
+
+[Kayan](/work/kayan) is the identity library I've been building in Go:
+authentication, sessions, authorization, SAML and OAuth, multi-tenancy. It is
+what signs people in to [GDGoC Admin](/work/gdgoc-admin).
+
+The most useful thing it taught me has nothing to do with any one protocol.
+It's this: **most security bugs are not clever, they are forgotten.** Someone
+checked the signature on one path and not the other. Someone added a
+repository method and didn't copy the `WHERE tenant_id = ?`. Someone parsed a
+redirect URL by hand.
+
+You cannot fix forgetting with more care. People will always forget. What you
+can do is design the code so the forgotten version either doesn't compile,
+fails loudly, or simply has nowhere to go. Here are five places Kayan does
+that, and the one habit that proved they work.
+
+## 1. Don't return what hasn't been verified
+
+XML Signature Wrapping is how SAML libraries get broken, and the pattern is
+always the same. A message carries a genuine signed element *and* a forged
+one. The verifier checks the signature over the first, and the application
+reads the user's identity from the second.
+
+The usual fix is a check: "make sure the element you read from is the one that
+was signed." That check has to be remembered by every piece of code that ever
+reads a claim, forever.
+
+Kayan's fix is a type. Verification doesn't return a yes-or-no; it returns
+*only the part that was verified*:
+
+```go
+// ValidatedDocument is the portion of a SAML message whose signature has been
+// verified.
+//
+// Claims must be read only from here. The unverified document is not carried
+// alongside it, so the Signature Wrapping family of attacks — where a valid
+// signature covers a decoy element while the parser reads an attacker's
+// injected one — cannot be expressed: there is no unverified tree to read.
+type ValidatedDocument struct {
+	// Element is the signed element, as verified.
+	Element *etree.Element
+
+	// XML is Element serialized. Unmarshal from this, never from the original
+	// request body.
+	XML []byte
+	// ...
+}
+```
+
+Everything downstream takes a `ValidatedDocument`. There's no way to ask it
+for the forged element, because it doesn't have one. The attack isn't blocked
+by a check; it just has nothing to hold on to.
+
+## 2. One path, not many
+
+JWT algorithm confusion is a classic. A service verifies tokens with an RSA
+public key. An attacker takes a real token, re-signs it with HMAC using the
+public key's text as the secret, and sets the header to `HS256`. A library that
+trusts the token's own `alg` header will HMAC-check it against the public key —
+which is public — and accept the forgery.
+
+The fix is easy: ignore the header and require the algorithm you configured.
+The hard part is making sure *every* parse does it. Kayan has one function for
+that, and every parse goes through it:
+
+```go
+// Pinning the algorithm is what stops an attacker re-signing an RS256 token as
+// HS256 using the PEM of the public key as the HMAC secret. Every parse in this
+// package goes through here so the check cannot be present on some paths and
+// missing on others.
+func (s *JWTStrategy) keyFunc(expected jwt.SigningMethod, key any) jwt.Keyfunc {
+	return func(token *jwt.Token) (any, error) {
+		if expected == nil {
+			return nil, fmt.Errorf("session: no signing method configured")
+		}
+		if token.Method.Alg() != expected.Alg() {
+			return nil, fmt.Errorf("session: unexpected signing method: %v", token.Header["alg"])
+		}
+		return key, nil
+	}
+}
+```
+
+The comment is doing real work. It tells the next person, including me in six
+months, that the point isn't the check itself; it's that there is only one of
+it.
+
+The same idea shapes the whole API. Kayan is headless, with no router and no
+HTTP handlers, but it still owns *parsing*. `ParseAuthorizeRequest` enforces
+the exact-match `redirect_uri` allowlist and the PKCE rules itself, because an
+app that parses the query string by hand has to reimplement both, and that's
+where open redirects come from.
+
+## 3. Make the default the safe one, and the exception explicit
+
+Multi-tenant apps leak data in the most boring way possible. Every repository
+method has `.Where("tenant_id = ?", id)`, until someone adds a new one, writes
+a raw query for a report, or adds a preload of a related table. That query
+returns another customer's rows, and it looks exactly like a correct query that
+found a lot of results. No error, no failing test, no log line.
+
+Kayan inverts it. One call at startup registers a GORM callback that runs on
+*every* statement touching a tenant-scoped table:
+
+```go
+if err := gormstore.RegisterTenantIsolation(db); err != nil {
+	return err
+}
+```
+
+After that, reads and writes are scoped automatically, and — this is the
+important part — **a query with no tenant in context fails**. It doesn't run
+unscoped, and it doesn't return an empty list either. An empty list looks like
+"this customer has no users", and someone would believe it.
+
+Crossing tenants is still possible, for admin jobs and migrations. But you have
+to type it out, with `tenant.WithSystemContext`, where a reviewer can see it.
+Forgetting produces an error; crossing a boundary requires a sentence.
+
+## 4. Keep the evidence
+
+Refresh token rotation is standard: every time a client refreshes, it gets a
+new token and the old one is thrown away. But rotation alone doesn't detect
+theft. If an attacker uses a stolen token first, the attacker now holds the
+only valid one, and the real user's next refresh just fails, which looks like
+an ordinary expired session.
+
+The counterintuitive fix is to **not throw the old token away**. Kayan keeps
+spent tokens, marked as used, and links every token from one login into a
+family. If a used token ever shows up again, two parties have held it, so the
+whole family is revoked and the user signs in again. Deleting the token would
+have destroyed exactly the evidence that detects the theft.
+
+The same instinct applies to login timing. If "no such account" returns
+instantly while a real account pays around 250ms for a password hash, anyone
+can tell which emails are registered just by timing the responses. So an
+unknown account is compared against a dummy hash too. Identical error messages
+aren't enough when the stopwatch disagrees.
+
+## 5. Keep the architecture decisions out of the library
+
+The last lesson is about what a library *shouldn't* decide. Kayan has no user
+table to adopt, no base struct to embed, no reserved columns. Your `User` type
+stays yours.
+
+I also deliberately didn't use Go generics for this, which surprises people.
+Generics would give nicer type safety at the call site, but a type parameter
+spreads: `Storage[T]` forces `LoginManager[T]`, which forces `Strategy[T]`,
+every option and every hook. A service with two kinds of identity, say users
+and service accounts, would end up with two copies of the entire library. A
+single type assertion at the boundary, where you already know the type, is a
+much smaller price.
+
+That decision is written down as a rule in the repository, not left as a
+preference, because it's the kind of thing that gets quietly reversed one
+function signature at a time.
+
+## The habit that made it real: tests that can fail
+
+None of the above means anything if the tests don't actually test it, and for
+a while some of Kayan's didn't.
+
+A security test that asserts `err != nil` often passes for the wrong reason:
+the input was malformed and rejected by the parser before it ever reached the
+defense, or a mock returned an error no matter what. The test goes green, and
+it's testing nothing.
+
+So Kayan's security tests follow two rules:
+
+- **Assert the specific error.** `errors.Is(err, ErrInvalidRequest)`, not just
+  "some error happened".
+- **Revert the fix and watch the test fail.** Every security fix was checked
+  this way. A test that has never been seen failing has never been shown to
+  work.
+
+The tests themselves are tables of hostile inputs rather than one example: the
+`redirect_uri` corpus alone has fourteen entries, covering subdomain tricks,
+`user@host` confusion, path traversal, a Cyrillic look-alike character, and a
+trailing slash. On top of that, nine fuzz targets hammer the parsers that read
+untrusted bytes on every push.
+
+## The common thread
+
+Every one of these is the same move: take a rule that people have to remember,
+and turn it into a shape that makes the rule automatic. Return only verified
+data. Route every parse through one function. Make the safe path the default
+and the unsafe one explicit. Keep the evidence. Prove the test can fail.
+
+None of it is clever. That's the point. Clever defenses get forgotten too.
