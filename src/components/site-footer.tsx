@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { site } from "@/content/site";
-import { Chibi } from "./chibi";
-import { Emoji } from "./emoji";
 
 /*
   Everything a reader might want once they reach the bottom: where to follow
@@ -18,18 +16,12 @@ const MORE = [
 export function SiteFooter() {
   return (
     <footer className="no-print px-3 pb-3 sm:px-6 sm:pb-6">
-      <div className="relative mx-auto w-full max-w-[1240px] pt-28 sm:pt-36">
-        {/*
-          The chibi fills the top padding exactly (same height), so his feet
-          land on the card's edge. He sits outside the card's clipped box so the
-          rounded corner never cuts him off.
-        */}
-        <div className="absolute top-0 right-6 flex translate-y-1.5 items-end gap-2 sm:right-16">
-          <p className="mb-16 hidden rounded-[18px] rounded-br-sm border-2 border-on-pop bg-white px-4 py-2 text-[14px] font-semibold text-on-pop shadow-[3px_3px_0_0_var(--on-pop)] sm:block">
-            see you next post <Emoji char="👋" />
-          </p>
-          <Chibi className="h-28 sm:h-36" sizes="110px" />
-        </div>
+      {/*
+        The chibi who stands on this card lives in ChibiDock, rendered just
+        above the footer in the root layout: on phones he rides along the
+        bottom of the screen and lands here.
+      */}
+      <div className="relative mx-auto w-full max-w-[1240px]">
         <div className="relative overflow-hidden rounded-[36px] bg-night px-6 py-14 text-white sm:px-12 sm:py-16">
           {/* Decorative blobs. Behind the text, never under a link. */}
           <span

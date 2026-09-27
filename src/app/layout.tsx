@@ -7,6 +7,7 @@ import {
 import { site } from "@/content/site";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ChibiDock } from "@/components/chibi-dock";
 import "./globals.css";
 
 /*
@@ -119,6 +120,7 @@ export default function RootLayout({
         <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 pb-24 sm:px-6">
           {children}
         </main>
+        <ChibiDock />
         <SiteFooter />
       </body>
     </html>
