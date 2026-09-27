@@ -1,5 +1,94 @@
 [
   {
+    "slug": "gdgoc-admin",
+    "title": "GDGoC Admin",
+    "summary": "An open-source platform that designs, issues, emails and verifies event certificates for 20+ GDG on Campus chapters across Egypt.",
+    "sections": [
+      {
+        "title": "The use case",
+        "body": "Google Developer Groups on Campus chapters run workshops, study jams and hackathons all year, and every event ends the same way: each attendee is owed a certificate.\n\nGDGoC Admin is where chapter leaders do that work. A leader designs the certificate once, drops in the attendee sheet, and the platform renders a personalised certificate for every row, emails it from the chapter's own address, and gives each one a public page anyone can use to check it is genuine. A super admin oversees every chapter, and good templates can be shared so a new chapter starts from a design that already works."
+      },
+      {
+        "title": "The problem",
+        "body": "At GDG on Campus NCTU, every event meant hours of copy-pasting names into a design file, exporting one certificate at a time, and sending emails by hand. The work grew in a straight line with attendance, so the bigger the community got, the worse it became.\n\nIt was also fragile. A typo meant redoing a certificate, designs drifted between organisers, and once a certificate left the inbox there was no way to prove it was real. Every chapter across Egypt was solving the same problem on its own."
+      },
+      {
+        "title": "Features",
+        "body": "- **Visual certificate editor**: drag, resize, rotate and layer text, images, vector shapes and QR codes on a canvas, Canva-style. Text layers can be *dynamic*, bound to a variable such as the recipient's name.\n- **Bulk issuance**: import recipients from CSV or Excel, optionally compute cells with spreadsheet-style formulas, and issue the whole batch in one run.\n- **Direct mail to recipients**: branded HTML emails written in a rich-text editor, with variable placeholders, sent through each chapter's own SMTP (manual, Google or Microsoft OAuth) with the certificate attached.\n- **Public verification**: every certificate carries a QR code that opens a public page confirming it, with a proper link preview when shared.\n- **Dynamic images**: personalised social cards and banners rendered on the fly from a single URL with query parameters, with no batch needed.\n- **Versioned, shareable templates**: every save is an immutable version, and templates and email designs can be published for other chapters to clone.\n- **PDF and PNG output**, including a print-safe colour mode.\n- **Font library**: upload custom fonts, with automatic fallback to Google Fonts.\n- **Roles and audit log**: super admins and chapter leaders, whitelist-only sign-up, and a record of who did what."
+      },
+      {
+        "title": "How it is built",
+        "body": "A monorepo with a **Go + Fiber** API and a **React 19 + React Router v7** single-page app, on **PostgreSQL** and **Redis**, shipped as Docker images to **AWS ECS** via **ECR**.\n\n- **Domain-driven API.** Each area (templates, issuance, mail, verification, dynamic images, chapters, users) is its own package with the same handler → service → repository layering.\n- **Designs as data.** The editor, built on Konva, saves a certificate as a JSON scene. Each save is an immutable version, and a batch snapshots the version it was issued under, so an old certificate always renders exactly as it was issued.\n- **A pure-Go renderer.** Certificates are drawn server-side with `tdewolff/canvas`, handling text, images, gradients, bezier shapes and QR codes with no C dependencies, which keeps the container a small static binary. The same renderer powers certificates and dynamic images.\n- **Batches off the request path.** Issuing a batch hands its ID to an in-process queue that a pool of goroutines drains, sending each email concurrently. Rendering is lazy: a certificate is rasterised the first time it is fetched, then cached, so a big batch never stalls on image work nobody has asked for yet.\n- **Layered variables.** Emails and certificates resolve placeholders in a fixed order: recipient values, then batch-level overrides, then system values such as the certificate ID and verification link.\n- **Auth by Kayan**, a headless identity platform I built, providing OIDC, multi-provider OAuth and role-based access control.\n\nFrontend: Konva, Tiptap, TanStack Query, React Hook Form + Zod, Radix UI, Tailwind CSS. Backend: Fiber, GORM, go-redis, tdewolff/canvas, go-qrcode, gofpdf."
+      },
+      {
+        "title": "Results",
+        "body": "The platform is live in production, used by **20+ GDG on Campus chapters across Egypt**, and has issued **more than 1,000 certificates** so far.\n\nWhat used to be hours of manual work per event is now one design, one spreadsheet and one click, and every certificate can be verified by anyone who receives it. It is open source, so any chapter organiser can run it or build on it."
+      }
+    ],
+    "role": "Creator & sole engineer",
+    "timeline": "2026",
+    "metrics": [
+      {
+        "value": "20+",
+        "label": "Chapters using it"
+      },
+      {
+        "value": "1,000+",
+        "label": "Certificates issued"
+      }
+    ],
+    "domains": [
+      "web",
+      "backend",
+      "automation"
+    ],
+    "capabilities": [
+      "system-design",
+      "data-flow",
+      "api-design",
+      "ui-engineering",
+      "devops"
+    ],
+    "stack": [
+      "Go",
+      "Fiber",
+      "React 19",
+      "React Router v7",
+      "PostgreSQL",
+      "Redis",
+      "Konva",
+      "Tiptap",
+      "TanStack Query",
+      "Tailwind CSS",
+      "GORM",
+      "Docker",
+      "AWS ECS",
+      "AWS ECR"
+    ],
+    "links": [
+      {
+        "label": "Live app",
+        "href": "https://gdgoc-admin.vercel.app"
+      },
+      {
+        "label": "Source on GitHub",
+        "href": "https://github.com/Omaraldin/gdgoc-admin"
+      },
+      {
+        "label": "Kayan (auth platform)",
+        "href": "https://github.com/getkayan/kayan"
+      }
+    ],
+    "media": [],
+    "thumbnail": {
+      "src": "/media/gdgoc-admin/certificate-editor.jpg",
+      "alt": "The GDGoC Admin certificate editor: a certificate of appreciation on the canvas, with layers and properties panels either side.",
+      "width": 1280,
+      "height": 638
+    },
+    "featured": true
+  },
+  {
     "slug": "iot-telemetry-platform",
     "title": "IoT Telemetry Platform",
     "summary": "End-to-end pipeline carrying sensor readings from ESP32 nodes to a live dashboard.",
@@ -49,12 +138,6 @@
     ],
     "links": [],
     "media": [],
-    "thumbnail": {
-      "src": "/media/iot-telemetry-platform/1779485350633.jpg",
-      "alt": "GDGoC Admins - Certifications Editor",
-      "width": 1280,
-      "height": 638
-    },
     "featured": true
   },
   {
@@ -187,54 +270,5 @@
     "links": [],
     "media": [],
     "featured": false
-  },
-  {
-    "slug": "gdgoc-admin-panel",
-    "title": "GDGoC Admin Panel",
-    "summary": "Certificate design, bulk issuance and delivery for Google Developer Groups on Campus chapters.",
-    "sections": [
-      {
-        "title": "Problem",
-        "body": "Chapters issued event certificates by editing a design file once per recipient and mailing each one by hand. The work scaled linearly with attendance, designs drifted between organisers, and a certificate had no way to be checked as genuine after the fact."
-      },
-      {
-        "title": "Approach",
-        "body": "A Go and Fiber API split into domain packages, paired with a React Router SPA. Templates are drawn in a Konva canvas editor and saved as an immutable versioned SceneDefinition, so a batch snapshots the exact design it was issued under. Text layers hold variable keys rather than literals; issuance resolves them per recipient from a spreadsheet import, alongside auto-injected system variables such as the verification URL. Batches hand a job ID to an in-process queue that a worker pool drains, rendering each certificate through a pure-Go rasteriser that handles text, images, gradients and QR codes without CGo, then sending it via the chapter's own SMTP credentials. Auth delegates to an OIDC provider with whitelist-gated registration and per-chapter roles."
-      },
-      {
-        "title": "Outcome",
-        "body": "One design, one recipient sheet and one run replaces the per-certificate loop, and every certificate carries a QR that resolves to a public verification page. The same renderer backs dynamic images, which take their values from URL parameters so share cards and banners come from the same pipeline without creating a batch. Templates and mail templates can be published for reuse across chapters."
-      }
-    ],
-    "metrics": [],
-    "domains": [
-      "web",
-      "backend",
-      "automation"
-    ],
-    "capabilities": [
-      "system-design",
-      "api-design",
-      "ui-engineering",
-      "data-flow",
-      "devops"
-    ],
-    "stack": [
-      "Go",
-      "Fiber",
-      "GORM",
-      "PostgreSQL",
-      "Redis",
-      "React Router v7",
-      "Konva",
-      "TanStack Query",
-      "Tailwind CSS",
-      "Docker"
-    ],
-    "role": "Sole engineer",
-    "timeline": "2026",
-    "links": [],
-    "featured": true,
-    "media": []
   }
 ]

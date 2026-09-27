@@ -1,0 +1,177 @@
+---
+title: "1,000 certificates later: what I'd change in GDGoC Admin"
+description: "The platform works. Reading its issuance pipeline back with fresh eyes, here are the places it only works until the worst possible moment — and how I'd fix each one."
+date: "2026-09-27"
+tags: ["architecture", "go", "postmortem"]
+related: ["gdgoc-admin"]
+draft: false
+---
+
+[GDGoC Admin](/work/gdgoc-admin) designs, issues, emails and verifies event
+certificates for more than twenty GDG on Campus chapters across Egypt. It has
+issued over a thousand certificates, and organisers have stopped spending their
+evenings copy-pasting names into design files. By the measure that matters most
+— people use it and it saves them time — it works.
+
+But "it works" and "it holds up" are different claims. I went back through the
+issuance pipeline, the part that turns a design and a spreadsheet into a
+thousand emails, and read it the way I would read someone else's pull request.
+This is what I found, in the order I'd fix it.
+
+## 1. The queue lives in RAM
+
+When an organiser issues a batch, the API writes it to Postgres and hands its
+ID to the worker through a Go channel:
+
+```go
+issuanceQ := make(chan string, 256)
+```
+
+A channel is a lovely queue right up until the process holding it goes away.
+Two things follow from that.
+
+**A full queue loses the batch.** Enqueueing never blocks the request:
+
+```go
+select {
+case s.queue <- batch.ID:
+default:
+	// Non-fatal: batch is created, worker will pick it up when queue drains
+	fmt.Printf("warn: issuance queue full, batch %s will process after backlog clears\n", batch.ID)
+}
+```
+
+The comment makes a promise the code never keeps. Nothing ever goes back to the
+database looking for `pending` batches. Once 256 batches are already waiting,
+the next one is saved and then silently never processed.
+
+**A deploy orphans whatever is running.** On `SIGTERM`, `main` shuts the HTTP
+server down and returns. The worker's context is cancelled by a deferred call
+on the way out, but nothing waits for in-flight batches to finish. On ECS, every
+deploy replaces the task, so any batch that was halfway through is left in
+`processing` forever. The recipient it was working on is left marked
+`rendering` or `rendered` but never `emailed`, and because the worker only picks
+up recipients whose status is `queued`, even re-running the batch would skip
+them.
+
+<Callout type="info">
+It hasn't bitten yet because batches are small and deploys are rare. That is
+luck, not design: the first big event that lands on a deploy will find it.
+</Callout>
+
+**What I'd do instead:** make Postgres the queue. The rows are already there,
+and it is the one component that survives everything else restarting. Workers
+claim recipients, not batches, with a lease:
+
+```sql
+UPDATE issuance_recipients
+SET status = 'processing',
+    locked_until = NOW() + INTERVAL '2 minutes'
+WHERE id IN (
+  SELECT id FROM issuance_recipients
+  WHERE status = 'queued'
+     OR (status = 'processing' AND locked_until < NOW())
+  ORDER BY created_at
+  LIMIT 20
+  FOR UPDATE SKIP LOCKED
+)
+RETURNING id;
+```
+
+`SKIP LOCKED` lets several workers, or several ECS tasks, pull from the same
+table without handing out the same row twice. The lease means a crashed worker's
+rows come back on their own once `locked_until` passes, so there is no sweeper
+to forget. The channel can stay as a wake-up signal so new work starts
+instantly, but it stops being the source of truth. Add a graceful drain on
+`SIGTERM` (stop claiming, finish what you hold, exit before ECS's stop timeout)
+and a deploy becomes a non-event.
+
+## 2. "Completed" means rendered, not delivered
+
+This is the loop that processes each recipient, simplified:
+
+```go
+if err := w.sendCertificateMail(ctx, batch, rec, smtpCfg); err != nil {
+	log.Printf("send mail failed for recipient %s: %v", rec.ID, err)
+	// Mail failure is non-fatal — certificate is rendered
+}
+successCount++
+```
+
+A recipient whose email failed still counts as a success. If the chapter's SMTP
+settings cannot be resolved at all, email is skipped for the whole batch with a
+log line. Either way, the organiser sees a green **completed** badge and a
+success count equal to the batch size, while their attendees received nothing.
+
+The one person who needs to know about the failure is the one the system tells
+it succeeded.
+
+**What I'd do instead:** treat rendering and delivery as separate states, and
+derive the batch's status from its recipients instead of counting inside a
+loop. A batch where every certificate rendered but thirty emails bounced is
+*completed with problems*, and the UI should list those thirty people with a
+retry button. Delivery also deserves retries with backoff: the config already
+has a `WORKER_MAX_RETRIES` setting, but only the separate mail worker uses it —
+the issuance path sends each email exactly once.
+
+## 3. Lazy rendering that isn't lazy
+
+The design says certificates render on demand: the worker marks a recipient
+`rendered` without drawing anything, and the image is produced the first time
+someone opens it. That is a good idea for batches that don't send email.
+
+But when a batch does send email, each message attaches the certificate PNG, so
+the worker renders every certificate anyway, inside the loop, one recipient at
+a time. The worker's concurrency setting limits how many *batches* run at once;
+inside a batch, everything is sequential. A six-hundred-person event is six
+hundred render-then-send steps in a row.
+
+**What I'd do instead:** with recipient-level claiming from section 1, this
+mostly solves itself: a pool of workers processes recipients in parallel,
+whichever batch they belong to. The one new constraint is the mail provider.
+Gmail and Workspace cap how much one account can send per day and per minute,
+and those limits are per *chapter*, since each chapter sends from its own
+account. So parallel rendering needs a per-chapter token bucket in front of
+SMTP, and deferring a send because a chapter is over its rate should be a normal
+state, not a failure.
+
+## 4. A cache on a disk that doesn't last
+
+Rendered certificates are cached on the task's local disk
+(`CERT_CACHE_DIR`, defaulting to `./cert_cache`), and a weekly job clears it.
+On ECS that disk belongs to the task: every deploy starts empty, and if the API
+ever runs as two tasks, each keeps its own half of the cache.
+
+The schema already has the right answer in it. `issuance_recipients` has
+`pdf_object_key` and `png_object_key` columns, and the code reads them when
+deleting a batch, but nothing ever writes them.
+
+**What I'd do instead:** on first render, upload the file to object storage and
+record the key. From then on a certificate is rendered once in its life, not
+once per deploy, and the local disk becomes an optional speed-up in front of
+storage rather than the only copy.
+
+## What held up
+
+Not everything needs changing, and the parts that are right are worth naming:
+
+- **The renderer.** Drawing certificates in pure Go with `tdewolff/canvas` keeps
+  the API a small static binary, and the same code renders certificates and
+  dynamic images. No headless browser, no C dependencies.
+- **Versioned designs.** A batch snapshots the template version it was issued
+  under, so editing a design never changes a certificate someone already has.
+- **Render deduplication.** If ten people open the same certificate at once, it
+  is rendered once and the other nine wait for that result.
+- **Certificate IDs** use `crypto/rand`, and the public render, verify and
+  dynamic-image routes are rate-limited.
+
+## The pattern
+
+Every problem above has the same shape: the happy path is solid, and the system
+assumes nothing else will happen. No second task, no deploy mid-batch, no mail
+server having a bad day.
+
+That is a reasonable place for version one to be. It is not where I want a tool
+that twenty chapters depend on to stay. The fixes are not glamorous, a status
+column here, a lease there, a retry, but they are the difference
+between software that works and software you can stop thinking about.
