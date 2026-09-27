@@ -9,7 +9,47 @@ import type { MDXComponents } from "mdx/types";
  * `[text](/link)` — and still gets optimised images and client-side navigation
  * without having to reach for components.
  */
+/*
+  Themed tints take ink; the fixed fills (butter, rose) take --on-pop, which is
+  dark in both themes.
+*/
+const CALLOUTS = {
+  info: { emoji: "💡", fill: "bg-tint-1 text-ink border-rule" },
+  warning: { emoji: "⚠️", fill: "bg-pop-yellow text-on-pop border-on-pop" },
+  success: { emoji: "✅", fill: "bg-tint-1 text-ink border-rule" },
+  danger: { emoji: "🚨", fill: "bg-pop-rose text-on-pop border-on-pop" },
+} as const;
+
+/**
+ * An aside set apart from the running text. Used in MDX as
+ * `<Callout type="warning">…</Callout>`.
+ */
+function Callout({
+  type = "info",
+  children,
+}: {
+  type?: keyof typeof CALLOUTS;
+  children?: React.ReactNode;
+}) {
+  const { emoji, fill } = CALLOUTS[type] ?? CALLOUTS.info;
+  return (
+    <aside
+      className={`relative my-8 rounded-[22px] border-2 px-6 py-5 text-[17px] [&_a]:text-current [&_code]:bg-white/60 [&_code]:text-on-pop ${fill}`}
+    >
+      <span
+        aria-hidden
+        className="absolute -top-4 -left-3 grid h-9 w-9 -rotate-12 place-items-center rounded-full border-2 border-on-pop bg-white text-[18px]"
+      >
+        {emoji}
+      </span>
+      <div className="space-y-3">{children}</div>
+    </aside>
+  );
+}
+
 export const mdxComponents: MDXComponents = {
+  Callout,
+
   img: (props) => {
     const { src, alt, title } = props as {
       src?: string;
@@ -44,14 +84,14 @@ export const mdxComponents: MDXComponents = {
           sizes="(min-width: 768px) 68ch, 100vw"
           // The intrinsic size above is a ceiling; height:auto lets the real
           // aspect ratio win so tall images are not letterboxed.
-          className="h-auto w-full border border-rule bg-paper-raised"
+          className="h-auto w-full rounded-[20px] border-2 border-rule bg-paper-raised"
         />
         {/*
           Markdown's title attribute — the quoted string after the URL — is the
           natural place for a caption, since alt text is for description.
         */}
         {title ? (
-          <span className="mt-2 block font-mono text-[11px] text-ink-muted">
+          <span className="mt-3 block text-center font-mono text-[12px] text-ink-muted">
             {title}
           </span>
         ) : null}

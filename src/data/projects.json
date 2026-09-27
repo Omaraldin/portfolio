@@ -17,6 +17,8 @@
         "body": "Operators see device state within seconds, and the buffer means a lost uplink no longer means lost data."
       }
     ],
+    "role": "Sole engineer",
+    "timeline": "2025",
     "metrics": [
       {
         "value": "< 2s",
@@ -45,11 +47,15 @@
       "PostgreSQL",
       "Next.js"
     ],
-    "role": "Sole engineer",
-    "timeline": "2025",
     "links": [],
-    "featured": true,
-    "media": []
+    "media": [],
+    "thumbnail": {
+      "src": "/media/iot-telemetry-platform/1779485350633.jpg",
+      "alt": "GDGoC Admins - Certifications Editor",
+      "width": 1280,
+      "height": 638
+    },
+    "featured": true
   },
   {
     "slug": "offline-first-mobile-app",

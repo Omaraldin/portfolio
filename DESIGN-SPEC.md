@@ -1,3 +1,11 @@
+> **Superseded (2026-09-27).** The site now uses a "pop" direction modelled on
+> ManyChat (white ground, heavy Bricolage Grotesque headlines, pill buttons,
+> saturated sticker cards) with Josh Comeau-style whimsy (springy hovers,
+> sparkles, light/dark toggle, reading progress, MDX `<Callout>`). Tokens live in
+> `src/app/globals.css`; primitives in `src/components/ui.tsx`. The information
+> architecture below — work, writing, certifications, per-role CV, print/ATS
+> rules — still holds. The visual rules (§1, §1.5) do not.
+
 # Design specification — "Technical Specification"
 
 Direction A, approved. This document is the contract for the build. No code is

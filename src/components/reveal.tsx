@@ -12,9 +12,12 @@ import { useEffect, useRef } from "react";
 export function Reveal({
   children,
   delay = 0,
+  className = "",
 }: {
   children: React.ReactNode;
   delay?: number;
+  /** Grid placement belongs on the wrapper, since it is the grid item. */
+  className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -41,7 +44,7 @@ export function Reveal({
   }, []);
 
   return (
-    <div ref={ref} className="reveal" style={{ transitionDelay: `${delay}ms` }}>
+    <div ref={ref} className={`reveal ${className}`} style={{ transitionDelay: `${delay}ms` }}>
       {children}
     </div>
   );

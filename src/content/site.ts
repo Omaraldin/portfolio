@@ -8,7 +8,7 @@ export const site = {
   role: "Software Engineer",
   /** The thesis. Everything on the site is arguing this. */
   thesis:
-    "I design the system before I choose the stack. That is the part that transfers.",
+    "I turn messy problems into things that work — business first, then whatever tools solve it best.",
   location: "New Cairo, Egypt",
   email: "omar@khashab.horusbyte.com",
   /*
@@ -29,8 +29,6 @@ export const site = {
     which degrades to no preview rather than breaking anything.
   */
   ogImage: "/og.png",
-  /** Shown as a live value in the identity block. */
-  status: "Open to opportunities",
   socials: [
     // TODO: real URLs still needed.
     { label: "GitHub", href: "https://github.com/" },
@@ -51,15 +49,13 @@ export const author = {
 } as const;
 
 /*
-  Set lowercase because the header renders them as written rather than
-  transforming them — "cv" is the one that would look wrong uppercased by CSS
-  and right here.
+  "home" is the wordmark itself, so it is not repeated as a link. The site is a
+  place to share work, not a pitch, so writing leads and the CV lives in the
+  footer rather than the main bar.
 */
 export const nav = [
-  { label: "home", href: "/" },
-  { label: "about", href: "/about" },
-  { label: "projects", href: "/work" },
-  { label: "blogs", href: "/writing" },
-  { label: "certs", href: "/certifications" },
-  { label: "cv", href: "/cv" },
+  { label: "Blog", href: "/writing" },
+  { label: "Work", href: "/work" },
+  { label: "Certs", href: "/certifications" },
+  { label: "About", href: "/about" },
 ] as const;

@@ -59,6 +59,12 @@ export type Project = {
    * plenty of work has nothing worth showing.
    */
   media: ProjectMedia[];
+  /**
+   * The cover image for cards and the top of the project page. Optional —
+   * without one, cards fall back to the first screenshot, then to the domain
+   * stickers. 16:10 crops best (e.g. 1600×1000).
+   */
+  thumbnail?: ProjectMedia;
   /** Surfaces on the home page. Choose for spread across domains, not recency. */
   featured: boolean;
 };

@@ -20,6 +20,7 @@ import {
   TextInput,
 } from "./form";
 import { MediaManager } from "./media-manager";
+import { ThumbnailPicker } from "./thumbnail-picker";
 import { SectionEditor } from "./section-editor";
 
 type Status =
@@ -191,6 +192,17 @@ export function WorkEditor({ projects }: { projects: Project[] }) {
             rows={2}
             value={draft.summary}
             onChange={(e) => update("summary", e.target.value)}
+          />
+        </Field>
+
+        <Field
+          label="Thumbnail"
+          hint="The cover on cards and at the top of the project page."
+        >
+          <ThumbnailPicker
+            slug={draft.slug}
+            thumbnail={draft.thumbnail}
+            onChange={(thumbnail) => update("thumbnail", thumbnail)}
           />
         </Field>
 

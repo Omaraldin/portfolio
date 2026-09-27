@@ -26,8 +26,9 @@ export default function AboutPage() {
   return (
     <>
       <PageTitle
-        index="RECORD / ABOUT"
-        title="About"
+        index="about me"
+        emoji="👋"
+        title="Hey, I'm Omar"
         intro={about.intro}
       />
 
@@ -43,7 +44,7 @@ export default function AboutPage() {
               section, so the header rule spans the full column like every other
               section on the page.
             */}
-            <div className="max-w-2xl space-y-5 text-[17px] leading-relaxed">
+            <div className="max-w-2xl space-y-5 text-[19px] leading-relaxed">
               {section.paragraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
@@ -90,8 +91,10 @@ export default function AboutPage() {
                 key={language.name}
                 className="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-rule py-3"
               >
-                <dt className="text-[16px] font-semibold">{language.name}</dt>
-                <dd className="font-mono text-[11px] tracking-[0.08em] text-ink-muted">
+                <dt className="font-display text-[20px] font-bold tracking-[-0.02em]">
+                  {language.name}
+                </dt>
+                <dd className="rounded-full bg-accent-quiet px-3 py-1 font-mono text-[12px] font-medium text-accent">
                   {language.level}
                 </dd>
               </div>
@@ -146,9 +149,11 @@ function Record({
   bullets?: string[];
 }) {
   return (
-    <div className="border-b border-rule py-4">
+    <div className="border-b border-rule py-5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-        <h3 className="text-[16px] font-semibold">{title}</h3>
+        <h3 className="font-display text-[20px] font-bold tracking-[-0.02em]">
+          {title}
+        </h3>
         <span className="tabular font-mono text-[11px] text-ink-muted">
           {timeline}
         </span>

@@ -11,6 +11,17 @@ import { CAPABILITIES, DOMAINS } from "./taxonomy";
  * so it is validated here instead. Anything malformed is dropped with a warning
  * rather than crashing the build: one bad entry should not take the site down.
  */
+function isMedia(m: unknown): m is ProjectMedia {
+  return (
+    typeof m === "object" &&
+    m !== null &&
+    typeof (m as ProjectMedia).src === "string" &&
+    typeof (m as ProjectMedia).alt === "string" &&
+    typeof (m as ProjectMedia).width === "number" &&
+    typeof (m as ProjectMedia).height === "number"
+  );
+}
+
 function isProject(value: unknown): value is Project {
   if (typeof value !== "object" || value === null) return false;
   const p = value as Record<string, unknown>;
@@ -63,6 +74,9 @@ function isProject(value: unknown): value is Project {
   ) {
     return false;
   }
+
+  // Optional, but a thumbnail that is present must be a complete image record.
+  if (p.thumbnail !== undefined && !isMedia(p.thumbnail)) return false;
 
   // Unknown taxonomy values would silently create empty matrix axes.
   const domainsOk = p.domains.every((d) => DOMAINS.includes(d as never));

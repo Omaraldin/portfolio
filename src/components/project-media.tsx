@@ -18,7 +18,7 @@ export function ProjectMediaGallery({ media }: { media: ProjectMedia[] }) {
     <div className={single ? "" : "grid gap-6 sm:grid-cols-2"}>
       {media.map((item) => (
         <figure key={item.src} className={single ? "" : "min-w-0"}>
-          <div className="overflow-hidden rounded-lg border border-rule bg-paper-raised">
+          <div className="overflow-hidden rounded-[24px] border-2 border-rule bg-paper-raised">
             <Image
               src={item.src}
               alt={item.alt}

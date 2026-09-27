@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProject, projects } from "@/content/projects";
-import { CAPABILITY_LABELS, DOMAIN_LABELS } from "@/content/taxonomy";
+import type { Project } from "@/content/types";
+import {
+  CAPABILITY_LABELS,
+  DOMAIN_EMOJI,
+  DOMAIN_LABELS,
+} from "@/content/taxonomy";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { mdxOptions } from "@/lib/mdx-options";
 import { mdxComponents } from "@/components/mdx-components";
-import { FieldRow, SpecHeader, StatBlock } from "@/components/ui";
+import { StatBlock, TagChip } from "@/components/ui";
 import { ProjectMediaGallery } from "@/components/project-media";
 
 export function generateStaticParams() {
@@ -20,10 +26,17 @@ export async function generateMetadata(
   const project = getProject(slug);
   if (!project) return {};
 
+  // A shared link previews with the project's own cover when it has one.
+  const image = project.thumbnail?.src;
+
   return {
     title: project.title,
     description: project.summary,
-    openGraph: { title: project.title, description: project.summary },
+    openGraph: {
+      title: project.title,
+      description: project.summary,
+      ...(image ? { images: [{ url: image }] } : {}),
+    },
   };
 }
 
@@ -37,130 +50,261 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
   const next =
     position < projects.length - 1 ? projects[position + 1] : null;
 
+  /*
+    The cover is the uploaded thumbnail only. Falling back to the first
+    screenshot here would show that image twice — once as the cover and again
+    in the gallery below.
+  */
+  const cover = project.thumbnail;
+
   return (
     <article>
-      <header className="border-b border-rule pt-10 pb-8">
+      {/* ───────────── Header ───────────── */}
+      <header className="pt-10 pb-10 sm:pt-14">
         <Link
           href="/work"
-          className="font-mono text-[11px] tracking-[0.12em] text-ink-muted lowercase transition-colors hover:text-accent"
+          className="pill inline-flex items-center gap-1.5 rounded-full border-2 border-rule px-4 py-2 text-[14px] font-semibold text-ink-muted hover:border-ink hover:text-ink"
         >
-          ← projects
+          <span aria-hidden>←</span> Work
         </Link>
+
+        <div className="mt-8 flex flex-wrap items-center gap-2">
+          {project.domains.map((d) => (
+            <span
+              key={d}
+              className="inline-flex items-center gap-1.5 rounded-full border-2 border-rule bg-paper-raised px-3 py-1 font-mono text-[12px] font-semibold"
+            >
+              <span aria-hidden>{DOMAIN_EMOJI[d]}</span>
+              {DOMAIN_LABELS[d]}
+            </span>
+          ))}
+          <span className="tabular font-mono text-[13px] text-ink-muted">
+            · {project.timeline}
+          </span>
+        </div>
+
         {/* Not lowercased — project titles carry acronyms. */}
-        <h1 className="mt-4 font-serif text-[52px] leading-[1.05] font-semibold">
+        <h1 className="mt-5 max-w-5xl font-display text-[48px] leading-[0.95] font-extrabold tracking-[-0.045em] sm:text-[80px]">
           {project.title}
         </h1>
-        <p className="mt-3 max-w-2xl text-[17px] leading-relaxed text-ink-muted">
+        <p className="mt-6 max-w-3xl text-[20px] leading-relaxed text-ink-muted sm:text-[22px]">
           {project.summary}
         </p>
       </header>
 
-      <dl className="max-w-3xl pt-8">
-        <FieldRow label="Role">{project.role}</FieldRow>
-        <FieldRow label="Timeline">{project.timeline}</FieldRow>
-        <FieldRow label="Domains">
-          {project.domains.map((d) => DOMAIN_LABELS[d]).join(" · ")}
-        </FieldRow>
-        <FieldRow label="Capabilities">
-          {project.capabilities.map((c) => CAPABILITY_LABELS[c]).join(" · ")}
-        </FieldRow>
-        <FieldRow label="Stack">{project.stack.join(" · ")}</FieldRow>
-        {project.links.length > 0 ? (
-          <FieldRow label="Links">
-            <span className="flex flex-wrap gap-x-4">
-              {project.links.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-accent underline underline-offset-4"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </span>
-          </FieldRow>
-        ) : null}
-      </dl>
+      {/* ───────────── Cover ───────────── */}
+      {cover ? (
+        <div className="relative aspect-[16/9] overflow-hidden rounded-[32px] border-2 border-on-pop bg-paper-raised shadow-[8px_8px_0_0_var(--shadow)] dark:border-rule">
+          <Image
+            src={cover.src}
+            alt={cover.alt}
+            fill
+            priority
+            sizes="(min-width: 1280px) 1200px, 100vw"
+            className="object-cover"
+          />
+        </div>
+      ) : null}
 
+      {/* ───────────── Numbers ───────────── */}
       {project.metrics.length > 0 ? (
-        <section>
-          <SpecHeader title="Measured" />
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {project.metrics.map((metric) => (
-              <StatBlock
-                key={metric.label}
-                value={metric.value}
-                label={metric.label}
-              />
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {project.media?.length ? (
-        <section>
-          <SpecHeader title="Media" />
-          <ProjectMediaGallery media={project.media} />
-        </section>
-      ) : null}
-
-      {/*
-        Sections are authored, not fixed, so the numbering is handed out here in
-        render order rather than written into the content.
-      */}
-      <section className="max-w-2xl">
-        {project.sections.map((entry, i) => (
-          <div key={entry.title}>
-            <SpecHeader
-              index={String(i + 1).padStart(2, "0")}
-              title={entry.title}
+        <div
+          className={`grid gap-4 sm:grid-cols-2 ${
+            project.metrics.length >= 3 ? "lg:grid-cols-4" : ""
+          } ${cover ? "mt-10" : ""}`}
+        >
+          {project.metrics.map((metric, i) => (
+            <StatBlock
+              key={metric.label}
+              index={i}
+              value={metric.value}
+              label={metric.label}
             />
-            {/*
-              Bodies go through the article MDX pipeline, so a section can hold
-              a list, a table, or highlighted code rather than one paragraph.
-            */}
-            <div className="prose">
-              <MDXRemote
-                source={entry.body}
-                options={mdxOptions}
-                components={mdxComponents}
-              />
-            </div>
-          </div>
-        ))}
-      </section>
+          ))}
+        </div>
+      ) : null}
 
-      <nav className="mt-20 flex justify-between gap-6 border-t border-rule-strong pt-6">
+      {/* ───────────── Body ───────────── */}
+      <div className="mt-14 grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-16">
+        <div className="min-w-0">
+          {project.sections.map((entry) => (
+            <section key={entry.title} className="mb-14 last:mb-0">
+              <h2 className="spec-header-title flex items-center gap-3 font-display text-[30px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[34px]">
+                <span
+                  aria-hidden
+                  className="spec-header-rule h-3.5 w-3.5 shrink-0 rotate-12 rounded-[4px] border-2 border-on-pop bg-pop-yellow"
+                />
+                {entry.title}
+              </h2>
+              {/*
+                Bodies go through the article MDX pipeline, so a section can
+                hold a list, a table, or highlighted code, not one paragraph.
+              */}
+              <div className="prose mt-5 max-w-[68ch]">
+                <MDXRemote
+                  source={entry.body}
+                  options={mdxOptions}
+                  components={mdxComponents}
+                />
+              </div>
+            </section>
+          ))}
+
+          {project.media.length > 0 ? (
+            <section className="mt-14">
+              <h2 className="flex items-center gap-3 font-display text-[30px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[34px]">
+                <span
+                  aria-hidden
+                  className="h-3.5 w-3.5 shrink-0 rotate-12 rounded-[4px] border-2 border-on-pop bg-pop-yellow"
+                />
+                Screens
+              </h2>
+              <div className="mt-6">
+                <ProjectMediaGallery media={project.media} />
+              </div>
+            </section>
+          ) : null}
+        </div>
+
+        {/*
+          The facts panel. Sticky on wide screens so the stack and links stay in
+          reach while reading; on narrow screens it simply follows the write-up.
+        */}
+        <aside className="lg:sticky lg:top-28 lg:self-start">
+          <Facts project={project} />
+        </aside>
+      </div>
+
+      {/* ───────────── Prev / next ───────────── */}
+      <nav
+        aria-label="More work"
+        className="mt-20 grid gap-4 border-t border-rule pt-10 sm:grid-cols-2"
+      >
         {previous ? (
-          <Link href={`/work/${previous.slug}`} className="group max-w-[45%]">
-            <span className="font-mono text-[10px] tracking-[0.12em] text-ink-faint uppercase">
-              Previous
-            </span>
-            <span className="mt-1 block text-[15px] font-medium transition-colors group-hover:text-accent">
-              {previous.title}
-            </span>
-          </Link>
+          <NeighbourLink project={previous} direction="Previous" />
         ) : (
           <span />
         )}
-        {next ? (
-          <Link
-            href={`/work/${next.slug}`}
-            className="group max-w-[45%] text-right"
-          >
-            <span className="font-mono text-[10px] tracking-[0.12em] text-ink-faint uppercase">
-              Next
-            </span>
-            <span className="mt-1 block text-[15px] font-medium transition-colors group-hover:text-accent">
-              {next.title}
-            </span>
-          </Link>
-        ) : (
-          <span />
-        )}
+        {next ? <NeighbourLink project={next} direction="Next" /> : null}
       </nav>
     </article>
+  );
+}
+
+function Facts({ project }: { project: Project }) {
+  return (
+    <div className="rounded-[28px] border-2 border-rule bg-paper-raised p-6">
+      <dl className="space-y-5">
+        <Fact label="Role">
+          <span className="text-[16px] font-semibold">{project.role}</span>
+        </Fact>
+        <Fact label="Timeline">
+          <span className="tabular text-[16px]">{project.timeline}</span>
+        </Fact>
+        <Fact label="Capabilities">
+          <span className="flex flex-wrap gap-1.5">
+            {project.capabilities.map((c) => (
+              <span
+                key={c}
+                className="rounded-full bg-accent-quiet px-2.5 py-1 text-[13px] font-semibold text-accent"
+              >
+                {CAPABILITY_LABELS[c]}
+              </span>
+            ))}
+          </span>
+        </Fact>
+        <Fact label="Stack">
+          <span className="flex flex-wrap gap-1.5">
+            {project.stack.map((tech) => (
+              <TagChip key={tech}>{tech}</TagChip>
+            ))}
+          </span>
+        </Fact>
+      </dl>
+
+      {project.links.length > 0 ? (
+        <div className="mt-6 flex flex-col gap-2 border-t border-rule pt-6">
+          {project.links.map((link, i) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noreferrer"
+              className={`pill inline-flex items-center justify-between rounded-full border-2 px-5 py-2.5 text-[15px] font-semibold ${
+                i === 0
+                  ? "border-on-pop bg-brand text-on-brand"
+                  : "border-ink text-ink hover:bg-ink hover:text-paper"
+              }`}
+            >
+              {link.label} <span aria-hidden>↗</span>
+            </a>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function Fact({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <dt className="font-mono text-[11px] font-semibold tracking-[0.08em] text-ink-muted uppercase">
+        {label}
+      </dt>
+      <dd className="mt-1.5">{children}</dd>
+    </div>
+  );
+}
+
+function NeighbourLink({
+  project,
+  direction,
+}: {
+  project: Project;
+  direction: "Previous" | "Next";
+}) {
+  const isNext = direction === "Next";
+  const cover = project.thumbnail ?? project.media[0];
+
+  return (
+    <Link
+      href={`/work/${project.slug}`}
+      className={`pop-card group flex items-center gap-4 rounded-[24px] bg-paper p-4 ${
+        isNext ? "flex-row-reverse text-right" : ""
+      }`}
+    >
+      <span className="relative aspect-[16/10] w-28 shrink-0 overflow-hidden rounded-[14px] border-2 border-rule bg-tint-1">
+        {cover ? (
+          <Image
+            src={cover.src}
+            alt=""
+            fill
+            sizes="112px"
+            className="object-cover"
+          />
+        ) : (
+          <span
+            aria-hidden
+            className="absolute inset-0 grid place-items-center text-[28px]"
+          >
+            {DOMAIN_EMOJI[project.domains[0]]}
+          </span>
+        )}
+      </span>
+      <span className="min-w-0">
+        <span className="font-mono text-[12px] font-semibold text-ink-muted">
+          {isNext ? "Next →" : "← Previous"}
+        </span>
+        <span className="mt-1 block font-display text-[22px] leading-tight font-extrabold tracking-[-0.03em]">
+          {project.title}
+        </span>
+      </span>
+    </Link>
   );
 }

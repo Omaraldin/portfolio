@@ -21,7 +21,7 @@ export function CVDocument({ cv }: { cv: CV }) {
   return (
     <div>
       <header className="border-b border-rule-strong pb-6">
-        <h1 className="text-[36px] leading-[1.1] font-bold tracking-[-0.02em]">
+        <h1 className="font-display text-[40px] leading-[1.05] font-extrabold tracking-[-0.035em] print:font-sans print:text-[22pt] print:tracking-normal">
           {site.name}
         </h1>
         <p className="mt-2 font-mono text-[12px] tracking-[0.12em] text-ink-muted uppercase print:font-sans print:tracking-normal print:normal-case">

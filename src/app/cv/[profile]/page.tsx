@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cvs, getCV } from "@/content/cvs";
 import { CVDocument } from "@/components/cv-document";
 import { CVActions, ProfileSwitch } from "@/components/profile-switch";
+import { PageTitle } from "@/components/ui";
 
 export function generateStaticParams() {
   return cvs.map((cv) => ({ profile: cv.handle }));
@@ -29,19 +30,20 @@ export default async function CVProfilePage(
   if (!cv) notFound();
 
   return (
-    <div className="pt-16">
-      <div className="no-print flex flex-wrap items-center justify-between gap-4">
-        <p className="max-w-xl text-[15px] leading-relaxed text-ink-muted">
-          The same record, arranged for the role. Each version has its own
-          sections and ordering, and downloads as a PDF built for applicant
-          tracking systems.
-        </p>
+    <div>
+      <div className="no-print">
+        <PageTitle
+          index="curriculum vitae"
+          emoji="📄"
+          title="One record, many roles"
+          intro="The same record, arranged for the role. Each version has its own sections and ordering, and downloads as a PDF built for applicant tracking systems."
+        />
         <CVActions handle={cv.handle} />
       </div>
 
       <ProfileSwitch active={cv.handle} />
 
-      <div className="pt-8">
+      <div className="mt-8 rounded-[32px] border-2 border-rule bg-paper p-6 sm:p-12 print:m-0 print:rounded-none print:border-0 print:p-0">
         <CVDocument cv={cv} />
       </div>
     </div>

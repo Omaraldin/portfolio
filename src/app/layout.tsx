@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import {
-  Archivo,
-  Cormorant_Garamond,
+  Bricolage_Grotesque,
+  DM_Sans,
   JetBrains_Mono,
-  Mrs_Saint_Delafield,
 } from "next/font/google";
 import { site } from "@/content/site";
 import { SiteHeader } from "@/components/site-header";
@@ -15,51 +14,45 @@ import "./globals.css";
   theme tokens. Pointing a token at a variable of the same name makes it
   self-referential, which CSS resolves to an empty value.
 */
-const grotesque = Archivo({
-  variable: "--font-grotesque",
+
+/*
+  Headlines. A grotesque with a lot of personality at heavy weights — chunky and
+  friendly at display sizes, which is the whole ManyChat register.
+*/
+const display = Bricolage_Grotesque({
+  variable: "--font-display-face",
   subsets: ["latin"],
   display: "swap",
 });
 
+/* Body. Round and open, so long articles stay easy on the eye. */
+const body = DM_Sans({
+  variable: "--font-body-face",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+/* Labels, tags, dates, code — the engineer's voice in the design. */
 const mono = JetBrains_Mono({
   variable: "--font-mono-face",
   subsets: ["latin"],
   display: "swap",
 });
 
-/*
-  The signature face, used for the wordmark and nothing else. Single weight —
-  the family has no others, and a script that close to handwriting would not
-  survive a synthesised bold.
-*/
-const script = Mrs_Saint_Delafield({
-  variable: "--font-script-face",
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
-
-/*
-  Section headings and page titles. A high-contrast garamond set lowercase
-  reads as considered rather than as a default, and its low x-height keeps the
-  headings from shouting over the mono labels beneath them.
-*/
-const serif = Cormorant_Garamond({
-  variable: "--font-serif-face",
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  display: "swap",
-});
-
-/*
-  The site has a single dark theme, so the browser is told outright — this is
-  what keeps native scrollbars, form controls, and the address bar from
-  rendering light against it.
-*/
 export const viewport: Viewport = {
-  colorScheme: "dark",
-  themeColor: "#0a0a08",
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f0e4" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f1612" },
+  ],
 };
+
+/*
+  Runs before first paint. A stored choice wins; otherwise the system
+  preference. Inline and synchronous on purpose — anything later flashes the
+  wrong theme.
+*/
+const themeScript = `(function(){try{var t=localStorage.getItem("theme");var d=t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches;if(d)document.documentElement.classList.add("dark")}catch(e){}})()`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -115,12 +108,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${grotesque.variable} ${mono.variable} ${script.variable} ${serif.variable} h-full antialiased`}
+      className={`${display.variable} ${body.variable} ${mono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="flex min-h-full flex-col font-sans">
         <SiteHeader />
-        <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 pb-32 sm:px-6">
+        <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 pb-24 sm:px-6">
           {children}
         </main>
         <SiteFooter />

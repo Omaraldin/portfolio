@@ -1,32 +1,88 @@
 @import "tailwindcss";
 
 /*
-  One theme, dark. The ground is a near-black that carries a trace of the accent
-  hue rather than a neutral grey, so the acid green reads as belonging to the
-  page instead of sitting on top of it. Nothing here is pure — no #000, no #fff
-  — which keeps large fills from vibrating against the green.
+  Dark mode follows a `dark` class on <html>, set before first paint by the
+  inline script in the root layout, so a stored choice never flashes.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  Two references, one system.
+
+  From ManyChat: a clean ground, near-black ink, one primary for actions, and
+  bold shapes. From Josh Comeau: whimsy in the details — springy hovers,
+  sparkles, a real dark mode, and prose built for long reading.
+
+  Palette: Forest & Cream. Chosen from the portrait — the sweater is a soft
+  sage (~82°), so the site's green is the same family taken deep (forest) and
+  pale (sage tint), with warm cream as the ground and butter yellow as the one
+  highlight. 60-30-10: cream and ink carry the page, forest carries actions,
+  butter is used sparingly for emphasis. No rainbow — card covers alternate two
+  quiet tints.
+
+  Contrast (WCAG): ink on cream 16:1, links 7:1 light / 11:1 dark, cream on
+  forest 11:1, ink on butter 13:1.
 */
 :root {
-  --paper: #0a0a08;
-  --paper-raised: #131310;
-  --ink: #ecebe4;
-  --ink-muted: #9d9c92;
-  --ink-faint: #6a6961;
-  --rule: #232320;
-  --rule-strong: #3a3a34;
-  /*
-    Acid green. Pitched at ~79° with the chroma pushed close to the sRGB
-    boundary — the same hue family as the old olive, taken to the top of its
-    range so it reads as signal rather than as a muted brand colour.
+  --paper: #f5f0e4;
+  --paper-raised: #ece5d3;
+  --ink: #1a1a14;
+  --ink-muted: #5f5a4c;
+  --ink-faint: #948d7b;
+  --rule: #e2dccb;
+  --rule-strong: #1a1a14;
 
-    14.8:1 on --paper, so it holds as body-adjacent text, not only as an
-    ornament. --accent-quiet is the same hue at low lightness, used for fills
-    behind accent text (7.1:1 for accent on quiet) and for the portrait panel,
-    which is the one place the accent appears at full strength as a large area.
-  */
-  --accent: #9eff00;
-  --accent-quiet: #1a2400;
-  --accent-ink: #0a0a08;
+  /* The action colour: buttons, active states. Always with --on-brand on it. */
+  --brand: #1d3b2a;
+  --on-brand: #f5f0e4;
+  /* Links and small coloured text. */
+  --accent: #1d5b3a;
+  --accent-quiet: #dfe7cf;
+  --accent-ink: #ffffff;
+
+  /* Deep green panel (portrait card, "work." highlight) and its text. */
+  --forest: #1d3b2a;
+  --on-forest: #f5f0e4;
+  /* Card-cover tints. Themed — they follow the ground, so text on them is ink. */
+  --tint-1: #dfe7cf;
+  --tint-2: #e8e0cc;
+
+  /* Fixed fills — the same in both themes, always with --on-pop ink. */
+  --pop-yellow: #ffd966;
+  --pop-rose: #f3cfc6;
+  --cream: #f5f0e4;
+  --on-pop: #1a1a14;
+
+  /* The dark slabs: the footer is forest; code blocks stay near-black. */
+  --night: #1d3b2a;
+  --night-raised: #26493a;
+  --code: #1a1a14;
+  --shadow: #1a1a14;
+}
+
+.dark {
+  --paper: #0f1612;
+  --paper-raised: #161d18;
+  --ink: #efeadc;
+  --ink-muted: #aaa594;
+  --ink-faint: #6f7066;
+  --rule: #223028;
+  --rule-strong: #efeadc;
+  /* On the dark ground butter takes over as the action colour. */
+  --brand: #ffd966;
+  --on-brand: #0f1612;
+  --accent: #ffd966;
+  --accent-quiet: #1a2d22;
+  --accent-ink: #0f1612;
+  --forest: #2c5a40;
+  --on-forest: #efeadc;
+  --tint-1: #1a2d22;
+  --tint-2: #1b211c;
+  --night: #080c09;
+  --night-raised: #131a15;
+  --code: #080c09;
+  /* Butter, matching the dark theme's action colour. */
+  --shadow: #ffd966;
 }
 
 @theme inline {
@@ -37,25 +93,83 @@
   --color-ink-faint: var(--ink-faint);
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
+  --color-brand: var(--brand);
+  --color-on-brand: var(--on-brand);
   --color-accent: var(--accent);
   --color-accent-quiet: var(--accent-quiet);
   --color-accent-ink: var(--accent-ink);
+  --color-pop-yellow: var(--pop-yellow);
+  --color-pop-rose: var(--pop-rose);
+  --color-cream: var(--cream);
+  --color-forest: var(--forest);
+  --color-on-forest: var(--on-forest);
+  --color-tint-1: var(--tint-1);
+  --color-tint-2: var(--tint-2);
+  --color-on-pop: var(--on-pop);
+  --color-night: var(--night);
+  --color-night-raised: var(--night-raised);
 
   /* Set from next/font in the root layout. */
-  --font-sans: var(--font-grotesque), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, monospace;
-  /*
-    The wordmark only. A script face is unreadable at paragraph length and has
-    no business anywhere but the signature.
-  */
-  --font-script: var(--font-script-face), ui-serif, cursive;
-  /* Section headings and page titles — lowercase, never body copy. */
-  --font-serif: var(--font-serif-face), ui-serif, Georgia, serif;
+  /* Headlines, card titles, big numerals. Never body copy. */
+  --font-display:
+    var(--font-display-face), ui-sans-serif, system-ui, sans-serif;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 2s ease-out infinite;
+  --animate-sparkle: sparkle 900ms ease-in-out forwards;
+  --animate-wiggle: wiggle 500ms ease-in-out;
+}
+
+/* --tilt lets each floating sticker keep its own resting angle. */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--tilt, 0deg));
+  }
+  50% {
+    transform: translateY(-10px) rotate(var(--tilt, 0deg));
+  }
+}
+
+@keyframes pulse-dot {
+  0% {
+    box-shadow: 0 0 0 0 rgb(34 197 94 / 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 10px rgb(34 197 94 / 0);
+  }
+}
+
+@keyframes sparkle {
+  0% {
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    transform: scale(1) rotate(90deg);
+  }
+  100% {
+    transform: scale(0) rotate(180deg);
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-12deg);
+  }
+  75% {
+    transform: rotate(12deg);
+  }
 }
 
 html {
-  /* 8px base unit. Every spacing value in the site is a multiple of this. */
-  scroll-padding-top: 32px;
+  /* Clears the sticky header when jumping to an anchor. */
+  scroll-padding-top: 104px;
 }
 
 body {
@@ -63,39 +177,22 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-}
-
-/*
-  The blueprint grid. Drawn on a fixed layer so it reads as the substrate the
-  document sits on rather than as decoration that scrolls with the content.
-*/
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--rule) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
-  background-size: 64px 64px;
   /*
-    Lower than the light theme carried. A hairline that read as a faint pencil
-    rule on paper reads as a lit line on a near-black ground, and at the old
-    opacity the grid competed with the content sitting on it.
+    Floating stickers hang past the hero card's edge on narrow screens. clip,
+    not hidden — hidden would break the sticky header.
   */
-  opacity: 0.5;
+  overflow-x: clip;
 }
 
 ::selection {
-  background: var(--accent-quiet);
-  color: var(--ink);
+  background: var(--pop-yellow);
+  color: var(--on-pop);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 2px;
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 8px;
 }
 
 /* Numbers that sit in columns must not jitter between values. */
@@ -103,28 +200,69 @@ body::before {
   font-variant-numeric: tabular-nums;
 }
 
-/*
-  The home-page accordions supply their own chevron, so the native disclosure
-  triangle is dropped. Safari needs the -webkit- pseudo-element; everything else
-  honours list-style on the summary itself.
-*/
 summary::-webkit-details-marker {
   display: none;
 }
 
 /*
-  Shiki resolves both palettes per token; with a single dark theme only one of
-  them is ever read.
+  The sticker card: a hard ink border that lifts on hover and drops an offset
+  shadow behind itself. The one signature move of the design, so it is a class
+  rather than utilities repeated on every card. The spring overshoot is what
+  makes it feel alive rather than mechanical.
 */
-.prose pre code span {
-  color: var(--shiki-dark);
+.pop-card {
+  border: 2px solid var(--on-pop);
+  transition:
+    transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dark .pop-card {
+  border-color: var(--rule);
+}
+@media (hover: hover) {
+  .pop-card:hover,
+  .pop-card:focus-visible {
+    /*
+      Translate only. Even a fraction of a degree of rotation makes the
+      browser resample the whole card, which turns the hard border and offset
+      shadow into jagged, pixelated edges.
+    */
+    transform: translate(-4px, -4px);
+    box-shadow: 6px 6px 0 0 var(--shadow);
+  }
 }
 
-/*
-  Minimal scrollbars. The default chrome is heavy enough to compete with the
-  hairline rules the layout is built from, so the track is dropped entirely and
-  the thumb is a thin bar that only asserts itself on hover.
-*/
+/* The springy press used by every pill button. */
+.pill {
+  transition:
+    transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 160ms,
+    color 160ms,
+    border-color 160ms;
+}
+@media (hover: hover) {
+  .pill:hover {
+    transform: translateY(-2px) scale(1.03);
+  }
+}
+.pill:active {
+  transform: scale(0.97);
+}
+
+/* Every loop and spring stops for visitors who asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 1ms !important;
+  }
+  .pop-card:hover,
+  .pill:hover {
+    transform: none !important;
+  }
+}
+
 .admin-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--rule) transparent;
@@ -147,23 +285,12 @@ summary::-webkit-details-marker {
   background: transparent;
 }
 
-/* Code blocks scroll horizontally; the same treatment applies inside prose. */
-.prose pre {
-  scrollbar-width: thin;
-  scrollbar-color: var(--rule) transparent;
+/* A horizontal row that scrolls without showing chrome (mobile nav). */
+.no-scrollbar {
+  scrollbar-width: none;
 }
-.prose pre::-webkit-scrollbar {
-  height: 8px;
-}
-.prose pre::-webkit-scrollbar-track {
-  background: transparent;
-}
-.prose pre::-webkit-scrollbar-thumb {
-  background: var(--rule);
-  border-radius: 4px;
-}
-.prose pre::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-faint);
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /*
@@ -173,10 +300,10 @@ summary::-webkit-details-marker {
 @media (prefers-reduced-motion: no-preference) {
   .reveal {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(24px);
     transition:
-      opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
-      transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+      opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 600ms cubic-bezier(0.34, 1.4, 0.64, 1);
   }
 
   .reveal[data-shown="true"] {
@@ -186,40 +313,46 @@ summary::-webkit-details-marker {
 }
 
 /*
-  Long-form article body, applied to the MDX wrapper. The measure is set by
-  whatever contains it — the article page caps its whole column so the headings
-  and rules line up with the text — rather than here, where it would apply only
-  to the body and leave the surrounding chrome wider.
+  Long-form article body. The measure is set by whatever contains it, so the
+  headings and rules line up with the text.
 */
 .prose {
+  font-size: 1.1875rem;
   line-height: 1.75;
 }
 .prose > * + * {
-  margin-top: 1.5em;
+  margin-top: 1.4em;
 }
-/*
-  Article headings take the serif so they match the section headings elsewhere.
-  Body copy stays sans — the serif is set for display sizes and gets muddy at
-  paragraph scale on a dark ground.
-*/
 .prose h2 {
-  font-family: var(--font-serif);
-  font-size: 2rem;
-  font-weight: 600;
-  line-height: 1.2;
-  margin-top: 2.5em;
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin-top: 2.2em;
 }
 .prose h3 {
-  font-family: var(--font-serif);
-  font-size: 1.55rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
   line-height: 1.25;
-  margin-top: 2em;
+  margin-top: 1.8em;
 }
 .prose a {
   color: var(--accent);
+  font-weight: 600;
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: text-decoration-color 160ms;
+}
+.prose a:hover {
+  text-decoration-color: var(--accent);
+}
+.prose strong {
+  font-weight: 700;
 }
 .prose ul,
 .prose ol {
@@ -231,37 +364,61 @@ summary::-webkit-details-marker {
 .prose ol {
   list-style: decimal;
 }
+.prose li::marker {
+  color: var(--accent);
+}
 .prose li + li {
   margin-top: 0.4em;
 }
 .prose blockquote {
-  border-left: 2px solid var(--rule);
-  padding-left: 1em;
+  border-left: 5px solid var(--pop-yellow);
+  background: var(--paper-raised);
+  border-radius: 0 18px 18px 0;
+  padding: 1em 1.25em;
   color: var(--ink-muted);
 }
 .prose code {
   font-family: var(--font-mono);
-  font-size: 0.875em;
+  font-size: 0.85em;
 }
 .prose :not(pre) > code {
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-radius: 3px;
-  padding: 0.1em 0.35em;
+  background: var(--accent-quiet);
+  color: var(--accent);
+  border-radius: 6px;
+  padding: 0.15em 0.4em;
 }
+/*
+  Code blocks stay dark in both themes — an editor window dropped into the
+  article — so Shiki's dark palette is the one read.
+*/
 .prose pre {
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  padding: 1rem 1.25rem;
+  background: var(--code);
+  color: #ecebe4;
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
   overflow-x: auto;
   font-size: 0.875rem;
-  line-height: 1.6;
+  line-height: 1.7;
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a44 transparent;
 }
-
+.prose pre code span {
+  color: var(--shiki-dark);
+}
+.prose pre::-webkit-scrollbar {
+  height: 8px;
+}
+.prose pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+.prose pre::-webkit-scrollbar-thumb {
+  background: #3a3a44;
+  border-radius: 4px;
+}
 .prose table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.925em;
+  font-size: 0.9em;
 }
 .prose th,
 .prose td {
@@ -269,17 +426,21 @@ summary::-webkit-details-marker {
   padding: 0.5em 0.75em;
   text-align: left;
 }
+.prose th {
+  background: var(--paper-raised);
+}
 .prose img {
   max-width: 100%;
   height: auto;
 }
 
 /*
-  Print: the CV renders straight to PDF from the browser. Grid, accent, and
+  Print: the CV renders straight to PDF from the browser. Colour, pops, and
   navigation are all dropped so the result is a plain document.
 */
 @media print {
-  :root {
+  :root,
+  .dark {
     --paper: #ffffff;
     --paper-raised: #ffffff;
     --ink: #000000;
@@ -291,22 +452,14 @@ summary::-webkit-details-marker {
     --accent-quiet: #ffffff;
     --accent-ink: #ffffff;
   }
-  body::before {
-    display: none;
-  }
-  /*
-    The screen palette is dark-only, so the ground has to be forced back to
-    white here rather than inherited — otherwise the CV prints as a black slab.
-  */
+  /* Forced rather than inherited so no theme or fill leaks into the PDF. */
   body {
     background: #ffffff !important;
     color: #000000 !important;
+    font-size: 10.5pt;
   }
   .no-print {
     display: none !important;
-  }
-  body {
-    font-size: 10.5pt;
   }
   a {
     text-decoration: none;
@@ -317,16 +470,13 @@ summary::-webkit-details-marker {
 
   /*
     Applicant tracking systems extract the text and try to recognise section
-    headings. The screen design sets those as a mono index number, a flexing
-    rule, and a right-aligned label — which extracts as noise around the word
-    that matters. In print the ornament is dropped and the heading becomes a
+    headings, so in print the ornament is dropped and the heading becomes a
     plain left-aligned line.
   */
   .spec-header-rule,
   .spec-header-link {
     display: none !important;
   }
-  /* Hidden on screen, where the accent marker carries the section instead. */
   .spec-header-index {
     display: inline !important;
     margin-right: 0.5em;
@@ -341,6 +491,7 @@ summary::-webkit-details-marker {
     font-size: 11pt !important;
     font-weight: 700 !important;
     letter-spacing: 0.04em !important;
+    text-transform: none !important;
     color: #000 !important;
   }
 

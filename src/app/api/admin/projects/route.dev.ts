@@ -112,6 +112,25 @@ function parseProject(input: unknown): Project {
         .filter((m) => m.src && m.width > 0 && m.height > 0)
     : [];
 
+  /*
+    Same rules as a media entry: the upload endpoint supplied the dimensions,
+    and a record missing any of them is treated as no thumbnail at all.
+  */
+  const t = p.thumbnail as Record<string, unknown> | null | undefined;
+  const thumbnail =
+    t &&
+    typeof t.src === "string" &&
+    t.src.trim() &&
+    Number(t.width) > 0 &&
+    Number(t.height) > 0
+      ? {
+          src: t.src.trim(),
+          alt: typeof t.alt === "string" ? t.alt.trim() : "",
+          width: Number(t.width),
+          height: Number(t.height),
+        }
+      : undefined;
+
   return {
     slug,
     title: str("title"),
@@ -125,6 +144,8 @@ function parseProject(input: unknown): Project {
     stack: strList("stack"),
     links,
     media,
+    // Omitted when absent, so the JSON stays free of empty placeholders.
+    ...(thumbnail ? { thumbnail } : {}),
     featured: Boolean(p.featured),
   };
 }

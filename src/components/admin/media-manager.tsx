@@ -6,6 +6,43 @@ import type { ProjectMedia } from "@/content/types";
 import { Button, TextInput } from "./form";
 
 /**
+ * Sends one file to the upload endpoint, filed under the project's slug, and
+ * returns the stored record with dimensions read from the file itself.
+ */
+export async function uploadMedia(
+  file: File,
+  slug: string,
+): Promise<ProjectMedia> {
+  const body = new FormData();
+  body.append("file", file);
+  body.append("slug", slug);
+
+  const response = await fetch("/api/admin/media", { method: "POST", body });
+  const result = (await response.json()) as
+    | { ok: true; media: ProjectMedia }
+    | { ok: false; error: string };
+
+  if (!result.ok) throw new Error(result.error);
+  return result.media;
+}
+
+/**
+ * Removes an uploaded file. Best effort: callers drop the reference first, so
+ * a failed unlink only leaves an orphaned file, never a broken image.
+ */
+export async function deleteMedia(src: string): Promise<void> {
+  try {
+    await fetch("/api/admin/media", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ src }),
+    });
+  } catch {
+    // Ignored deliberately — see above.
+  }
+}
+
+/**
  * Upload and arrange a project's screenshots.
  *
  * Dimensions are never typed by hand — the upload endpoint reads them from the
@@ -48,20 +85,7 @@ export function MediaManager({
       */
       const uploaded: ProjectMedia[] = [];
       for (const file of Array.from(files)) {
-        const body = new FormData();
-        body.append("file", file);
-        body.append("slug", slug.trim());
-
-        const response = await fetch("/api/admin/media", {
-          method: "POST",
-          body,
-        });
-        const result = (await response.json()) as
-          | { ok: true; media: ProjectMedia }
-          | { ok: false; error: string };
-
-        if (!result.ok) throw new Error(result.error);
-        uploaded.push(result.media);
+        uploaded.push(await uploadMedia(file, slug.trim()));
       }
 
       onChange([...items, ...uploaded]);
@@ -81,18 +105,7 @@ export function MediaManager({
   const remove = async (index: number) => {
     const [removed] = items.slice(index, index + 1);
     onChange(items.filter((_, i) => i !== index));
-
-    // Best effort: the record is already gone, so a failed unlink only leaves
-    // an orphaned file rather than a broken reference.
-    try {
-      await fetch("/api/admin/media", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ src: removed.src }),
-      });
-    } catch {
-      // Ignored deliberately — see above.
-    }
+    await deleteMedia(removed.src);
   };
 
   const move = (index: number, delta: number) => {

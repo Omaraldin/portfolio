@@ -13,8 +13,9 @@ export default function WorkPage() {
   return (
     <>
       <PageTitle
-        index="INDEX / WORK"
-        title="Work"
+        index="work"
+        emoji="🛠️"
+        title="Things I've built"
         intro="Filter by where the work happened, or by what it required. The second axis is usually the more useful one."
       />
       <WorkIndex projects={projects} />

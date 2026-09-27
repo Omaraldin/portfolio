@@ -11,11 +11,11 @@ export function ProfileSwitch({ active }: { active: string }) {
   if (cvs.length < 2) return null;
 
   return (
-    <div className="no-print flex flex-col gap-2 border-b border-rule py-5 sm:flex-row sm:items-center sm:gap-4">
-      <span className="font-mono text-[10px] tracking-[0.12em] text-ink-faint uppercase sm:w-20 sm:shrink-0">
-        Version
+    <div className="no-print mt-6 flex flex-col gap-3 rounded-[28px] border-2 border-rule bg-paper-raised p-5 sm:flex-row sm:items-center sm:gap-4">
+      <span className="font-mono text-[12px] font-semibold text-ink-muted sm:shrink-0">
+        {"// pick a role"}
       </span>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-2">
         {cvs.map((cv) => {
           const isActive = cv.handle === active;
           return (
@@ -24,10 +24,10 @@ export function ProfileSwitch({ active }: { active: string }) {
               href={`/cv/${cv.handle}`}
               scroll={false}
               aria-current={isActive ? "page" : undefined}
-              className={`rounded-[3px] border px-3 py-1.5 font-mono text-[10px] font-medium tracking-[0.1em] uppercase transition-colors ${
+              className={`pill rounded-full border-2 px-4 py-2 text-[14px] font-semibold ${
                 isActive
-                  ? "border-accent bg-accent-quiet text-accent"
-                  : "border-rule text-ink-muted hover:border-ink-muted hover:text-ink"
+                  ? "border-on-pop bg-brand text-on-brand"
+                  : "border-rule bg-paper text-ink-muted hover:border-ink hover:text-ink"
               }`}
             >
               {cv.label}
@@ -49,14 +49,14 @@ export function CVActions({ handle }: { handle: string }) {
     <div className="no-print flex flex-wrap items-center gap-2">
       <a
         href={`/cv/${handle}.pdf`}
-        className="rounded-[3px] border border-accent bg-accent-quiet px-3 py-1.5 font-mono text-[10px] font-medium tracking-[0.1em] text-accent uppercase transition-opacity hover:opacity-80"
+        className="pill inline-flex items-center gap-1.5 rounded-full border-2 border-on-pop bg-brand px-5 py-2.5 text-[15px] font-semibold text-on-brand"
       >
         Download PDF ↓
       </a>
       <button
         type="button"
         onClick={() => window.print()}
-        className="rounded-[3px] border border-rule px-3 py-1.5 font-mono text-[10px] font-medium tracking-[0.1em] uppercase transition-colors hover:border-accent hover:text-accent"
+        className="pill rounded-full border-2 border-ink px-5 py-2.5 text-[15px] font-semibold hover:bg-ink hover:text-paper"
       >
         Print
       </button>

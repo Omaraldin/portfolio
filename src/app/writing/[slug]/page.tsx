@@ -10,6 +10,8 @@ import { getArticle, getArticles } from "@/lib/articles";
 import { getProject } from "@/content/projects";
 import { author, site } from "@/content/site";
 import { formatDate } from "@/lib/format";
+import { popFill } from "@/components/ui";
+import { ReadingProgress } from "@/components/reading-progress";
 
 export function generateStaticParams() {
   return getArticles().map((article) => ({ slug: article.slug }));
@@ -83,26 +85,51 @@ export default async function ArticlePage(
       otherwise the rules and headings stretch across dead space to the right of
       the text.
     */
-    <article className="mx-auto max-w-[68ch] pt-16">
-      <header className="border-b border-rule-strong pb-6">
+    <article className="mx-auto max-w-[70ch] pt-10 sm:pt-14">
+      <ReadingProgress />
+      <header>
         <Link
           href="/writing"
-          className="font-mono text-[11px] tracking-[0.12em] text-ink-muted lowercase transition-colors hover:text-accent"
+          className="pill inline-flex items-center gap-1.5 rounded-full border-2 border-rule px-4 py-2 text-[14px] font-semibold text-ink-muted hover:border-ink hover:text-ink"
         >
-          ← blogs
+          <span aria-hidden>←</span> Blog
         </Link>
-        <h1 className="mt-4 font-serif text-[48px] leading-[1.1] font-semibold lowercase">
+        {article.tags.length ? (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {article.tags.map((tag, i) => (
+              <span
+                key={tag}
+                className={`rounded-full border-2 border-rule px-3 py-1 font-mono text-[12px] font-semibold text-ink ${popFill(i + 1)}`}
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        <h1 className="mt-5 font-display text-[44px] leading-[1] font-extrabold tracking-[-0.045em] sm:text-[64px]">
           {article.title}
         </h1>
-        <p className="mt-3 font-mono text-[11px] tracking-[0.08em] text-ink-muted uppercase">
-          {formatDate(article.date)} · {article.readingTime} min read
-          {article.tags.length ? ` · ${article.tags.join(" · ")}` : ""}
-        </p>
-        {article.updated && article.updated !== article.date ? (
-          <p className="mt-1 font-mono text-[10px] tracking-[0.08em] text-ink-faint uppercase">
-            Updated {formatDate(article.updated)}
+        {article.description ? (
+          <p className="mt-5 text-[21px] leading-relaxed text-ink-muted">
+            {article.description}
           </p>
         ) : null}
+        <div className="mt-7 flex flex-wrap items-center gap-3 border-y border-rule py-4">
+          <Image
+            src={author.portrait}
+            alt=""
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-full border-2 border-on-pop bg-pop-yellow object-cover"
+          />
+          <span className="text-[15px] font-semibold">{author.name}</span>
+          <span className="tabular font-mono text-[13px] text-ink-muted">
+            {formatDate(article.date)} · {article.readingTime} min read
+            {article.updated && article.updated !== article.date
+              ? ` · updated ${formatDate(article.updated)}`
+              : ""}
+          </span>
+        </div>
       </header>
 
       {article.cover ? (
@@ -112,8 +139,8 @@ export default async function ArticlePage(
           width={1600}
           height={900}
           priority
-          sizes="(min-width: 768px) 68ch, 100vw"
-          className="mt-8 h-auto w-full border border-rule bg-paper-raised"
+          sizes="(min-width: 768px) 70ch, 100vw"
+          className="mt-8 h-auto w-full rounded-[28px] border-2 border-on-pop bg-paper-raised"
         />
       ) : null}
 
@@ -126,18 +153,18 @@ export default async function ArticlePage(
       </div>
 
       {related.length > 0 ? (
-        <aside className="mt-16 border-t border-rule-strong pt-6">
-          <h2 className="font-mono text-[11px] tracking-[0.12em] text-ink-muted uppercase">
-            Referenced work
+        <aside className="mt-16 rounded-[28px] border-2 border-rule bg-paper-raised p-6">
+          <h2 className="font-mono text-[12px] font-semibold text-ink-muted">
+            {"// referenced work"}
           </h2>
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             {related.map((project) => (
               <Link
                 key={project.slug}
                 href={`/work/${project.slug}`}
-                className="text-[15px] text-accent underline underline-offset-4 transition-opacity hover:opacity-70"
+                className="pill inline-flex items-center gap-1 rounded-full border-2 border-ink bg-paper px-4 py-1.5 text-[14px] font-semibold hover:bg-ink hover:text-paper"
               >
-                {project.title}
+                {project.title} <span aria-hidden>→</span>
               </Link>
             ))}
           </div>

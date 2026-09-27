@@ -77,3 +77,16 @@ export const CAPABILITY_LABELS: Record<Capability, string> = {
   "ui-engineering": "UI engineering",
   devops: "DevOps",
 };
+
+/** A sticker per domain, for cards and chips. Decoration only — never the label. */
+export const DOMAIN_EMOJI: Record<Domain, string> = {
+  embedded: "🔌",
+  web: "🌐",
+  mobile: "📱",
+  desktop: "🖥️",
+  backend: "🗄️",
+  automation: "🤖",
+  games: "🎮",
+  security: "🔐",
+  ecommerce: "🛒",
+};

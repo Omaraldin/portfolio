@@ -8,21 +8,21 @@ import { author, site } from "@/content/site";
  */
 export function AuthorByline() {
   return (
-    <aside className="mt-16 flex items-start gap-4 border-t border-rule-strong pt-6">
+    <aside className="mt-16 flex items-start gap-5 rounded-[28px] border-2 border-rule bg-tint-1 p-6 text-ink sm:p-8">
       {author.portrait ? (
         <Image
           src={author.portrait}
           alt=""
-          width={56}
-          height={56}
-          className="shrink-0 rounded-full border border-rule object-cover"
+          width={72}
+          height={72}
+          className="h-[72px] w-[72px] shrink-0 -rotate-6 rounded-[22px] border-2 border-on-pop bg-pop-yellow object-cover"
         />
       ) : (
         // Initials keep the block's shape while there is no photograph, rather
         // than collapsing the layout or showing a broken image.
         <span
           aria-hidden
-          className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-rule font-mono text-[15px] text-ink-muted"
+          className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-on-pop bg-pop-yellow font-mono text-[15px]"
         >
           {author.name
             .split(/\s+/)
@@ -33,18 +33,20 @@ export function AuthorByline() {
       )}
 
       <div className="min-w-0">
-        <p className="font-mono text-[10px] tracking-[0.12em] text-ink-faint uppercase">
-          Written by
+        <p className="font-mono text-[12px] font-semibold">
+          {"// written by"}
         </p>
-        <p className="mt-1 text-[16px] font-semibold">{author.name}</p>
-        <p className="mt-1 max-w-prose text-[14px] leading-relaxed text-ink-muted">
+        <p className="mt-1 font-display text-[24px] font-extrabold tracking-[-0.02em]">
+          {author.name}
+        </p>
+        <p className="mt-1 max-w-prose text-[16px] leading-relaxed">
           {author.bio}
         </p>
 
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href="/about"
-            className="font-mono text-[10px] tracking-[0.1em] text-accent uppercase transition-opacity hover:opacity-70"
+            className="pill inline-flex rounded-full border-2 border-on-pop bg-brand px-4 py-1.5 text-[14px] font-semibold text-on-brand"
           >
             More about me →
           </Link>
@@ -54,7 +56,7 @@ export function AuthorByline() {
               href={social.href}
               target="_blank"
               rel="noreferrer"
-              className="font-mono text-[10px] tracking-[0.1em] text-ink-muted uppercase transition-colors hover:text-accent"
+              className="pill inline-flex rounded-full border-2 border-on-pop bg-white px-4 py-1.5 text-[14px] font-semibold"
             >
               {social.label}
             </a>

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { getArticles } from "@/lib/articles";
-import { ArticleRow } from "@/components/article-row";
-import { PageTitle } from "@/components/ui";
+import { WritingIndex } from "@/components/writing-index";
+import { EmptyState, PageTitle } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "Writing",
+  title: "Blog",
   description: "Notes on system design, data flow, and building across stacks.",
 };
 
@@ -14,21 +14,16 @@ export default function WritingPage() {
   return (
     <>
       <PageTitle
-        index="INDEX / WRITING"
-        title="Writing"
-        intro="Notes on architecture, data flow, and what actually transfers between stacks."
+        index="the blog"
+        emoji="✍️"
+        title="Thinking out loud"
+        intro="Notes on architecture, data flow, and what actually transfers between stacks. No hot takes — just what held up in production."
       />
 
       {articles.length > 0 ? (
-        <div>
-          {articles.map((article) => (
-            <ArticleRow key={article.slug} article={article} />
-          ))}
-        </div>
+        <WritingIndex articles={articles} />
       ) : (
-        <p className="py-16 text-center font-mono text-[11px] tracking-[0.1em] text-ink-faint uppercase">
-          Nothing published yet
-        </p>
+        <EmptyState>First article is cooking ✍️</EmptyState>
       )}
     </>
   );
