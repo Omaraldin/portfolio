@@ -10,6 +10,7 @@ import {
 import { formatMonth } from "@/lib/format";
 import { PdfThumbnail } from "./pdf-thumbnail";
 import { popFill } from "./ui";
+import { Emoji } from "./emoji";
 
 /**
  * Certificates as a grid of document thumbnails. Clicking one opens the full
@@ -113,7 +114,7 @@ function Card({
           className={`grid aspect-[4/3] w-full place-items-center border-b-2 border-on-pop text-ink dark:border-rule ${popFill(index)}`}
         >
           <span className="grid h-24 w-24 -rotate-6 place-items-center rounded-[28px] border-2 border-on-pop bg-white text-[48px] shadow-[5px_5px_0_0_var(--on-pop)]">
-            <span aria-hidden>🏅</span>
+            <Emoji char="🏅" />
           </span>
         </div>
       )}

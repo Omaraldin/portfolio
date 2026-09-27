@@ -10,6 +10,7 @@ import {
   type Domain,
 } from "@/content/taxonomy";
 import { ProjectCard } from "./project-card";
+import { Emoji } from "./emoji";
 
 /**
  * The full work index. Domains are the primary filter, as a row of pills;
@@ -59,7 +60,12 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
   return (
     <div>
       <div className="flex flex-col gap-4 border-y border-rule py-5 lg:flex-row lg:items-center lg:justify-between">
-        <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 lg:flex-wrap">
+        {/*
+          The row scrolls sideways on narrow screens, and any overflow box
+          clips vertically too — so it is padded out (and pulled back with
+          negative margin) to leave room for the pills' hover lift.
+        */}
+        <div className="no-scrollbar -mx-2 -my-2 flex gap-2 overflow-x-auto px-2 py-2 lg:flex-wrap">
           <Pill active={domain === null} onClick={() => setDomain(null)}>
             All work
           </Pill>
@@ -69,7 +75,7 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
               active={domain === d}
               onClick={() => setDomain(domain === d ? null : d)}
             >
-              <span aria-hidden>{DOMAIN_EMOJI[d]}</span> {DOMAIN_LABELS[d]}
+              <Emoji char={DOMAIN_EMOJI[d]} /> {DOMAIN_LABELS[d]}
             </Pill>
           ))}
         </div>
@@ -120,7 +126,7 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
       {visible.length === 0 ? (
         <div className="py-16 text-center">
           <p className="font-display text-[22px] font-bold">
-            Nothing matches both filters 🤷
+            Nothing matches both filters <Emoji char="🤷" />
           </p>
           <button
             type="button"

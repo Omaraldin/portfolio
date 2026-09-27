@@ -22,6 +22,7 @@ export function Chibi({
   priority = false,
   label = "Chibi illustration of Omar",
   decorative = false,
+  hop = true,
 }: {
   /** Sizing lives on the wrapper; the frames fill it. */
   className?: string;
@@ -30,6 +31,8 @@ export function Chibi({
   label?: string;
   /** Pure garnish: hidden from assistive tech instead of announced. */
   decorative?: boolean;
+  /** The hover hop. Off where a hop would move him out of a clip box. */
+  hop?: boolean;
 }) {
   const [blinking, setBlinking] = useState(false);
   const [happy, setHappy] = useState(false);
@@ -68,7 +71,7 @@ export function Chibi({
     >
       <div
         className={`absolute inset-0 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-          happy ? "-translate-y-2 -rotate-2" : ""
+          happy && hop ? "-translate-y-2 -rotate-2" : ""
         }`}
       >
         <Image

@@ -1,176 +1,272 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { about } from "@/content/about";
 import { certifications } from "@/content/certifications";
 import { languages } from "@/content/languages";
-import { awards, community, education } from "@/content/cv";
-import { CertificationRow } from "@/components/certification-row";
-import { SpecHeader, PageTitle } from "@/components/ui";
+import { awards, community, education, type CVEntry } from "@/content/cv";
+import { site } from "@/content/site";
+import { CertificationChip } from "@/components/certification-row";
+import { PillLink, SpecHeader } from "@/components/ui";
+import { Emoji } from "@/components/emoji";
 
 export const metadata: Metadata = {
   title: "About",
   description:
-    "How the breadth happened, and why it is deliberate rather than accidental.",
+    "Who I am, how I got here, and how I approach problems.",
 };
 
 export default function AboutPage() {
-  // The record sections continue the numbering after however many prose
-  // sections the content currently has, so editing prose cannot leave a gap.
-  const sectionIndex = (offset: number) =>
-    String(about.sections.length + offset).padStart(2, "0");
-
-  // Certifications and languages both sit between education and community, and
-  // are skipped entirely when empty — so the sections after them shift up.
-  const certOffset = certifications.length > 0 ? 2 : 1;
-  const languageOffset = languages.length > 0 ? 1 : 0;
+  const school = education[0];
 
   return (
     <>
-      <PageTitle
-        index="about me"
-        emoji="👋"
-        title="Hey, I'm Omar"
-        intro={about.intro}
-      />
+      {/* ───────────── Header ───────────── */}
+      <header className="grid items-center gap-12 pt-10 pb-6 sm:pt-16 lg:grid-cols-[1.25fr_1fr] lg:gap-16">
+        <div>
+          <span className="inline-flex -rotate-2 items-center gap-2 rounded-full border-2 border-on-pop bg-pop-yellow px-3.5 py-1.5 font-mono text-[12px] font-semibold text-on-pop">
+            <Emoji char="👋" />
+            about me
+          </span>
+          <h1 className="mt-5 font-display text-[52px] leading-[0.95] font-extrabold tracking-[-0.045em] sm:text-[84px]">
+            Hey, I&apos;m {site.name.split(" ")[0]}.
+          </h1>
+          {about.intro ? (
+            <p className="mt-6 max-w-xl text-[20px] leading-relaxed text-ink-muted">
+              {about.intro}
+            </p>
+          ) : null}
 
-      <section>
-        {about.sections.map((section, i) => (
-          <div key={section.title}>
-            <SpecHeader
-              index={String(i + 1).padStart(2, "0")}
-              title={section.title}
-            />
-            {/*
-              The measure is constrained on the prose itself rather than on the
-              section, so the header rule spans the full column like every other
-              section on the page.
-            */}
-            <div className="max-w-2xl space-y-5 text-[19px] leading-relaxed">
-              {section.paragraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
+          {/* The quick facts a visitor looks for first, as chips. */}
+          <ul className="mt-7 flex flex-wrap gap-2">
+            <FactChip emoji="📍">{site.location}</FactChip>
+            {school ? (
+              <FactChip emoji="🎓">
+                {school.title} · {school.timeline.replace(/^Graduated\s*/i, "")}
+              </FactChip>
+            ) : null}
+            {languages.length > 0 ? (
+              <FactChip emoji="💬">
+                {languages.map((l) => l.name).join(" · ")}
+              </FactChip>
+            ) : null}
+          </ul>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <PillLink href={`mailto:${site.email}`}>
+              Say hello <Emoji char="✉️" />
+            </PillLink>
+            <PillLink href="/writing" variant="outline">
+              Read the blog
+            </PillLink>
           </div>
-        ))}
-      </section>
+        </div>
 
-      <section>
-        <SpecHeader index={sectionIndex(1)} title="Education" />
-        {education.map((entry) => (
-          <Record
-            key={entry.title}
-            title={entry.title}
-            org={entry.org}
-            timeline={entry.timeline}
-          />
-        ))}
-      </section>
+        {/*
+          A polaroid rather than the home page's big card: same person, more
+          personal register, and it keeps the two pages from looking alike.
+        */}
+        <figure className="mx-auto w-full max-w-[380px] rotate-2 rounded-[20px] border-2 border-on-pop bg-cream p-3 pb-4 text-on-pop shadow-[8px_8px_0_0_var(--shadow)] dark:border-rule">
+          <div className="relative aspect-square overflow-hidden rounded-[12px] bg-forest">
+            <span
+              aria-hidden
+              className="absolute top-1/2 left-1/2 h-[72%] w-[72%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-pop-yellow"
+            />
+            <Image
+              src="/portrait.png"
+              alt={`Illustrated portrait of ${site.name}`}
+              width={880}
+              height={880}
+              sizes="380px"
+              priority
+              className="relative h-full w-full object-cover object-[50%_100%]"
+            />
+          </div>
+          <figcaption className="mt-3 text-center font-mono text-[13px]">
+            me, mid-whiteboard <Emoji char="🧠" />
+          </figcaption>
+        </figure>
+      </header>
+
+      {/* ───────────── Story + glance ───────────── */}
+      <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-16">
+        <div className="min-w-0">
+          {about.sections.map((section) => (
+            <section key={section.title} className="mb-14 last:mb-0">
+              <h2 className="flex items-center gap-3 font-display text-[30px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[36px]">
+                <span
+                  aria-hidden
+                  className="h-3.5 w-3.5 shrink-0 rotate-12 rounded-[4px] border-2 border-on-pop bg-pop-yellow"
+                />
+                {section.title}
+              </h2>
+              <div className="mt-5 max-w-[68ch] space-y-5 text-[19px] leading-[1.75]">
+                {section.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        <aside className="lg:sticky lg:top-28 lg:self-start">
+          <div className="rounded-[28px] border-2 border-rule bg-paper-raised p-6">
+            <p className="font-mono text-[12px] font-semibold text-accent">
+              {"// at a glance"}
+            </p>
+            <dl className="mt-4 space-y-5">
+              {education.map((entry) => (
+                <Glance key={entry.title} label="Education">
+                  <span className="block font-semibold">{entry.title}</span>
+                  <span className="block text-ink-muted">{entry.org}</span>
+                  <span className="tabular mt-0.5 block font-mono text-[12px] text-ink-muted">
+                    {entry.timeline}
+                  </span>
+                </Glance>
+              ))}
+              {languages.length > 0 ? (
+                <Glance label="Languages">
+                  <span className="flex flex-col gap-1.5">
+                    {languages.map((language) => (
+                      <span
+                        key={language.name}
+                        className="flex flex-wrap items-baseline justify-between gap-x-3"
+                      >
+                        <span className="font-semibold">{language.name}</span>
+                        <span className="text-[13px] text-ink-muted">
+                          {language.level}
+                        </span>
+                      </span>
+                    ))}
+                  </span>
+                </Glance>
+              ) : null}
+              <Glance label="Elsewhere">
+                <span className="flex flex-wrap gap-2">
+                  {site.socials.map((social) => (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="pill inline-flex rounded-full border-2 border-ink px-3.5 py-1 text-[14px] font-semibold hover:bg-ink hover:text-paper"
+                    >
+                      {social.label}
+                    </a>
+                  ))}
+                </span>
+              </Glance>
+            </dl>
+          </div>
+        </aside>
+      </div>
+
+      {/* ───────────── Along the way ───────────── */}
+      {community.length + awards.length > 0 ? (
+        <section>
+          <SpecHeader eyebrow="// along the way" title="Community & awards" />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {community.map((entry) => (
+              <RecordCard key={entry.title} entry={entry} emoji="🤝" />
+            ))}
+            {awards.map((entry) => (
+              <RecordCard key={entry.title} entry={entry} emoji="🏆" />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {certifications.length > 0 ? (
         <section>
           <SpecHeader
-            index={sectionIndex(2)}
+            eyebrow="// always learning"
             title="Certifications"
             href="/certifications"
             hrefLabel="View certificates"
           />
-          {certifications.map((certification) => (
-            <CertificationRow
-              key={certification.slug}
-              certification={certification}
-            />
-          ))}
-        </section>
-      ) : null}
-
-      {languages.length > 0 ? (
-        <section>
-          <SpecHeader index={sectionIndex(certOffset + 1)} title="Languages" />
-          <dl>
-            {languages.map((language) => (
-              <div
-                key={language.name}
-                className="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-rule py-3"
-              >
-                <dt className="font-display text-[20px] font-bold tracking-[-0.02em]">
-                  {language.name}
-                </dt>
-                <dd className="rounded-full bg-accent-quiet px-3 py-1 font-mono text-[12px] font-medium text-accent">
-                  {language.level}
-                </dd>
-              </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {certifications.map((certification, i) => (
+              <CertificationChip
+                key={certification.slug}
+                certification={certification}
+                index={i}
+              />
             ))}
-          </dl>
+          </div>
         </section>
       ) : null}
-
-      <section>
-        <SpecHeader
-          index={sectionIndex(certOffset + languageOffset + 1)}
-          title="Community"
-        />
-        {community.map((entry) => (
-          <Record
-            key={entry.title}
-            title={entry.title}
-            org={entry.org}
-            timeline={entry.timeline}
-            bullets={entry.bullets}
-          />
-        ))}
-      </section>
-
-      <section>
-        <SpecHeader
-          index={sectionIndex(certOffset + languageOffset + 2)}
-          title="Awards"
-        />
-        {awards.map((entry) => (
-          <Record
-            key={entry.title}
-            title={entry.title}
-            org={entry.org}
-            timeline={entry.timeline}
-          />
-        ))}
-      </section>
     </>
   );
 }
 
-function Record({
-  title,
-  org,
-  timeline,
-  bullets = [],
+function FactChip({
+  emoji,
+  children,
 }: {
-  title: string;
-  org: string;
-  timeline: string;
-  bullets?: string[];
+  emoji: string;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="border-b border-rule py-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-        <h3 className="font-display text-[20px] font-bold tracking-[-0.02em]">
-          {title}
-        </h3>
-        <span className="tabular font-mono text-[11px] text-ink-muted">
-          {timeline}
+    <li className="inline-flex items-center gap-2 rounded-full border-2 border-rule bg-paper-raised px-3.5 py-1.5 text-[14px] font-semibold">
+      <Emoji char={emoji} />
+      {children}
+    </li>
+  );
+}
+
+function Glance({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <dt className="font-mono text-[11px] font-semibold tracking-[0.08em] text-ink-muted uppercase">
+        {label}
+      </dt>
+      <dd className="mt-1.5 text-[15px] leading-snug">{children}</dd>
+    </div>
+  );
+}
+
+/** A community role or award. Placeholder timelines ("—") are not shown. */
+function RecordCard({ entry, emoji }: { entry: CVEntry; emoji: string }) {
+  const timeline = entry.timeline.replace(/^[—-]$/, "").trim();
+
+  return (
+    <article className="flex h-full flex-col rounded-[28px] border-2 border-rule bg-paper p-6">
+      <div className="flex items-start justify-between gap-3">
+        <span
+          aria-hidden
+          className="grid h-12 w-12 -rotate-6 place-items-center rounded-[16px] border-2 border-on-pop bg-pop-yellow text-[24px]"
+        >
+          <Emoji char={emoji} />
         </span>
+        {timeline ? (
+          <span className="tabular rounded-full bg-paper-raised px-2.5 py-1 font-mono text-[11px] font-medium text-ink-muted">
+            {timeline}
+          </span>
+        ) : null}
       </div>
-      {org ? <p className="mt-0.5 text-[14px] text-ink-muted">{org}</p> : null}
-      {bullets.length > 0 ? (
-        <ul className="mt-2 space-y-1">
-          {bullets.map((bullet) => (
+      <h3 className="mt-5 font-display text-[20px] leading-tight font-bold tracking-[-0.02em]">
+        {entry.title}
+      </h3>
+      {entry.org ? (
+        <p className="mt-1 text-[15px] text-ink-muted">{entry.org}</p>
+      ) : null}
+      {entry.bullets.length > 0 ? (
+        <ul className="mt-3 space-y-1.5">
+          {entry.bullets.map((bullet) => (
             <li
               key={bullet}
-              className="relative pl-4 text-[15px] leading-relaxed text-ink-muted before:absolute before:top-[0.65em] before:left-0 before:h-px before:w-2 before:bg-ink-faint"
+              className="text-[15px] leading-relaxed text-ink-muted"
             >
               {bullet}
             </li>
           ))}
         </ul>
       ) : null}
-    </div>
+    </article>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Chibi } from "./chibi";
+import { Emoji, EmojiText } from "./emoji";
 
 /**
  * The pop fills, in the order cards cycle through them. Listed as full class
@@ -173,7 +174,7 @@ export function PageTitle({
       <span
         className={`inline-flex -rotate-2 items-center gap-2 rounded-full border-2 border-on-pop px-3.5 py-1.5 font-mono text-[12px] font-semibold text-on-pop ${fill}`}
       >
-        {emoji ? <span aria-hidden>{emoji}</span> : null}
+        {emoji ? <Emoji char={emoji} /> : null}
         {index}
       </span>
       <h1 className="mt-5 font-display text-[52px] leading-[0.95] font-extrabold tracking-[-0.045em] sm:text-[88px]">
@@ -232,7 +233,7 @@ export function EmptyState({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center rounded-[28px] border-2 border-dashed border-rule px-6 py-12 text-center">
       <Chibi className="h-32" sizes="100px" />
-      <p className="mt-5 font-display text-[22px] font-bold">{children}</p>
+      <p className="mt-5 font-display text-[22px] font-bold">{typeof children === "string" ? <EmojiText>{children}</EmojiText> : children}</p>
       <p className="mt-2 font-mono text-[12px] text-ink-faint">
         {"// check back soon"}
       </p>

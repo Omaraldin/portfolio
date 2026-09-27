@@ -14,6 +14,7 @@ import { mdxOptions } from "@/lib/mdx-options";
 import { mdxComponents } from "@/components/mdx-components";
 import { StatBlock, TagChip } from "@/components/ui";
 import { ProjectMediaGallery } from "@/components/project-media";
+import { Emoji } from "@/components/emoji";
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -74,7 +75,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
               key={d}
               className="inline-flex items-center gap-1.5 rounded-full border-2 border-rule bg-paper-raised px-3 py-1 font-mono text-[12px] font-semibold"
             >
-              <span aria-hidden>{DOMAIN_EMOJI[d]}</span>
+              <Emoji char={DOMAIN_EMOJI[d]} />
               {DOMAIN_LABELS[d]}
             </span>
           ))}
@@ -293,7 +294,7 @@ function NeighbourLink({
             aria-hidden
             className="absolute inset-0 grid place-items-center text-[28px]"
           >
-            {DOMAIN_EMOJI[project.domains[0]]}
+            <Emoji char={DOMAIN_EMOJI[project.domains[0]]} />
           </span>
         )}
       </span>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ArticleMeta } from "@/content/types";
 import { formatDate } from "@/lib/format";
 import { popFill } from "./ui";
+import { Emoji } from "./emoji";
 
 /**
  * An article as a card. With no cover image the title itself becomes the art,
@@ -59,7 +60,7 @@ export function ArticleCard({
         )}
         {lg ? (
           <span className="absolute top-5 right-5 rotate-6 rounded-full border-2 border-on-pop bg-white px-3 py-1 font-mono text-[11px] font-bold">
-            ✨ latest
+            <Emoji char="✨" /> latest
           </span>
         ) : null}
       </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { site } from "@/content/site";
 import { Chibi } from "./chibi";
+import { Emoji } from "./emoji";
 
 /*
   Everything a reader might want once they reach the bottom: where to follow
@@ -25,7 +26,7 @@ export function SiteFooter() {
         */}
         <div className="absolute top-0 right-6 flex translate-y-1.5 items-end gap-2 sm:right-16">
           <p className="mb-16 hidden rounded-[18px] rounded-br-sm border-2 border-on-pop bg-white px-4 py-2 text-[14px] font-semibold text-on-pop shadow-[3px_3px_0_0_var(--on-pop)] sm:block">
-            see you next post 👋
+            see you next post <Emoji char="👋" />
           </p>
           <Chibi className="h-28 sm:h-36" sizes="110px" />
         </div>

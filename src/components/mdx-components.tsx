@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { MDXComponents } from "mdx/types";
+import { Emoji } from "./emoji";
 
 /**
  * Overrides for elements markdown produces.
@@ -40,7 +41,7 @@ function Callout({
         aria-hidden
         className="absolute -top-4 -left-3 grid h-9 w-9 -rotate-12 place-items-center rounded-full border-2 border-on-pop bg-white text-[18px]"
       >
-        {emoji}
+        <Emoji char={emoji} />
       </span>
       <div className="space-y-3">{children}</div>
     </aside>

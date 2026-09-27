@@ -34,16 +34,16 @@ export function ChibiPeek({ className = "" }: { className?: string }) {
   return (
     <div
       aria-hidden
-      className={`pointer-events-none absolute top-full h-[68px] w-[72px] overflow-hidden ${className}`}
+      className={`pointer-events-none absolute top-full h-[58px] w-[72px] overflow-hidden ${className}`}
     >
       <div
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         className={`pointer-events-auto absolute bottom-0 left-1/2 w-[72px] -translate-x-1/2 rotate-180 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-          shown ? "translate-y-0" : "translate-y-[-16px]"
+          shown ? "translate-y-0" : "translate-y-[-10px]"
         }`}
       >
-        <Chibi decorative className="w-full" sizes="72px" />
+        <Chibi decorative hop={false} className="w-full" sizes="72px" />
       </div>
     </div>
   );

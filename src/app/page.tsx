@@ -9,6 +9,7 @@ import { ArticleCard } from "@/components/article-card";
 import { CertificationChip } from "@/components/certification-row";
 import { Sparkles } from "@/components/sparkles";
 import { Reveal } from "@/components/reveal";
+import { Emoji } from "@/components/emoji";
 import { EmptyState, PillLink, SpecHeader } from "@/components/ui";
 
 /*
@@ -111,7 +112,7 @@ export default function Home() {
               Read the blog <span aria-hidden>→</span>
             </PillLink>
             <PillLink href="/work" variant="outline">
-              See what I&apos;ve built <span aria-hidden>🛠️</span>
+              See what I&apos;ve built <Emoji char="🛠️" />
             </PillLink>
           </div>
         </div>
@@ -230,7 +231,7 @@ export default function Home() {
                       step_{item.step}
                     </span>
                     <span aria-hidden className="text-[32px]">
-                      {item.emoji}
+                      <Emoji char={item.emoji} />
                     </span>
                   </div>
                   <h3 className="mt-6 font-display text-[26px] leading-tight font-extrabold tracking-[-0.03em]">

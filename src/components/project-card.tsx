@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Project } from "@/content/types";
 import { DOMAIN_EMOJI, DOMAIN_LABELS } from "@/content/taxonomy";
 import { popFill } from "./ui";
+import { Emoji } from "./emoji";
 
 /**
  * A project as a sticker card: a 16:10 cover — the uploaded thumbnail, else the
@@ -72,7 +73,7 @@ export function ProjectCard({
                   style={{ ["--tilt" as string]: `${[-8, 6, -4][i]}deg` }}
                   className="grid h-16 w-16 rotate-[var(--tilt)] place-items-center rounded-[20px] border-2 border-on-pop bg-white text-[32px] shadow-[4px_4px_0_0_var(--on-pop)] transition-transform duration-300 group-hover:-translate-y-1 sm:h-20 sm:w-20 sm:text-[40px]"
                 >
-                  {DOMAIN_EMOJI[domain]}
+                  <Emoji char={DOMAIN_EMOJI[domain]} />
                 </span>
               ))}
             </div>
