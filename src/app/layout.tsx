@@ -68,13 +68,13 @@ export const metadata: Metadata = {
     title: `${site.name} — ${site.role}`,
     description: site.thesis,
     url: site.url,
-    images: [{ url: site.ogImage, width: 1200, height: 630 }],
+    images: [site.ogImage],
   },
   twitter: {
     card: "summary_large_image",
     title: `${site.name} — ${site.role}`,
     description: site.thesis,
-    images: [site.ogImage],
+    images: [{ url: site.ogImage.url, alt: site.ogImage.alt }],
   },
   alternates: {
     canonical: "/",

@@ -28,7 +28,14 @@ export async function generateMetadata(
   // Without an image a shared link renders as bare text, which is what kills
   // click-through, so an article with no cover of its own falls back to the
   // site card.
-  const image = article.cover ?? site.ogImage;
+  const image = article.cover
+    ? {
+        url: article.cover,
+        width: 1600,
+        height: 900,
+        alt: article.coverAlt ?? article.title,
+      }
+    : site.ogImage;
 
   return {
     title: article.title,
@@ -47,14 +54,7 @@ export async function generateMetadata(
       modifiedTime: article.updated ?? article.date,
       authors: [author.name],
       tags: article.tags,
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 630,
-          alt: article.coverAlt ?? article.title,
-        },
-      ],
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",

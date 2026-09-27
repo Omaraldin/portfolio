@@ -20,15 +20,18 @@ export const site = {
     site invites scrapers.
   */
   phone: "+20 100 000 0000",
-  url: "https://omaraldin.dev",
+  url: "https://khashab.horusbyte.com",
   /*
-    The card a shared link previews with when the page has no image of its own.
-
-    TODO: add the file. A 1200x630 PNG or JPG under /public — name, role, and
-    the thesis line is enough. Until it exists the tag points at a missing file,
-    which degrades to no preview rather than breaking anything.
+    The card a shared link previews with (X/Twitter, Discord, WhatsApp, Slack…)
+    when the page has no image of its own. Dimensions are the file's real ones:
+    platforms use them to lay out the preview before the image arrives.
   */
-  ogImage: "/og.png",
+  ogImage: {
+    url: "/khashab.horusbyte.com.png",
+    width: 1903,
+    height: 987,
+    alt: "Omar El-Khashab — Software Engineer",
+  },
   socials: [
     // TODO: real URLs still needed.
     { label: "GitHub", href: "https://github.com/" },

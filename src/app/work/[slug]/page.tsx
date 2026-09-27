@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProject, projects } from "@/content/projects";
+import { site } from "@/content/site";
 import type { Project } from "@/content/types";
 import {
   CAPABILITY_LABELS,
@@ -27,8 +28,19 @@ export async function generateMetadata(
   const project = getProject(slug);
   if (!project) return {};
 
-  // A shared link previews with the project's own cover when it has one.
-  const image = project.thumbnail?.src;
+  /*
+    A shared link previews with the project's own cover when it has one, else
+    the site card. The fallback has to be explicit: a page's openGraph object
+    replaces the layout's wholesale, images included.
+  */
+  const image = project.thumbnail
+    ? {
+        url: project.thumbnail.src,
+        width: project.thumbnail.width,
+        height: project.thumbnail.height,
+        alt: project.thumbnail.alt || project.title,
+      }
+    : site.ogImage;
 
   return {
     title: project.title,
@@ -36,7 +48,13 @@ export async function generateMetadata(
     openGraph: {
       title: project.title,
       description: project.summary,
-      ...(image ? { images: [{ url: image }] } : {}),
+      images: [image],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.title,
+      description: project.summary,
+      images: [{ url: image.url, alt: image.alt }],
     },
   };
 }
