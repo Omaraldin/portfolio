@@ -209,6 +209,99 @@
     "featured": true
   },
   {
+    "slug": "ankhimate",
+    "title": "Ankhimate",
+    "summary": "An open-source 2D skeletal animation editor in Rust, with an MCP server for AI assistants and sandboxed community plugins.",
+    "sections": [
+      {
+        "title": "The use case",
+        "body": "2D games animate characters with **skeletons**, not frame-by-frame drawings: artwork is cut into parts, pinned to bones, and animated by moving the bones. It keeps files small, motion smooth, and lets one skeleton wear many outfits.\n\nAnkhimate is the editor for that job. An animator imports the artwork (images, PSD files or a sprite atlas), rigs it to a skeleton, poses it on a timeline, and exports a format the game's engine can play back. A game developer embeds the small runtime to play those animations."
+      },
+      {
+        "title": "The problem",
+        "body": "The established tools in this space are closed and licensed per seat, and their runtimes come with licence terms of their own. The open alternatives are either unmaintained or GPL, which forces the copyleft onto any game that embeds them.\n\nThey also carry old limits that nobody revisits. The best-known example: IK chains are capped at two bones, because longer chains have infinitely many solutions. So a tail, a tentacle or a rope has to be faked with several hand-chained constraints.\n\nAnkhimate is **free, open source, and dual-licensed MIT or Apache-2.0**, so a game can embed the runtime without buying a licence or inheriting copyleft."
+      },
+      {
+        "title": "Features",
+        "body": "- **Bones and IK of any length**: forward kinematics, gizmos for translate, rotate, scale and shear, and IK chains of any length, not just two bones.\n- **Constraints**: IK, transform, path and physics, with physics run on a fixed step so it behaves the same at any framerate.\n- **Meshes and weight painting**: turn artwork into a deformable mesh, trace its outline from the image, and paint bone weights with a real brush (radius, feather, five blend modes, per-bone locking).\n- **Animation**: dopesheet, graph editor with bezier curves, deform timelines, events with audio, and per-bone offsets for secondary motion.\n- **Setup and Animate modes**: structural edits and posing are kept apart, and the editor refuses the wrong one instead of quietly corrupting a rig.\n- **Export as a format editor**: instead of a fixed list of exporters, an export preset is a set of templates with a live preview. Ankhimate's own runtime format is just one of those templates, so users can target any engine the same way.\n- **Community plugins**: sandboxed JavaScript plugins add operators, importers, exporters and panels, fetched from a separate community plugin repository.\n- **An MCP server**: AI assistants can open a rig, run edits, render a frame or a contact sheet of an animation, and export, through the same actions the editor uses."
+      },
+      {
+        "title": "How it is built",
+        "body": "A Rust workspace of eight crates, split so the parts that matter to a game never depend on the parts that only matter to an editor:\n\n- **`core`**: the data model and one `evaluate()` function that turns a rig and a time into a pose. No framework, `unsafe` code forbidden, and it compiles to WebAssembly as well as native. The editor, the exporters and games all use this same function.\n- **`document`**: the headless document with undo and a set of named **verbs** (`bone.create`, `anim.key_bone`, …), each described by a JSON Schema.\n- **`editor`**: the desktop app, built with egui and wgpu.\n- **`plugins`**: sandboxed QuickJS plugins.\n- **`mcp`**: the MCP server.\n- **`render`**: a headless CPU renderer for previews.\n- **`formats`** and **`export`**: file formats, importers and the export template engine.\n\nThe key design choice is that there is **one editing API, not three**. The editor, plugins and the MCP server all drive the same document verbs, so anything a plugin or an AI assistant can do, the editor can do, and vice versa. There is no second, weaker scripting interface to fall out of sync.\n\nLong IK chains use FABRIK, seeded with a circular arc from root to target so the bend spreads naturally along the chain. One- and two-bone chains still use the exact closed-form solve, and the solver is picked by chain length rather than exposed as a setting. Key decisions such as ID handling, transform maths, work modes and physics determinism are recorded as architecture decision records in the repo."
+      },
+      {
+        "title": "Status",
+        "body": "Ankhimate is **pre-alpha and in active development**. The editor runs and the data model is stable enough to build on, but the file format is not frozen yet. Rendered output (image sequences, spritesheets and video) is still being written, and the Rust runtime needs a worked example.\n\nThe repository tracks exactly what exists and what doesn't in its task list, and its comparison page is explicit about where it does *not* go further than the established tools."
+      }
+    ],
+    "role": "Creator & maintainer",
+    "timeline": "2026",
+    "metrics": [
+      {
+        "value": "8",
+        "label": "Rust crates, one editing API"
+      },
+      {
+        "value": "Any",
+        "label": "IK chain length (the usual cap is 2)"
+      }
+    ],
+    "domains": [
+      "desktop",
+      "games"
+    ],
+    "capabilities": [
+      "system-design",
+      "api-design",
+      "ui-engineering",
+      "performance"
+    ],
+    "stack": [
+      "Rust",
+      "egui",
+      "wgpu",
+      "WGSL",
+      "QuickJS",
+      "MCP",
+      "WebAssembly",
+      "FABRIK IK"
+    ],
+    "links": [
+      {
+        "label": "Source on GitHub",
+        "href": "https://github.com/ankhimate/editor"
+      },
+      {
+        "label": "Community plugins",
+        "href": "https://github.com/Ankhimate/community-plugins"
+      },
+      {
+        "label": "Runtimes",
+        "href": "https://github.com/Ankhimate/runtime"
+      }
+    ],
+    "media": [],
+    "board": {
+      "zone": "Creative tools",
+      "shape": "library",
+      "parts": [
+        "core",
+        "editor",
+        "plugins",
+        "MCP"
+      ],
+      "caption": "rig · pose · animate · export",
+      "note": "IK chains of any length",
+      "sameProblem": [
+        {
+          "project": "kayan",
+          "label": "one headless core, many front-ends"
+        }
+      ]
+    },
+    "featured": true
+  },
+  {
     "slug": "iot-telemetry-platform",
     "title": "IoT Telemetry Platform",
     "summary": "End-to-end pipeline carrying sensor readings from ESP32 nodes to a live dashboard.",

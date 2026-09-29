@@ -26,6 +26,7 @@ const BOX_H = 250;
 const GAP_X = (BOARD_WIDTH - PAD_X * 2 - BOX_W * COLS) / (COLS - 1);
 const ZONE_HEAD = 64;
 const ARC_ROOM = 96; // space above a row for a dependency arc and its label
+const TAB_ROOM = 34; // a library's "pkg" tab sticks up above its box
 const AUDIENCE_ROOM = 170; // arrow + stick figures + caption under a box
 const NOTE_ROOM = 56; // a red annotation under a box
 const SAME_ROOM = 120; // a dashed "same problem" dip under a row
@@ -188,6 +189,7 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
       const row = items.slice(r, r + COLS);
       const hasArc = row.some((p) => usesTargets.has(p.slug));
       if (hasArc) y += ARC_ROOM;
+      else if (row.some((p) => p.board?.shape === "library")) y += TAB_ROOM;
 
       row.forEach((p, c) => {
         const b = p.board;
@@ -295,15 +297,20 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
         const m = mid(p0, p1, p2, p3);
         [labelX, labelY, anchor] = [m[0], m[1] + 30, "middle"];
       } else {
-        // Different rows: out of the upper box's bottom, into the lower box's top.
+        /*
+          Different rows: from the right-hand end of the upper box's bottom to
+          the right-hand end of the lower box's top. Notes hang under the left
+          of a box, so the right side keeps the line clear of them; the label
+          sits just above the lower box, where nothing else is written.
+        */
         const [a, b] = target.y < other.y ? [target, other] : [other, target];
-        p0 = [a.x + a.w * 0.5, a.y + a.h + 6];
-        p3 = [b.x + b.w * 0.5, b.y - 12];
+        const tab = b.shape === "library" ? TAB_ROOM : 0;
+        p0 = [a.x + a.w * 0.88, a.y + a.h + 6];
+        p3 = [b.x + b.w * 0.88, b.y - 12 - tab];
         const bend = (p3[1] - p0[1]) * 0.5;
-        p1 = [p0[0] + 60, p0[1] + bend];
-        p2 = [p3[0] + 60, p3[1] - bend];
-        // Label just under the upper box, clear of the zone divider below it.
-        [labelX, labelY, anchor] = [p0[0] + 64, p0[1] + 36, "start"];
+        p1 = [p0[0] + 50, p0[1] + bend];
+        p2 = [p3[0] + 50, p3[1] - bend];
+        [labelX, labelY, anchor] = [p3[0] + 30, p3[1] - 6, "start"];
       }
       edges.push({
         id,
