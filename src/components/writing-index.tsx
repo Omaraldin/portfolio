@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 import type { ArticleMeta } from "@/content/types";
-import { ArticleCard } from "./article-card";
+import { ArticleRow } from "./article-row";
 
 /**
- * The blog index: the newest post as a wide feature card, then everything else
- * in a grid, filterable by tag. Filtering is client-side over the already
+ * The blog index: every post as an editorial row, newest first with a larger
+ * title, filterable by tag. Filtering is client-side over the already
  * rendered list, so it is instant and needs no navigation.
  */
 export function WritingIndex({ articles }: { articles: ArticleMeta[] }) {
@@ -40,16 +40,10 @@ export function WritingIndex({ articles }: { articles: ArticleMeta[] }) {
         </div>
       ) : null}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {feature ? (
-          <div className="md:col-span-full">
-            <ArticleCard article={feature} index={0} size="lg" />
-          </div>
-        ) : null}
-        {rest.map((article, i) =>
-          article ? (
-            <ArticleCard key={article.slug} article={article} index={i + 1} />
-          ) : null,
+      <div className="border-b border-rule">
+        {feature ? <ArticleRow article={feature} lead /> : null}
+        {rest.map((article) =>
+          article ? <ArticleRow key={article.slug} article={article} /> : null,
         )}
       </div>
     </div>

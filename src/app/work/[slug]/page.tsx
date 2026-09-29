@@ -13,7 +13,7 @@ import {
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { mdxOptions } from "@/lib/mdx-options";
 import { mdxComponents } from "@/components/mdx-components";
-import { StatBlock, TagChip } from "@/components/ui";
+import { MarkerUnderline, StatBlock, TagChip } from "@/components/ui";
 import { ProjectMediaGallery } from "@/components/project-media";
 import { Emoji } from "@/components/emoji";
 
@@ -148,12 +148,9 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         <div className="min-w-0">
           {project.sections.map((entry) => (
             <section key={entry.title} className="mb-14 last:mb-0">
-              <h2 className="spec-header-title flex items-center gap-3 font-display text-[30px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[34px]">
-                <span
-                  aria-hidden
-                  className="spec-header-rule h-3.5 w-3.5 shrink-0 rotate-12 rounded-[4px] border-2 border-on-pop bg-pop-yellow"
-                />
+              <h2 className="spec-header-title inline-block font-display text-[30px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[34px]">
                 {entry.title}
+                <MarkerUnderline className="mt-1 w-[60%]" />
               </h2>
               {/*
                 Bodies go through the article MDX pipeline, so a section can
@@ -171,12 +168,9 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
 
           {project.media.length > 0 ? (
             <section className="mt-14">
-              <h2 className="flex items-center gap-3 font-display text-[30px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[34px]">
-                <span
-                  aria-hidden
-                  className="h-3.5 w-3.5 shrink-0 rotate-12 rounded-[4px] border-2 border-on-pop bg-pop-yellow"
-                />
+              <h2 className="inline-block font-display text-[30px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[34px]">
                 Screens
+                <MarkerUnderline className="mt-1 w-[60%]" />
               </h2>
               <div className="mt-6">
                 <ProjectMediaGallery media={project.media} />
@@ -273,7 +267,7 @@ function Fact({
 }) {
   return (
     <div>
-      <dt className="font-mono text-[11px] font-semibold tracking-[0.08em] text-ink-muted uppercase">
+      <dt className="text-[14px] font-semibold text-ink-muted">
         {label}
       </dt>
       <dd className="mt-1.5">{children}</dd>

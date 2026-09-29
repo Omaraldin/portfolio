@@ -3,9 +3,8 @@ import { projects } from "@/content/projects";
 import { certifications, featuredCertifications } from "@/content/certifications";
 import { getArticles } from "@/lib/articles";
 import { layoutBoard } from "@/lib/board-layout";
-import { ArticleCard } from "@/components/article-card";
+import { ArticleRow } from "@/components/article-row";
 import { CertificationChip } from "@/components/certification-row";
-import { Reveal } from "@/components/reveal";
 import { Chibi } from "@/components/chibi";
 import { Whiteboard } from "@/components/board/whiteboard";
 import { BoardFlow } from "@/components/board/board-flow";
@@ -99,20 +98,15 @@ export default function Home() {
       {/* ───────────── Writing ───────────── */}
       <section>
         <SpecHeader
-          eyebrow="// thinking out loud"
           title="Latest writing"
           href="/writing"
           hrefLabel="All posts"
         />
         {latest ? (
-          <div className="grid gap-6 md:grid-cols-3">
-            <Reveal className="md:col-span-full">
-              <ArticleCard article={latest} index={0} size="lg" />
-            </Reveal>
-            {moreArticles.slice(0, 3).map((article, i) => (
-              <Reveal key={article.slug} delay={i * 80} className="h-full">
-                <ArticleCard article={article} index={i + 1} />
-              </Reveal>
+          <div className="border-b border-rule">
+            <ArticleRow article={latest} lead />
+            {moreArticles.slice(0, 3).map((article) => (
+              <ArticleRow key={article.slug} article={article} />
             ))}
           </div>
         ) : (
@@ -124,20 +118,13 @@ export default function Home() {
       {certs.length > 0 ? (
         <section>
           <SpecHeader
-            eyebrow="// always learning"
             title="Certifications"
             href="/certifications"
             hrefLabel="All certificates"
           />
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {certs.slice(0, 6).map((certification, i) => (
-              <Reveal
-                key={certification.slug}
-                delay={(i % 3) * 80}
-                className="h-full"
-              >
-                <CertificationChip certification={certification} index={i} />
-              </Reveal>
+              <CertificationChip key={certification.slug} certification={certification} index={i} />
             ))}
           </div>
         </section>

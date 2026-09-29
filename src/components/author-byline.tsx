@@ -33,8 +33,8 @@ export function AuthorByline() {
       )}
 
       <div className="min-w-0">
-        <p className="font-mono text-[12px] font-semibold">
-          {"// written by"}
+        <p className="text-[19px]" style={{ fontFamily: "var(--font-hand)" }}>
+          written by
         </p>
         <p className="mt-1 font-display text-[24px] font-extrabold tracking-[-0.02em]">
           {author.name}
@@ -48,7 +48,7 @@ export function AuthorByline() {
             href="/about"
             className="pill inline-flex rounded-full border-2 border-on-pop bg-brand px-4 py-1.5 text-[14px] font-semibold text-on-brand"
           >
-            More about me →
+            More about me
           </Link>
           {site.socials.map((social) => (
             <a

@@ -15,7 +15,6 @@ export default function WritingPage() {
     <>
       <PageTitle
         index="the blog"
-        emoji="✍️"
         title="Thinking out loud"
         intro="Notes on architecture, data flow, and what actually transfers between stacks. No hot takes — just what held up in production."
       />

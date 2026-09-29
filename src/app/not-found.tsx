@@ -5,8 +5,8 @@ export default function NotFound() {
   return (
     <section className="flex flex-col items-center py-20 text-center">
       <Chibi className="h-56" sizes="180px" priority />
-      <p className="mt-8 font-mono text-[13px] font-bold text-accent">
-        {"// 404: route not found"}
+      <p className="mt-8 text-[22px] text-ink-muted" style={{ fontFamily: "var(--font-hand)" }}>
+        404, nothing lives at this address
       </p>
       <h1 className="mt-3 font-display text-[44px] leading-[0.95] font-extrabold tracking-[-0.045em] sm:text-[64px]">
         This page wandered off.

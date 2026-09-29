@@ -12,8 +12,8 @@ export function ProfileSwitch({ active }: { active: string }) {
 
   return (
     <div className="no-print mt-6 flex flex-col gap-3 rounded-[28px] border-2 border-rule bg-paper-raised p-5 sm:flex-row sm:items-center sm:gap-4">
-      <span className="font-mono text-[12px] font-semibold text-ink-muted sm:shrink-0">
-        {"// pick a role"}
+      <span className="text-[20px] text-ink-muted sm:shrink-0" style={{ fontFamily: "var(--font-hand)" }}>
+        pick a role
       </span>
       <div className="flex flex-wrap gap-2">
         {cvs.map((cv) => {

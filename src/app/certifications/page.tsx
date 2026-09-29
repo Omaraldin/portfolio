@@ -14,7 +14,6 @@ export default function CertificationsPage() {
     <>
       <PageTitle
         index="receipts"
-        emoji="🏅"
         title="Certifications"
         intro="Each entry carries the certificate itself. Open one to read it in full."
       />

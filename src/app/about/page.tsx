@@ -6,7 +6,7 @@ import { languages } from "@/content/languages";
 import { awards, community, education, type CVEntry } from "@/content/cv";
 import { site } from "@/content/site";
 import { CertificationChip } from "@/components/certification-row";
-import { PillLink, SpecHeader } from "@/components/ui";
+import { MarkerUnderline, PillLink, SpecHeader } from "@/components/ui";
 import { Emoji } from "@/components/emoji";
 
 export const metadata: Metadata = {
@@ -23,10 +23,10 @@ export default function AboutPage() {
       {/* ───────────── Header ───────────── */}
       <header className="grid items-center gap-12 pt-10 pb-6 sm:pt-16 lg:grid-cols-[1.25fr_1fr] lg:gap-16">
         <div>
-          <span className="inline-flex -rotate-2 items-center gap-2 rounded-full border-2 border-on-pop bg-pop-yellow px-3.5 py-1.5 font-mono text-[12px] font-semibold text-on-pop">
-            <Emoji char="👋" />
+          <p className="inline-block text-[22px] text-ink-muted" style={{ fontFamily: "var(--font-hand)" }}>
             about me
-          </span>
+            <MarkerUnderline className="w-full" />
+          </p>
           <h1 className="mt-5 font-display text-[52px] leading-[0.95] font-extrabold tracking-[-0.045em] sm:text-[84px]">
             Hey, I&apos;m {site.name.split(" ")[0]}.
           </h1>
@@ -92,12 +92,9 @@ export default function AboutPage() {
         <div className="min-w-0">
           {about.sections.map((section) => (
             <section key={section.title} className="mb-14 last:mb-0">
-              <h2 className="flex items-center gap-3 font-display text-[30px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[36px]">
-                <span
-                  aria-hidden
-                  className="h-3.5 w-3.5 shrink-0 rotate-12 rounded-[4px] border-2 border-on-pop bg-pop-yellow"
-                />
+              <h2 className="inline-block font-display text-[30px] leading-tight font-extrabold tracking-[-0.03em] sm:text-[36px]">
                 {section.title}
+                <MarkerUnderline className="mt-1 w-[60%]" />
               </h2>
               <div className="mt-5 max-w-[68ch] space-y-5 text-[19px] leading-[1.75]">
                 {section.paragraphs.map((paragraph) => (
@@ -110,8 +107,8 @@ export default function AboutPage() {
 
         <aside className="lg:sticky lg:top-28 lg:self-start">
           <div className="rounded-[28px] border-2 border-rule bg-paper-raised p-6">
-            <p className="font-mono text-[12px] font-semibold text-accent">
-              {"// at a glance"}
+            <p className="text-[21px] text-ink-muted" style={{ fontFamily: "var(--font-hand)" }}>
+              at a glance
             </p>
             <dl className="mt-4 space-y-5">
               {education.map((entry) => (
@@ -163,7 +160,7 @@ export default function AboutPage() {
       {/* ───────────── Along the way ───────────── */}
       {community.length + awards.length > 0 ? (
         <section>
-          <SpecHeader eyebrow="// along the way" title="Community & awards" />
+          <SpecHeader title="Community & awards" />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {community.map((entry) => (
               <RecordCard key={entry.title} entry={entry} emoji="🤝" />
@@ -178,7 +175,6 @@ export default function AboutPage() {
       {certifications.length > 0 ? (
         <section>
           <SpecHeader
-            eyebrow="// always learning"
             title="Certifications"
             href="/certifications"
             hrefLabel="View certificates"
@@ -222,7 +218,7 @@ function Glance({
 }) {
   return (
     <div>
-      <dt className="font-mono text-[11px] font-semibold tracking-[0.08em] text-ink-muted uppercase">
+      <dt className="text-[14px] font-semibold text-ink-muted">
         {label}
       </dt>
       <dd className="mt-1.5 text-[15px] leading-snug">{children}</dd>

@@ -34,7 +34,6 @@ export default async function CVProfilePage(
       <div className="no-print">
         <PageTitle
           index="curriculum vitae"
-          emoji="📄"
           title="One record, many roles"
           intro="The same record, arranged for the role. Each version has its own sections and ordering, and downloads as a PDF built for applicant tracking systems."
         />

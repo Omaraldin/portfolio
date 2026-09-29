@@ -35,14 +35,12 @@ export function SiteFooter() {
 
           <div className="relative grid gap-12 lg:grid-cols-[1.4fr_1fr]">
             <div>
-              <p className="font-mono text-[13px] text-pop-yellow">
-                {"$ tail -f omaraldin.log"}
-              </p>
-              <h2 className="mt-4 max-w-2xl font-display text-[40px] leading-[0.95] font-extrabold tracking-[-0.045em] sm:text-[64px]">
-                Thanks for{" "}
-                <span className="inline-block -rotate-1 rounded-2xl bg-pop-yellow px-3 text-on-pop">
-                  reading.
-                </span>
+              {/* Chalk on the dark panel: the same hand as the board. */}
+              <h2
+                className="max-w-2xl text-[44px] leading-[1.05] font-bold sm:text-[60px]"
+                style={{ fontFamily: "var(--font-hand)" }}
+              >
+                Thanks for reading.
               </h2>
               <p className="mt-5 max-w-md text-[17px] leading-relaxed text-white/70">
                 I post what I build and what I learn building it. Follow along
@@ -77,8 +75,8 @@ export function SiteFooter() {
             </div>
 
             <nav aria-label="Footer" className="lg:justify-self-end">
-              <p className="font-mono text-[12px] text-white/50">
-                {"// around the site"}
+              <p className="text-[20px] text-white/60" style={{ fontFamily: "var(--font-hand)" }}>
+                around the site
               </p>
               <ul className="mt-4 grid grid-cols-2 gap-x-10 gap-y-2.5">
                 {MORE.map((item) => (

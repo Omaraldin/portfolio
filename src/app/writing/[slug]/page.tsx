@@ -155,8 +155,8 @@ export default async function ArticlePage(
 
       {related.length > 0 ? (
         <aside className="mt-16 rounded-[28px] border-2 border-rule bg-paper-raised p-6">
-          <h2 className="font-mono text-[12px] font-semibold text-ink-muted">
-            {"// referenced work"}
+          <h2 className="text-[21px] text-ink-muted" style={{ fontFamily: "var(--font-hand)" }}>
+            the work this is about
           </h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {related.map((project) => (
@@ -165,7 +165,7 @@ export default async function ArticlePage(
                 href={`/work/${project.slug}`}
                 className="pill inline-flex items-center gap-1 rounded-full border-2 border-ink bg-paper px-4 py-1.5 text-[14px] font-semibold hover:bg-ink hover:text-paper"
               >
-                {project.title} <span aria-hidden>→</span>
+                {project.title}
               </Link>
             ))}
           </div>

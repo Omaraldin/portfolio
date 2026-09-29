@@ -63,9 +63,6 @@ export function ProjectCard({
             angle so the cluster reads as hand-placed.
           */
           <div aria-hidden className="absolute inset-0">
-            <span className="absolute top-4 left-5 font-mono text-[13px] font-semibold opacity-60">
-              #{String(index + 1).padStart(2, "0")}
-            </span>
             <div className="absolute inset-0 flex items-center justify-center gap-3">
               {project.domains.slice(0, 3).map((domain, i) => (
                 <span
@@ -123,15 +120,6 @@ export function ProjectCard({
               {tech}
             </span>
           ))}
-          <span className="ml-auto inline-flex items-center gap-1 text-[14px] font-semibold text-accent">
-            Case study
-            <span
-              aria-hidden
-              className="transition-transform duration-300 group-hover:translate-x-1"
-            >
-              →
-            </span>
-          </span>
         </div>
       </div>
     </Link>

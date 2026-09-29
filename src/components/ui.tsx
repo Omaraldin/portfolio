@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Chibi } from "./chibi";
-import { Emoji, EmojiText } from "./emoji";
+import { EmojiText } from "./emoji";
 
 /**
  * The pop fills, in the order cards cycle through them. Listed as full class
@@ -13,8 +13,31 @@ export function popFill(index: number) {
 }
 
 /**
- * A section header: a tilted pop square, then the title in the display face,
- * with an optional "see all" pill on the right.
+ * A red marker stroke under a heading — the same hand that writes on the
+ * home-page board. Decorative, and dropped in print.
+ */
+export function MarkerUnderline({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 200 12"
+      preserveAspectRatio="none"
+      className={`spec-header-rule block h-[10px] ${className}`}
+    >
+      <path
+        d="M2 8 C 40 3, 90 10, 140 5 S 190 6, 198 4"
+        fill="none"
+        stroke="var(--wb-red)"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/**
+ * A section header: the title in the display face with a marker stroke under
+ * it, and an optional plain link on the right.
  *
  * The index is kept in the signature and rendered for print only. An applicant
  * tracking system reading the CV still benefits from the numbering.
@@ -24,15 +47,12 @@ export function SpecHeader({
   title,
   href,
   hrefLabel,
-  eyebrow,
 }: {
   /** Omit for sections that are not part of a numbered sequence. */
   index?: string;
   title: string;
   href?: string;
   hrefLabel?: string;
-  /** Small mono line above the title, e.g. "// what I shipped". */
-  eyebrow?: string;
 }) {
   /*
     The class hooks let the print stylesheet strip the ornament — marker and
@@ -41,32 +61,22 @@ export function SpecHeader({
   return (
     <div className="spec-header flex flex-wrap items-end gap-x-4 gap-y-3 pt-16 pb-7">
       <div className="min-w-0 flex-1">
-        {eyebrow ? (
-          <p className="spec-header-link mb-2 font-mono text-[12px] font-medium text-accent">
-            {eyebrow}
-          </p>
+        {index ? (
+          <span className="spec-header-index tabular hidden font-mono text-[11px] font-medium text-ink-muted">
+            {index}
+          </span>
         ) : null}
-        <div className="flex items-center gap-3">
-          {index ? (
-            <span className="spec-header-index tabular hidden font-mono text-[11px] font-medium text-ink-muted">
-              {index}
-            </span>
-          ) : null}
-          <span
-            aria-hidden
-            className="spec-header-rule h-4 w-4 shrink-0 rotate-12 rounded-[5px] border-2 border-on-pop bg-pop-yellow"
-          />
-          <h2 className="spec-header-title font-display text-[32px] leading-[1.05] font-extrabold tracking-[-0.03em] sm:text-[40px]">
-            {title}
-          </h2>
-        </div>
+        <h2 className="spec-header-title inline-block font-display text-[32px] leading-[1.05] font-extrabold tracking-[-0.03em] sm:text-[40px]">
+          {title}
+          <MarkerUnderline className="mt-1 w-[70%]" />
+        </h2>
       </div>
       {href ? (
         <Link
           href={href}
-          className="spec-header-link pill inline-flex items-center gap-1.5 rounded-full border-2 border-ink px-4 py-2 text-[14px] font-semibold hover:bg-ink hover:text-paper"
+          className="spec-header-link text-[16px] font-semibold text-ink underline decoration-rule decoration-2 underline-offset-[6px] transition-colors hover:decoration-[color:var(--wb-red)]"
         >
-          {hrefLabel ?? "View all"} <span aria-hidden>→</span>
+          {hrefLabel ?? "View all"}
         </Link>
       ) : null}
     </div>
@@ -145,39 +155,31 @@ export function StatBlock({
       <div className="tabular font-display text-[40px] leading-none font-extrabold tracking-[-0.03em]">
         {value}
       </div>
-      <div className="mt-2 font-mono text-[11px] font-medium tracking-[0.06em] uppercase">
-        {label}
-      </div>
+      <div className="mt-2 text-[14px] text-ink-muted">{label}</div>
     </div>
   );
 }
 
 /**
- * Page title block, used at the top of every section page: a tilted sticker,
- * a big display title, and a line of intro.
+ * Page title block, used at the top of every section page: a small
+ * handwritten label, a big display title, and a line of intro.
  */
 export function PageTitle({
   index,
   title,
   intro,
-  emoji,
-  fill = "bg-pop-yellow",
 }: {
   index: string;
   title: string;
   intro?: string;
-  emoji?: string;
-  fill?: string;
 }) {
   return (
     <header className="pt-10 pb-6 sm:pt-16">
-      <span
-        className={`inline-flex -rotate-2 items-center gap-2 rounded-full border-2 border-on-pop px-3.5 py-1.5 font-mono text-[12px] font-semibold text-on-pop ${fill}`}
-      >
-        {emoji ? <Emoji char={emoji} /> : null}
+      <p className="inline-block text-[22px] text-ink-muted" style={{ fontFamily: "var(--font-hand)" }}>
         {index}
-      </span>
-      <h1 className="mt-5 font-display text-[52px] leading-[0.95] font-extrabold tracking-[-0.045em] sm:text-[88px]">
+        <MarkerUnderline className="w-full" />
+      </p>
+      <h1 className="mt-4 font-display text-[52px] leading-[0.95] font-extrabold tracking-[-0.045em] sm:text-[88px]">
         {title}
       </h1>
       {intro ? (
@@ -234,9 +236,6 @@ export function EmptyState({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col items-center rounded-[28px] border-2 border-dashed border-rule px-6 py-12 text-center">
       <Chibi className="h-32" sizes="100px" />
       <p className="mt-5 font-display text-[22px] font-bold">{typeof children === "string" ? <EmojiText>{children}</EmojiText> : children}</p>
-      <p className="mt-2 font-mono text-[12px] text-ink-faint">
-        {"// check back soon"}
-      </p>
     </div>
   );
 }
