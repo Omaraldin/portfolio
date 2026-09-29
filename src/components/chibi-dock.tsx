@@ -56,7 +56,8 @@ export function ChibiDock() {
         <div className="relative mx-auto h-full w-full max-w-[1240px]">
           <div className="absolute right-6 bottom-0 flex items-end gap-2 sm:right-16">
             <p
-              className={`mb-16 rounded-[18px] rounded-br-sm border-2 border-on-pop bg-white px-4 py-2 text-[14px] font-semibold whitespace-nowrap text-on-pop shadow-[3px_3px_0_0_var(--on-pop)] transition-all duration-300 ${
+              style={{ fontFamily: "var(--font-hand)" }}
+              className={`mb-16 rounded-[16px] rounded-br-sm border-[1.5px] border-ink bg-[color:var(--wb-bg)] px-4 py-1.5 text-[18px] whitespace-nowrap text-ink transition-all duration-300 ${
                 docked
                   ? "translate-y-0 opacity-100"
                   : "pointer-events-none translate-y-2 opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100"

@@ -24,7 +24,7 @@ export function CVDocument({ cv }: { cv: CV }) {
         <h1 className="font-display text-[40px] leading-[1.05] font-extrabold tracking-[-0.035em] print:font-sans print:text-[22pt] print:tracking-normal">
           {site.name}
         </h1>
-        <p className="mt-2 font-mono text-[12px] tracking-[0.12em] text-ink-muted uppercase print:font-sans print:tracking-normal print:normal-case">
+        <p className="mt-2 text-[15px] font-semibold text-ink-muted">
           {cv.title}
         </p>
 
@@ -38,7 +38,7 @@ export function CVDocument({ cv }: { cv: CV }) {
           Contact details are a single plain line so an extractor reads them in
           order rather than pulling them out of a grid.
         */}
-        <p className="mt-4 font-mono text-[11px] tracking-[0.08em] text-ink-muted print:font-sans print:tracking-normal">
+        <p className="mt-4 text-[14px] text-ink-muted">
           {[site.phone, site.email, site.location]
             .filter(Boolean)
             .join(" · ")}
@@ -68,7 +68,7 @@ function SectionBody({ section }: { section: ResolvedSection }) {
             key={item.label}
             className="flex flex-col gap-1 sm:flex-row sm:gap-6"
           >
-            <dt className="font-mono text-[11px] tracking-[0.1em] text-ink-muted uppercase sm:w-36 sm:shrink-0 print:font-sans print:tracking-normal print:normal-case">
+            <dt className="label sm:w-36 sm:shrink-0">
               {item.label}
             </dt>
             <dd className="text-[14px]">{item.value}</dd>
@@ -115,7 +115,7 @@ function SectionBody({ section }: { section: ResolvedSection }) {
               ) : null}
             </h3>
             {entry.timeline ? (
-              <span className="tabular font-mono text-[11px] text-ink-muted print:font-sans">
+              <span className="tabular text-[14px] text-ink-muted">
                 {entry.timeline}
               </span>
             ) : null}

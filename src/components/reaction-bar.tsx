@@ -107,13 +107,13 @@ export function ReactionBar({ slug }: { slug: string }) {
   return (
     <section
       aria-label="Reactions"
-      className="no-print mt-16 rounded-[28px] border-2 border-rule bg-paper-raised p-6 sm:p-8"
+      className="surface no-print mt-16 p-6 sm:p-8"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="font-display text-[22px] font-extrabold tracking-[-0.02em]">
           Did this land?
         </p>
-        <p className="tabular font-mono text-[12px] text-ink-muted">
+        <p className="tabular text-[14px] text-ink-muted">
           {state
             ? `${total} ${total === 1 ? "reaction" : "reactions"}`
             : "loading…"}
@@ -132,11 +132,7 @@ export function ReactionBar({ slug }: { slug: string }) {
               disabled={!state}
               aria-pressed={active}
               aria-label={`${reaction.label}, ${count}`}
-              className={`pill inline-flex min-w-[76px] items-center justify-center gap-2 rounded-full border-2 px-4 py-2 text-[18px] disabled:opacity-60 ${
-                active
-                  ? "border-on-pop bg-brand text-on-brand"
-                  : "border-rule bg-paper text-ink hover:border-ink"
-              }`}
+              className="chip min-w-[72px] justify-center text-[18px] disabled:opacity-60"
             >
               <span
                 onAnimationEnd={() => setPopped(null)}
@@ -144,7 +140,7 @@ export function ReactionBar({ slug }: { slug: string }) {
               >
                 <Emoji char={reaction.emoji} />
               </span>
-              <span className="tabular font-mono text-[14px] font-semibold">
+              <span className="tabular text-[14px] font-semibold">
                 {state ? count : "·"}
               </span>
             </button>

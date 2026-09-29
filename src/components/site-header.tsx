@@ -6,11 +6,13 @@ import { usePathname } from "next/navigation";
 import { author, nav, site } from "@/content/site";
 import { ThemeToggle } from "./theme-toggle";
 import { ChibiPeek } from "./chibi-peek";
+import { MarkerUnderline } from "./ui";
 
 /**
- * A floating pill bar, sticky at the top. On narrow screens the links drop to a
- * second row that scrolls sideways instead of collapsing into a menu — five
- * links fit, and a hidden menu costs a tap every visit.
+ * A plain bar, sticky at the top, with a hairline beneath. The current page is
+ * marked with the board's red marker stroke rather than a filled pill. On
+ * narrow screens the links drop to a second row that scrolls sideways instead
+ * of collapsing into a menu — four links fit, and a hidden menu costs a tap.
  */
 export function SiteHeader() {
   const pathname = usePathname();
@@ -19,8 +21,8 @@ export function SiteHeader() {
     pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <header className="no-print sticky top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-4">
-      <div className="relative mx-auto flex w-full max-w-[1240px] flex-wrap items-center gap-2 rounded-[28px] border border-rule bg-paper/80 py-2 pr-2 pl-2 shadow-[0_8px_30px_-12px_rgb(0_0_0/0.18)] backdrop-blur-xl md:flex-nowrap md:rounded-full">
+    <header className="no-print sticky top-0 z-50 border-b border-rule bg-paper/85 backdrop-blur-md">
+      <div className="relative mx-auto flex w-full max-w-[1240px] flex-wrap items-center gap-2 px-4 py-2.5 sm:px-6 md:flex-nowrap">
         {/* Hangs from the bar's underside on the right, where page content
             leaves room. Desktop only — on phones the bar wraps to two rows
             and he would cover the nav. */}
@@ -31,9 +33,9 @@ export function SiteHeader() {
         <Link
           href="/"
           aria-label={`${site.name} — home`}
-          className="group flex shrink-0 items-center gap-2.5 rounded-full py-0.5 pr-3 pl-0.5"
+          className="group flex shrink-0 items-center gap-2.5 rounded-lg py-0.5 pr-3"
         >
-          <span className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-on-pop bg-pop-yellow">
+          <span className="relative h-9 w-9 overflow-hidden rounded-full border border-rule">
             <Image
               src={author.portrait}
               alt=""
@@ -59,13 +61,18 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`shrink-0 rounded-full px-3 py-2 text-[15px] sm:px-4 font-semibold transition-colors ${
-                  active
-                    ? "bg-brand text-on-brand"
-                    : "text-ink-muted hover:bg-paper-raised hover:text-ink"
+                className={`relative shrink-0 px-3 py-2 text-[15px] font-semibold transition-colors sm:px-4 ${
+                  active ? "text-ink" : "text-ink-muted hover:text-ink"
                 }`}
               >
                 {item.label}
+                {active ? (
+                  // An SVG does not stretch between left/right offsets, so a span
+                  // sets the width and the stroke fills it.
+                  <span className="absolute inset-x-3 bottom-0.5 sm:inset-x-4">
+                    <MarkerUnderline className="w-full" />
+                  </span>
+                ) : null}
               </Link>
             );
           })}
@@ -75,7 +82,7 @@ export function SiteHeader() {
           <ThemeToggle />
           <a
             href="/rss.xml"
-            className="pill hidden items-center gap-2 rounded-full border-2 border-on-pop bg-brand px-4 py-2 text-[14px] font-semibold text-on-brand sm:inline-flex"
+            className="btn btn-primary btn-sm hidden sm:inline-flex"
           >
             <svg
               aria-hidden

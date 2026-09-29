@@ -4,13 +4,11 @@ import { useMemo, useState } from "react";
 import type { Project } from "@/content/types";
 import {
   CAPABILITY_LABELS,
-  DOMAIN_EMOJI,
   DOMAIN_LABELS,
   type Capability,
   type Domain,
 } from "@/content/taxonomy";
 import { ProjectCard } from "./project-card";
-import { Emoji } from "./emoji";
 
 /**
  * The full work index. Domains are the primary filter, as a row of pills;
@@ -75,7 +73,7 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
               active={domain === d}
               onClick={() => setDomain(domain === d ? null : d)}
             >
-              <Emoji char={DOMAIN_EMOJI[d]} /> {DOMAIN_LABELS[d]}
+              {DOMAIN_LABELS[d]}
             </Pill>
           ))}
         </div>
@@ -88,7 +86,7 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
               onChange={(e) =>
                 setCapability((e.target.value || null) as Capability | null)
               }
-              className="cursor-pointer appearance-none rounded-full border-2 border-rule bg-paper py-2 pr-10 pl-4 text-[14px] font-semibold text-ink transition-colors hover:border-ink"
+              className="chip cursor-pointer appearance-none py-[0.3rem] pr-9 text-ink"
             >
               <option value="">Any capability</option>
               {capabilities.map((c) => (
@@ -104,7 +102,7 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
               ▾
             </span>
           </label>
-          <span className="tabular font-mono text-[13px] whitespace-nowrap text-ink-muted">
+          <span className="tabular text-[14px] whitespace-nowrap text-ink-muted">
             {visible.length} {visible.length === 1 ? "project" : "projects"}
           </span>
         </div>
@@ -126,7 +124,7 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
       {visible.length === 0 ? (
         <div className="py-16 text-center">
           <p className="font-display text-[22px] font-bold">
-            Nothing matches both filters <Emoji char="🤷" />
+            Nothing matches both filters.
           </p>
           <button
             type="button"
@@ -158,11 +156,7 @@ function Pill({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`pill shrink-0 rounded-full border-2 px-4 py-2 text-[14px] font-semibold whitespace-nowrap ${
-        active
-          ? "border-on-pop bg-brand text-on-brand"
-          : "border-rule bg-paper text-ink-muted hover:border-ink hover:text-ink"
-      }`}
+      className="chip shrink-0"
     >
       {children}
     </button>

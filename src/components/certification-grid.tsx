@@ -9,8 +9,7 @@ import {
 } from "@/content/certifications";
 import { formatMonth } from "@/lib/format";
 import { PdfThumbnail } from "./pdf-thumbnail";
-import { popFill } from "./ui";
-import { Emoji } from "./emoji";
+import { Stamp } from "./stamp";
 
 /**
  * Certificates as a grid of document thumbnails. Clicking one opens the full
@@ -82,13 +81,13 @@ function Card({
     .join(" · ");
 
   return (
-    <article className="pop-card h-full overflow-hidden rounded-[28px] bg-paper">
+    <article className="card h-full overflow-hidden">
       {hasDocument ? (
         <button
           type="button"
           onClick={onOpen}
           aria-label={`View ${certification.name}`}
-          className="group block w-full cursor-pointer overflow-hidden border-b-2 border-on-pop bg-paper-raised"
+          className="group block w-full cursor-pointer overflow-hidden border-b border-rule bg-paper-raised"
         >
           <div className="relative aspect-[4/3] w-full">
             {isPdf(certification.document) ? (
@@ -110,12 +109,8 @@ function Card({
       ) : (
         // No document yet: the slot still holds its place in the grid so the
         // rhythm does not break, and says plainly that nothing is attached.
-        <div
-          className={`grid aspect-[4/3] w-full place-items-center border-b-2 border-on-pop text-ink dark:border-rule ${popFill(index)}`}
-        >
-          <span className="grid h-24 w-24 -rotate-6 place-items-center rounded-[28px] border-2 border-on-pop bg-white text-[48px] shadow-[5px_5px_0_0_var(--on-pop)]">
-            <Emoji char="🏅" />
-          </span>
+        <div className="grid aspect-[4/3] w-full place-items-center border-b border-rule bg-[color:var(--wb-bg)]">
+          <Stamp text={certification.issuer} size={120} />
         </div>
       )}
 
@@ -130,7 +125,7 @@ function Card({
                 className="transition-colors hover:text-accent"
               >
                 {certification.name}
-                <span className="ml-1 font-mono text-[12px] text-accent">
+                <span className="ml-1 text-[13px] text-accent">
                   ↗
                 </span>
               </a>
@@ -139,13 +134,13 @@ function Card({
             )}
           </h3>
 
-          <p className="mt-2 font-mono text-[12px] text-ink-muted">
+          <p className="mt-2 text-[14px] text-ink-muted">
             {meta}
             {expired ? " · Lapsed" : ""}
           </p>
 
           {certification.credentialId ? (
-            <p className="tabular mt-0.5 font-mono text-[11px] text-ink-faint">
+            <p className="tabular mt-0.5 text-[13px] text-ink-faint">
               ID {certification.credentialId}
             </p>
           ) : null}
@@ -175,7 +170,7 @@ function Overlay({
       <header className="mx-auto flex w-full max-w-5xl shrink-0 items-start justify-between gap-6 pb-4">
         <div>
           <h2 className="font-display text-[24px] font-extrabold tracking-[-0.02em]">{certification.name}</h2>
-          <p className="mt-1 font-mono text-[12px] text-ink-muted">
+          <p className="mt-1 text-[14px] text-ink-muted">
             {certification.issuer}
             {certification.issued ? ` · ${formatMonth(certification.issued)}` : ""}
           </p>
@@ -187,7 +182,7 @@ function Overlay({
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="pill rounded-full border-2 border-ink px-4 py-2 text-[14px] font-semibold hover:bg-ink hover:text-paper"
+            className="btn btn-sm"
           >
             Open original ↗
           </a>
@@ -195,7 +190,7 @@ function Overlay({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="pill rounded-full border-2 border-ink px-4 py-2 text-[14px] font-semibold hover:bg-ink hover:text-paper"
+            className="btn btn-sm"
           >
             Close
           </button>
@@ -214,10 +209,10 @@ function Overlay({
           <iframe
             src={certification.document}
             title={certification.name}
-            className="h-full w-full rounded-[20px] border-2 border-rule bg-paper-raised"
+            className="surface h-full w-full"
           />
         ) : (
-          <div className="relative h-full w-full overflow-hidden rounded-[20px] border-2 border-rule bg-white">
+          <div className="surface relative h-full w-full overflow-hidden bg-white">
             <Image
               src={certification.document}
               alt={certification.name}

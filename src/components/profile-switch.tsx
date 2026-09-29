@@ -11,7 +11,7 @@ export function ProfileSwitch({ active }: { active: string }) {
   if (cvs.length < 2) return null;
 
   return (
-    <div className="no-print mt-6 flex flex-col gap-3 rounded-[28px] border-2 border-rule bg-paper-raised p-5 sm:flex-row sm:items-center sm:gap-4">
+    <div className="surface no-print mt-6 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:gap-4">
       <span className="text-[20px] text-ink-muted sm:shrink-0" style={{ fontFamily: "var(--font-hand)" }}>
         pick a role
       </span>
@@ -24,11 +24,7 @@ export function ProfileSwitch({ active }: { active: string }) {
               href={`/cv/${cv.handle}`}
               scroll={false}
               aria-current={isActive ? "page" : undefined}
-              className={`pill rounded-full border-2 px-4 py-2 text-[14px] font-semibold ${
-                isActive
-                  ? "border-on-pop bg-brand text-on-brand"
-                  : "border-rule bg-paper text-ink-muted hover:border-ink hover:text-ink"
-              }`}
+              className={`chip ${isActive ? "chip-active" : "hover:border-ink hover:text-ink"}`}
             >
               {cv.label}
             </Link>
@@ -49,14 +45,14 @@ export function CVActions({ handle }: { handle: string }) {
     <div className="no-print flex flex-wrap items-center gap-2">
       <a
         href={`/cv/${handle}.pdf`}
-        className="pill inline-flex items-center gap-1.5 rounded-full border-2 border-on-pop bg-brand px-5 py-2.5 text-[15px] font-semibold text-on-brand"
+        className="btn btn-primary"
       >
         Download PDF ↓
       </a>
       <button
         type="button"
         onClick={() => window.print()}
-        className="pill rounded-full border-2 border-ink px-5 py-2.5 text-[15px] font-semibold hover:bg-ink hover:text-paper"
+        className="btn"
       >
         Print
       </button>

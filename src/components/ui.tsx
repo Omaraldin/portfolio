@@ -3,16 +3,6 @@ import { Chibi } from "./chibi";
 import { EmojiText } from "./emoji";
 
 /**
- * The pop fills, in the order cards cycle through them. Listed as full class
- * names rather than built from a string so Tailwind can see them.
- */
-export const POP_FILLS = ["bg-tint-1", "bg-tint-2"] as const;
-
-export function popFill(index: number) {
-  return POP_FILLS[index % POP_FILLS.length];
-}
-
-/**
  * A red marker stroke under a heading — the same hand that writes on the
  * home-page board. Decorative, and dropped in print.
  */
@@ -98,7 +88,7 @@ export function FieldRow({
 }) {
   return (
     <div className="flex flex-col gap-1 border-b border-rule py-3 sm:flex-row sm:items-baseline sm:gap-6">
-      <dt className="font-mono text-[11px] font-medium tracking-[0.08em] text-ink-muted uppercase sm:w-40 sm:shrink-0">
+      <dt className="label sm:w-40 sm:shrink-0">
         {label}
       </dt>
       <dd
@@ -112,7 +102,7 @@ export function FieldRow({
   );
 }
 
-/** Rounded mono pill. Domain, capability, and stack tags. */
+/** A small static tag: stack, domain, capability. */
 export function TagChip({
   children,
   active = false,
@@ -126,32 +116,24 @@ export function TagChip({
 }) {
   const Tag = as;
   return (
-    <Tag
-      className={`inline-block rounded-full border px-2.5 py-1 font-mono text-[11px] font-medium transition-colors ${
-        active
-          ? "border-accent bg-accent-quiet text-accent"
-          : "border-rule bg-paper text-ink-muted"
-      } ${className}`}
-    >
+    <Tag className={`chip chip-static ${active ? "chip-active" : ""} ${className}`}>
       {children}
     </Tag>
   );
 }
 
-/** Large numeral in a pop-coloured tile. Used for project metrics. */
+/** A large numeral over its label. Used for project metrics. */
 export function StatBlock({
   value,
   label,
-  index = 0,
 }: {
   value: string;
   label: string;
+  /** Unused; kept so existing callers need no change. */
   index?: number;
 }) {
   return (
-    <div
-      className={`rounded-[24px] border-2 border-rule p-5 text-ink ${popFill(index)}`}
-    >
+    <div className="surface p-5 text-ink">
       <div className="tabular font-display text-[40px] leading-none font-extrabold tracking-[-0.03em]">
         {value}
       </div>
@@ -191,7 +173,7 @@ export function PageTitle({
   );
 }
 
-/** The primary and secondary pill buttons. */
+/** The main action (solid) and a secondary one (outline). */
 export function PillLink({
   href,
   children,
@@ -203,13 +185,7 @@ export function PillLink({
   variant?: "solid" | "outline" | "accent";
   external?: boolean;
 }) {
-  const styles = {
-    solid: "bg-ink text-paper border-ink",
-    outline: "border-ink text-ink hover:bg-ink hover:text-paper",
-    accent: "bg-brand text-on-brand border-on-pop",
-  }[variant];
-
-  const className = `pill inline-flex items-center gap-2 rounded-full border-2 px-6 py-3 text-[16px] font-semibold ${styles}`;
+  const className = variant === "outline" ? "btn" : "btn btn-primary";
 
   if (external || href.startsWith("mailto:")) {
     return (
@@ -233,7 +209,7 @@ export function PillLink({
 /** Centered empty-state line for an index with nothing in it yet. */
 export function EmptyState({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center rounded-[28px] border-2 border-dashed border-rule px-6 py-12 text-center">
+    <div className="surface flex flex-col items-center border-dashed px-6 py-12 text-center">
       <Chibi className="h-32" sizes="100px" />
       <p className="mt-5 font-display text-[22px] font-bold">{typeof children === "string" ? <EmojiText>{children}</EmojiText> : children}</p>
     </div>

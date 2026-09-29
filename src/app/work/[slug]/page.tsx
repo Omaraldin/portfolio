@@ -7,7 +7,6 @@ import { site } from "@/content/site";
 import type { Project } from "@/content/types";
 import {
   CAPABILITY_LABELS,
-  DOMAIN_EMOJI,
   DOMAIN_LABELS,
 } from "@/content/taxonomy";
 import { MDXRemote } from "next-mdx-remote/rsc";
@@ -15,7 +14,8 @@ import { mdxOptions } from "@/lib/mdx-options";
 import { mdxComponents } from "@/components/mdx-components";
 import { MarkerUnderline, StatBlock, TagChip } from "@/components/ui";
 import { ProjectMediaGallery } from "@/components/project-media";
-import { Emoji } from "@/components/emoji";
+import { PartsSketch } from "@/components/board/parts-sketch";
+import { sketchOf } from "@/lib/board-layout";
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -82,22 +82,18 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
       <header className="pt-10 pb-10 sm:pt-14">
         <Link
           href="/work"
-          className="pill inline-flex items-center gap-1.5 rounded-full border-2 border-rule px-4 py-2 text-[14px] font-semibold text-ink-muted hover:border-ink hover:text-ink"
+          className="btn btn-sm"
         >
           <span aria-hidden>←</span> Work
         </Link>
 
         <div className="mt-8 flex flex-wrap items-center gap-2">
           {project.domains.map((d) => (
-            <span
-              key={d}
-              className="inline-flex items-center gap-1.5 rounded-full border-2 border-rule bg-paper-raised px-3 py-1 font-mono text-[12px] font-semibold"
-            >
-              <Emoji char={DOMAIN_EMOJI[d]} />
+            <span key={d} className="chip chip-static">
               {DOMAIN_LABELS[d]}
             </span>
           ))}
-          <span className="tabular font-mono text-[13px] text-ink-muted">
+          <span className="tabular text-[14px] text-ink-muted">
             · {project.timeline}
           </span>
         </div>
@@ -113,7 +109,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
 
       {/* ───────────── Cover ───────────── */}
       {cover ? (
-        <div className="relative aspect-[16/9] overflow-hidden rounded-[32px] border-2 border-on-pop bg-paper-raised shadow-[8px_8px_0_0_var(--shadow)] dark:border-rule">
+        <div className="surface relative aspect-[16/9] overflow-hidden">
           <Image
             src={cover.src}
             alt={cover.alt}
@@ -206,7 +202,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
 
 function Facts({ project }: { project: Project }) {
   return (
-    <div className="rounded-[28px] border-2 border-rule bg-paper-raised p-6">
+    <div className="surface p-6">
       <dl className="space-y-5">
         <Fact label="Role">
           <span className="text-[16px] font-semibold">{project.role}</span>
@@ -219,7 +215,7 @@ function Facts({ project }: { project: Project }) {
             {project.capabilities.map((c) => (
               <span
                 key={c}
-                className="rounded-full bg-accent-quiet px-2.5 py-1 text-[13px] font-semibold text-accent"
+                className="chip chip-static"
               >
                 {CAPABILITY_LABELS[c]}
               </span>
@@ -243,11 +239,7 @@ function Facts({ project }: { project: Project }) {
               href={link.href}
               target="_blank"
               rel="noreferrer"
-              className={`pill inline-flex items-center justify-between rounded-full border-2 px-5 py-2.5 text-[15px] font-semibold ${
-                i === 0
-                  ? "border-on-pop bg-brand text-on-brand"
-                  : "border-ink text-ink hover:bg-ink hover:text-paper"
-              }`}
+              className={`btn justify-between ${i === 0 ? "btn-primary" : ""}`}
             >
               {link.label} <span aria-hidden>↗</span>
             </a>
@@ -284,15 +276,16 @@ function NeighbourLink({
 }) {
   const isNext = direction === "Next";
   const cover = project.thumbnail ?? project.media[0];
+  const sketch = sketchOf(project);
 
   return (
     <Link
       href={`/work/${project.slug}`}
-      className={`pop-card group flex items-center gap-4 rounded-[24px] bg-paper p-4 ${
+      className={`card group flex items-center gap-4 p-4 ${
         isNext ? "flex-row-reverse text-right" : ""
       }`}
     >
-      <span className="relative aspect-[16/10] w-28 shrink-0 overflow-hidden rounded-[14px] border-2 border-rule bg-tint-1">
+      <span className="relative aspect-[16/10] w-28 shrink-0 overflow-hidden rounded-[10px] border border-rule bg-paper-raised">
         {cover ? (
           <Image
             src={cover.src}
@@ -302,16 +295,13 @@ function NeighbourLink({
             className="object-cover"
           />
         ) : (
-          <span
-            aria-hidden
-            className="absolute inset-0 grid place-items-center text-[28px]"
-          >
-            <Emoji char={DOMAIN_EMOJI[project.domains[0]]} />
+          <span className="absolute inset-0 grid place-items-center bg-[color:var(--wb-bg)]">
+            <PartsSketch parts={sketch.parts} flow={sketch.flow} id={`nb-${project.slug}`} label={`How ${project.title} is built`} />
           </span>
         )}
       </span>
       <span className="min-w-0">
-        <span className="font-mono text-[12px] font-semibold text-ink-muted">
+        <span className="label">
           {isNext ? "Next →" : "← Previous"}
         </span>
         <span className="mt-1 block font-display text-[22px] leading-tight font-extrabold tracking-[-0.03em]">

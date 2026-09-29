@@ -11,7 +11,6 @@ import { getArticle, getArticles } from "@/lib/articles";
 import { getProject } from "@/content/projects";
 import { author, site } from "@/content/site";
 import { formatDate } from "@/lib/format";
-import { popFill } from "@/components/ui";
 import { ReadingProgress } from "@/components/reading-progress";
 
 export function generateStaticParams() {
@@ -91,17 +90,14 @@ export default async function ArticlePage(
       <header>
         <Link
           href="/writing"
-          className="pill inline-flex items-center gap-1.5 rounded-full border-2 border-rule px-4 py-2 text-[14px] font-semibold text-ink-muted hover:border-ink hover:text-ink"
+          className="btn btn-sm"
         >
           <span aria-hidden>←</span> Blog
         </Link>
         {article.tags.length ? (
           <div className="mt-6 flex flex-wrap gap-2">
-            {article.tags.map((tag, i) => (
-              <span
-                key={tag}
-                className={`rounded-full border-2 border-rule px-3 py-1 font-mono text-[12px] font-semibold text-ink ${popFill(i + 1)}`}
-              >
+            {article.tags.map((tag) => (
+              <span key={tag} className="chip chip-static">
                 #{tag}
               </span>
             ))}
@@ -121,10 +117,10 @@ export default async function ArticlePage(
             alt=""
             width={40}
             height={40}
-            className="h-10 w-10 rounded-full border-2 border-on-pop bg-pop-yellow object-cover"
+            className="h-10 w-10 rounded-full border border-rule object-cover"
           />
           <span className="text-[15px] font-semibold">{author.name}</span>
-          <span className="tabular font-mono text-[13px] text-ink-muted">
+          <span className="tabular text-[14px] text-ink-muted">
             {formatDate(article.date)} · {article.readingTime} min read
             {article.updated && article.updated !== article.date
               ? ` · updated ${formatDate(article.updated)}`
@@ -141,7 +137,7 @@ export default async function ArticlePage(
           height={900}
           priority
           sizes="(min-width: 768px) 70ch, 100vw"
-          className="mt-8 h-auto w-full rounded-[28px] border-2 border-on-pop bg-paper-raised"
+          className="surface mt-8 h-auto w-full"
         />
       ) : null}
 
@@ -154,7 +150,7 @@ export default async function ArticlePage(
       </div>
 
       {related.length > 0 ? (
-        <aside className="mt-16 rounded-[28px] border-2 border-rule bg-paper-raised p-6">
+        <aside className="surface mt-16 p-6">
           <h2 className="text-[21px] text-ink-muted" style={{ fontFamily: "var(--font-hand)" }}>
             the work this is about
           </h2>
@@ -163,7 +159,7 @@ export default async function ArticlePage(
               <Link
                 key={project.slug}
                 href={`/work/${project.slug}`}
-                className="pill inline-flex items-center gap-1 rounded-full border-2 border-ink bg-paper px-4 py-1.5 text-[14px] font-semibold hover:bg-ink hover:text-paper"
+                className="btn btn-sm"
               >
                 {project.title}
               </Link>

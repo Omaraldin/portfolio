@@ -1,8 +1,9 @@
 import type { Certification } from "@/content/certifications";
 import { formatMonth } from "@/lib/format";
+import { Stamp } from "./stamp";
 
 /**
- * Home-page card: an issuer monogram badge, the credential, and a verify link
+ * Home-page card: the issuer as a marker stamp, the credential, and a verify link
  * when there is one — the link is what turns a claim into something checkable.
  */
 export function CertificationChip({
@@ -12,23 +13,11 @@ export function CertificationChip({
   certification: Certification;
   index?: number;
 }) {
-  const monogram = certification.issuer
-    .split(/\s+/)
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
   const body = (
     <>
       <div className="flex items-start justify-between gap-3">
-        <span
-          aria-hidden
-          className={`grid h-14 w-14 shrink-0 -rotate-6 place-items-center rounded-[18px] border-2 border-on-pop font-display text-[20px] font-extrabold text-on-pop transition-transform duration-300 group-hover:rotate-6 bg-pop-yellow`}
-        >
-          {monogram}
-        </span>
-        <span className="rounded-full bg-paper-raised px-2.5 py-1 font-mono text-[11px] font-medium text-ink-muted">
+        <Stamp text={certification.issuer} size={64} />
+        <span className="chip chip-static text-ink-muted">
           {certification.issued ? formatMonth(certification.issued) : "Certified"}
         </span>
       </div>
@@ -45,7 +34,7 @@ export function CertificationChip({
   );
 
   const className =
-    "pop-card group flex h-full flex-col rounded-[28px] bg-paper p-6";
+    "card group flex h-full flex-col p-6";
 
   return certification.url ? (
     <a

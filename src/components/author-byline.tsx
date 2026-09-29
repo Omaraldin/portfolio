@@ -8,21 +8,21 @@ import { author, site } from "@/content/site";
  */
 export function AuthorByline() {
   return (
-    <aside className="mt-16 flex items-start gap-5 rounded-[28px] border-2 border-rule bg-tint-1 p-6 text-ink sm:p-8">
+    <aside className="surface mt-16 flex items-start gap-5 p-6 text-ink sm:p-8">
       {author.portrait ? (
         <Image
           src={author.portrait}
           alt=""
           width={72}
           height={72}
-          className="h-[72px] w-[72px] shrink-0 -rotate-6 rounded-[22px] border-2 border-on-pop bg-pop-yellow object-cover"
+          className="h-[72px] w-[72px] shrink-0 rounded-full border border-rule object-cover"
         />
       ) : (
         // Initials keep the block's shape while there is no photograph, rather
         // than collapsing the layout or showing a broken image.
         <span
           aria-hidden
-          className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-on-pop bg-pop-yellow font-mono text-[15px]"
+          className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-rule bg-paper-raised text-[15px] font-semibold"
         >
           {author.name
             .split(/\s+/)
@@ -46,7 +46,7 @@ export function AuthorByline() {
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href="/about"
-            className="pill inline-flex rounded-full border-2 border-on-pop bg-brand px-4 py-1.5 text-[14px] font-semibold text-on-brand"
+            className="btn btn-primary btn-sm"
           >
             More about me
           </Link>
@@ -56,7 +56,7 @@ export function AuthorByline() {
               href={social.href}
               target="_blank"
               rel="noreferrer"
-              className="pill inline-flex rounded-full border-2 border-on-pop bg-white px-4 py-1.5 text-[14px] font-semibold"
+              className="btn btn-sm"
             >
               {social.label}
             </a>

@@ -117,7 +117,7 @@ export function PdfThumbnail({
   return (
     <div ref={wrapRef} className={className}>
       {state === "failed" ? (
-        <span className="grid h-full w-full place-items-center font-mono text-[10px] tracking-[0.1em] text-ink-faint uppercase">
+        <span className="grid h-full w-full place-items-center text-[14px] text-ink-faint">
           PDF
         </span>
       ) : (

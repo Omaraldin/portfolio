@@ -18,7 +18,7 @@ export function ProjectMediaGallery({ media }: { media: ProjectMedia[] }) {
     <div className={single ? "" : "grid gap-6 sm:grid-cols-2"}>
       {media.map((item) => (
         <figure key={item.src} className={single ? "" : "min-w-0"}>
-          <div className="overflow-hidden rounded-[24px] border-2 border-rule bg-paper-raised">
+          <div className="surface overflow-hidden">
             <Image
               src={item.src}
               alt={item.alt}
@@ -33,7 +33,7 @@ export function ProjectMediaGallery({ media }: { media: ProjectMedia[] }) {
             />
           </div>
           {item.caption ? (
-            <figcaption className="mt-2 font-mono text-[11px] tracking-[0.08em] text-ink-muted lowercase">
+            <figcaption className="mt-2 text-[14px] text-ink-muted">
               {item.caption}
             </figcaption>
           ) : null}

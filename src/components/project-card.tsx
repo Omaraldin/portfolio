@@ -4,7 +4,6 @@ import type { Project } from "@/content/types";
 import { DOMAIN_LABELS } from "@/content/taxonomy";
 import { sketchOf } from "@/lib/board-layout";
 import { PartsSketch } from "./board/parts-sketch";
-import { popFill } from "./ui";
 
 /**
  * A project as a card: a 16:10 cover — the uploaded thumbnail, else the first
@@ -32,17 +31,17 @@ export function ProjectCard({
   return (
     <Link
       href={`/work/${project.slug}`}
-      className={`pop-card group flex h-full overflow-hidden rounded-[28px] bg-paper ${
+      className={`card group flex h-full overflow-hidden ${
         wide ? "flex-col lg:flex-row" : "flex-col"
       }`}
     >
       <div
-        className={`relative aspect-[16/10] shrink-0 overflow-hidden border-on-pop text-ink dark:border-rule ${cover ? popFill(index) : "bg-[color:var(--wb-bg)]"} ${
+        className={`relative aspect-[16/10] shrink-0 overflow-hidden border-rule text-ink ${cover ? "bg-paper-raised" : "bg-[color:var(--wb-bg)]"} ${
           wide
-            ? "border-b-2 lg:aspect-auto lg:min-h-[360px] lg:w-[58%] lg:border-r-2 lg:border-b-0"
+            ? "border-b lg:aspect-auto lg:min-h-[360px] lg:w-[58%] lg:border-r lg:border-b-0"
             : size === "lg"
-              ? "border-b-2 md:aspect-[21/10]"
-              : "border-b-2"
+              ? "border-b md:aspect-[21/10]"
+              : "border-b"
         }`}
       >
         {cover ? (
@@ -114,7 +113,7 @@ export function ProjectCard({
           {project.stack.slice(0, big ? 6 : 4).map((tech) => (
             <span
               key={tech}
-              className="rounded-full bg-paper-raised px-2.5 py-1 text-[13px] font-medium text-ink"
+              className="chip chip-static"
             >
               {tech}
             </span>

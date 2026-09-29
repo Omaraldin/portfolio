@@ -22,16 +22,11 @@ export function SiteFooter() {
         bottom of the screen and lands here.
       */}
       <div className="relative mx-auto w-full max-w-[1240px]">
-        <div className="relative overflow-hidden rounded-[36px] bg-night px-6 py-14 text-white sm:px-12 sm:py-16">
-          {/* Decorative blobs. Behind the text, never under a link. */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full bg-pop-yellow opacity-15 blur-3xl"
-          />
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -bottom-28 left-10 h-72 w-72 rounded-full bg-white opacity-10 blur-3xl"
-          />
+        {/*
+          A chalkboard in both themes: the home page hangs a whiteboard, the
+          footer closes on its dark sibling, framed the same way.
+        */}
+        <div className="relative rounded-[22px] border-[6px] border-[#34443b] bg-[#1f2b25] px-6 py-14 text-[#ecebe3] sm:px-12 sm:py-16">
 
           <div className="relative grid gap-12 lg:grid-cols-[1.4fr_1fr]">
             <div>
@@ -50,7 +45,7 @@ export function SiteFooter() {
               <div className="mt-8 flex flex-wrap items-center gap-2.5">
                 <a
                   href="/rss.xml"
-                  className="pill inline-flex items-center gap-2 rounded-full border-2 border-white bg-white px-5 py-2.5 text-[15px] font-semibold text-night"
+                  className="btn border-[#ecebe3] bg-[#ecebe3] text-[#1f2b25] hover:bg-transparent hover:text-[#ecebe3]"
                 >
                   RSS feed
                 </a>
@@ -60,14 +55,14 @@ export function SiteFooter() {
                     href={social.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="pill inline-flex items-center rounded-full border-2 border-white/30 px-5 py-2.5 text-[15px] font-semibold hover:border-white"
+                    className="btn border-white/35 text-[#ecebe3] hover:border-[#ecebe3] hover:bg-transparent hover:text-[#ecebe3]"
                   >
                     {social.label}
                   </a>
                 ))}
                 <a
                   href={`mailto:${site.email}`}
-                  className="pill inline-flex items-center rounded-full border-2 border-white/30 px-5 py-2.5 text-[15px] font-semibold hover:border-white"
+                  className="btn border-white/35 text-[#ecebe3] hover:border-[#ecebe3] hover:bg-transparent hover:text-[#ecebe3]"
                 >
                   Email
                 </a>
@@ -83,7 +78,7 @@ export function SiteFooter() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-[17px] font-semibold text-white/80 transition-colors hover:text-pop-yellow"
+                      className="text-[17px] font-semibold text-white/80 transition-colors hover:text-[#9fd4a2]"
                     >
                       {item.label}
                     </Link>
@@ -93,7 +88,7 @@ export function SiteFooter() {
             </nav>
           </div>
 
-          <div className="relative mt-14 flex flex-col gap-2 border-t border-white/15 pt-6 font-mono text-[12px] text-white/55 sm:flex-row sm:justify-between">
+          <div className="relative mt-14 flex flex-col gap-2 border-t border-white/15 pt-6 text-[14px] text-white/55 sm:flex-row sm:justify-between">
             <span>
               © {new Date().getFullYear()} {site.name} · {site.location}
             </span>

@@ -7,7 +7,6 @@ import { awards, community, education, type CVEntry } from "@/content/cv";
 import { site } from "@/content/site";
 import { CertificationChip } from "@/components/certification-row";
 import { MarkerUnderline, PillLink, SpecHeader } from "@/components/ui";
-import { Emoji } from "@/components/emoji";
 
 export const metadata: Metadata = {
   title: "About",
@@ -38,14 +37,14 @@ export default function AboutPage() {
 
           {/* The quick facts a visitor looks for first, as chips. */}
           <ul className="mt-7 flex flex-wrap gap-2">
-            <FactChip emoji="📍">{site.location}</FactChip>
+            <FactChip>{site.location}</FactChip>
             {school ? (
-              <FactChip emoji="🎓">
+              <FactChip>
                 {school.title} · {school.timeline.replace(/^Graduated\s*/i, "")}
               </FactChip>
             ) : null}
             {languages.length > 0 ? (
-              <FactChip emoji="💬">
+              <FactChip>
                 {languages.map((l) => l.name).join(" · ")}
               </FactChip>
             ) : null}
@@ -53,7 +52,7 @@ export default function AboutPage() {
 
           <div className="mt-8 flex flex-wrap gap-3">
             <PillLink href={`mailto:${site.email}`}>
-              Say hello <Emoji char="✉️" />
+              Say hello
             </PillLink>
             <PillLink href="/writing" variant="outline">
               Read the blog
@@ -65,12 +64,13 @@ export default function AboutPage() {
           A polaroid rather than the home page's big card: same person, more
           personal register, and it keeps the two pages from looking alike.
         */}
-        <figure className="mx-auto w-full max-w-[380px] rotate-2 rounded-[20px] border-2 border-on-pop bg-cream p-3 pb-4 text-on-pop shadow-[8px_8px_0_0_var(--shadow)] dark:border-rule">
-          <div className="relative aspect-square overflow-hidden rounded-[12px] bg-forest">
-            <span
-              aria-hidden
-              className="absolute top-1/2 left-1/2 h-[72%] w-[72%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-pop-yellow"
-            />
+        <figure className="relative mx-auto w-full max-w-[380px] rotate-2 rounded-[4px] border border-rule bg-white p-3 pb-4 text-[#1f2326] shadow-[0_10px_30px_-12px_rgb(0_0_0/0.25)]">
+          {/* A strip of tape holding the photo to the wall. */}
+          <span
+            aria-hidden
+            className="absolute -top-3 left-1/2 h-7 w-28 -translate-x-1/2 -rotate-3 bg-[color:var(--wb-note)] opacity-80"
+          />
+          <div className="relative aspect-square overflow-hidden rounded-[2px] bg-forest">
             <Image
               src="/portrait.png"
               alt={`Illustrated portrait of ${site.name}`}
@@ -81,8 +81,8 @@ export default function AboutPage() {
               className="relative h-full w-full object-cover object-[50%_100%]"
             />
           </div>
-          <figcaption className="mt-3 text-center font-mono text-[13px]">
-            me, mid-whiteboard <Emoji char="🧠" />
+          <figcaption className="mt-3 text-center text-[20px]" style={{ fontFamily: "var(--font-hand)" }}>
+            me, mid-whiteboard
           </figcaption>
         </figure>
       </header>
@@ -106,7 +106,7 @@ export default function AboutPage() {
         </div>
 
         <aside className="lg:sticky lg:top-28 lg:self-start">
-          <div className="rounded-[28px] border-2 border-rule bg-paper-raised p-6">
+          <div className="surface p-6">
             <p className="text-[21px] text-ink-muted" style={{ fontFamily: "var(--font-hand)" }}>
               at a glance
             </p>
@@ -115,7 +115,7 @@ export default function AboutPage() {
                 <Glance key={entry.title} label="Education">
                   <span className="block font-semibold">{entry.title}</span>
                   <span className="block text-ink-muted">{entry.org}</span>
-                  <span className="tabular mt-0.5 block font-mono text-[12px] text-ink-muted">
+                  <span className="tabular mt-0.5 block text-[14px] text-ink-muted">
                     {entry.timeline}
                   </span>
                 </Glance>
@@ -145,7 +145,7 @@ export default function AboutPage() {
                       href={social.href}
                       target="_blank"
                       rel="noreferrer"
-                      className="pill inline-flex rounded-full border-2 border-ink px-3.5 py-1 text-[14px] font-semibold hover:bg-ink hover:text-paper"
+                      className="btn btn-sm"
                     >
                       {social.label}
                     </a>
@@ -163,10 +163,10 @@ export default function AboutPage() {
           <SpecHeader title="Community & awards" />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {community.map((entry) => (
-              <RecordCard key={entry.title} entry={entry} emoji="🤝" />
+              <RecordCard key={entry.title} entry={entry} kind="community" />
             ))}
             {awards.map((entry) => (
-              <RecordCard key={entry.title} entry={entry} emoji="🏆" />
+              <RecordCard key={entry.title} entry={entry} kind="award" />
             ))}
           </div>
         </section>
@@ -194,19 +194,8 @@ export default function AboutPage() {
   );
 }
 
-function FactChip({
-  emoji,
-  children,
-}: {
-  emoji: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <li className="inline-flex items-center gap-2 rounded-full border-2 border-rule bg-paper-raised px-3.5 py-1.5 text-[14px] font-semibold">
-      <Emoji char={emoji} />
-      {children}
-    </li>
-  );
+function FactChip({ children }: { children: React.ReactNode }) {
+  return <li className="chip text-ink">{children}</li>;
 }
 
 function Glance({
@@ -227,20 +216,17 @@ function Glance({
 }
 
 /** A community role or award. Placeholder timelines ("—") are not shown. */
-function RecordCard({ entry, emoji }: { entry: CVEntry; emoji: string }) {
+function RecordCard({ entry, kind }: { entry: CVEntry; kind: string }) {
   const timeline = entry.timeline.replace(/^[—-]$/, "").trim();
 
   return (
-    <article className="flex h-full flex-col rounded-[28px] border-2 border-rule bg-paper p-6">
-      <div className="flex items-start justify-between gap-3">
-        <span
-          aria-hidden
-          className="grid h-12 w-12 -rotate-6 place-items-center rounded-[16px] border-2 border-on-pop bg-pop-yellow text-[24px]"
-        >
-          <Emoji char={emoji} />
+    <article className="surface flex h-full flex-col p-6">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-[20px] text-[color:var(--wb-red)]" style={{ fontFamily: "var(--font-hand)" }}>
+          {kind}
         </span>
         {timeline ? (
-          <span className="tabular rounded-full bg-paper-raised px-2.5 py-1 font-mono text-[11px] font-medium text-ink-muted">
+          <span className="tabular chip chip-static text-ink-muted">
             {timeline}
           </span>
         ) : null}

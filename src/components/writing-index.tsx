@@ -64,11 +64,7 @@ function TagPill({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`pill rounded-full border-2 px-4 py-2 text-[14px] font-semibold ${
-        active
-          ? "border-on-pop bg-brand text-on-brand"
-          : "border-rule bg-paper text-ink-muted hover:border-ink hover:text-ink"
-      }`}
+      className="chip"
     >
       {children}
     </button>

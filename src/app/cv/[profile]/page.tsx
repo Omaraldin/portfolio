@@ -42,7 +42,7 @@ export default async function CVProfilePage(
 
       <ProfileSwitch active={cv.handle} />
 
-      <div className="mt-8 rounded-[32px] border-2 border-rule bg-paper p-6 sm:p-12 print:m-0 print:rounded-none print:border-0 print:p-0">
+      <div className="surface mt-8 p-6 sm:p-12 print:m-0 print:rounded-none print:border-0 print:p-0">
         <CVDocument cv={cv} />
       </div>
     </div>
