@@ -1,14 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Project } from "@/content/types";
-import { DOMAIN_EMOJI, DOMAIN_LABELS } from "@/content/taxonomy";
+import { DOMAIN_LABELS } from "@/content/taxonomy";
+import { sketchOf } from "@/lib/board-layout";
+import { PartsSketch } from "./board/parts-sketch";
 import { popFill } from "./ui";
-import { Emoji } from "./emoji";
 
 /**
- * A project as a sticker card: a 16:10 cover — the uploaded thumbnail, else the
- * first screenshot, else the domain stickers — then the facts an engineer scans
- * for: domains, stack, and the one number that matters.
+ * A project as a card: a 16:10 cover — the uploaded thumbnail, else the first
+ * screenshot, else the project's own system sketch — then the facts an
+ * engineer scans for: domains, stack, and the one number that matters.
  *
  * `lg` is the bento lead on the home page; `wide` lays cover and text side by
  * side on large screens, for the spotlight slot at the top of the work index.
@@ -23,6 +24,7 @@ export function ProjectCard({
   size?: "md" | "lg" | "wide";
 }) {
   const cover = project.thumbnail ?? project.media[0];
+  const sketch = sketchOf(project);
   const metric = project.metrics[0];
   const wide = size === "wide";
   const big = size !== "md";
@@ -35,7 +37,7 @@ export function ProjectCard({
       }`}
     >
       <div
-        className={`relative aspect-[16/10] shrink-0 overflow-hidden border-on-pop text-ink dark:border-rule ${popFill(index)} ${
+        className={`relative aspect-[16/10] shrink-0 overflow-hidden border-on-pop text-ink dark:border-rule ${cover ? popFill(index) : "bg-[color:var(--wb-bg)]"} ${
           wide
             ? "border-b-2 lg:aspect-auto lg:min-h-[360px] lg:w-[58%] lg:border-r-2 lg:border-b-0"
             : size === "lg"
@@ -59,36 +61,33 @@ export function ProjectCard({
           />
         ) : (
           /*
-            No image: the domains become the art. Each sticker takes its own
-            angle so the cluster reads as hand-placed.
+            No image: the project's own system sketch, drawn in marker on a
+            small whiteboard, the same way the home-page board draws it.
           */
-          <div aria-hidden className="absolute inset-0">
-            <div className="absolute inset-0 flex items-center justify-center gap-3">
-              {project.domains.slice(0, 3).map((domain, i) => (
-                <span
-                  key={domain}
-                  style={{ ["--tilt" as string]: `${[-8, 6, -4][i]}deg` }}
-                  className="grid h-16 w-16 rotate-[var(--tilt)] place-items-center rounded-[20px] border-2 border-on-pop bg-white text-[32px] shadow-[4px_4px_0_0_var(--on-pop)] transition-transform duration-300 group-hover:-translate-y-1 sm:h-20 sm:w-20 sm:text-[40px]"
-                >
-                  <Emoji char={DOMAIN_EMOJI[domain]} />
-                </span>
-              ))}
-            </div>
+          <div className="absolute inset-0 grid place-items-center pb-6">
+            <PartsSketch
+              parts={sketch.parts}
+              flow={sketch.flow}
+              id={project.slug}
+              label={`How ${project.title} is built: ${sketch.parts.map((p) => p.label).join(", ")}`}
+            />
           </div>
         )}
 
         {metric ? (
-          <span className="absolute bottom-3 left-3 inline-flex items-baseline gap-1.5 rounded-full border-2 border-on-pop bg-white px-3 py-1 text-on-pop">
-            <span className="tabular font-display text-[15px] font-extrabold">
-              {metric.value}
-            </span>
-            <span className="font-mono text-[11px]">{metric.label}</span>
+          <span
+            className={`absolute bottom-3 left-4 -rotate-2 text-[20px] text-[color:var(--wb-red)] ${
+              cover ? "rounded-md bg-[color:var(--wb-bg)] px-2.5 py-0.5" : ""
+            }`}
+            style={{ fontFamily: "var(--font-hand)" }}
+          >
+            {metric.value} {metric.label.toLowerCase()}
           </span>
         ) : null}
       </div>
 
       <div className={`flex flex-1 flex-col ${wide ? "p-7 lg:p-10" : "p-6"}`}>
-        <p className="font-mono text-[12px] text-ink-muted">
+        <p className="text-[14px] text-ink-muted">
           {project.domains.map((d) => DOMAIN_LABELS[d]).join(" · ")} ·{" "}
           <span className="tabular">{project.timeline}</span>
         </p>
@@ -115,7 +114,7 @@ export function ProjectCard({
           {project.stack.slice(0, big ? 6 : 4).map((tech) => (
             <span
               key={tech}
-              className="rounded-full bg-paper-raised px-2.5 py-1 font-mono text-[11px] font-medium text-ink"
+              className="rounded-full bg-paper-raised px-2.5 py-1 text-[13px] font-medium text-ink"
             >
               {tech}
             </span>

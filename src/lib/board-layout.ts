@@ -98,7 +98,7 @@ function partKind(label: string): PartKind {
 /** Approximate width of a handwritten label, so part boxes fit their text. */
 const textWidth = (s: string, size: number) => s.length * size * 0.52;
 
-function layoutParts(labels: string[], flow: boolean): BoardPart[] {
+export function layoutParts(labels: string[], flow: boolean): BoardPart[] {
   const arrow = flow ? (labels.length > 3 ? 30 : 40) : 16;
   let widths = labels.map((l) => {
     const kind = partKind(l);
@@ -320,4 +320,10 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
   }
 
   return { width: BOARD_WIDTH, height: y + 10, zones, nodes, edges };
+}
+
+/** A project's parts laid out on their own, for a card cover. */
+export function sketchOf(project: Project): { parts: BoardPart[]; flow: boolean } {
+  const flow = (project.board?.shape ?? "service") === "service";
+  return { parts: layoutParts(project.board?.parts ?? project.stack.slice(0, 3), flow), flow };
 }

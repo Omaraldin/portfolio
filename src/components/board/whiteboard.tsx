@@ -1,6 +1,7 @@
 import Link from "next/link";
-import type { Board, BoardNode, BoardPart } from "@/lib/board-layout";
+import type { Board, BoardNode } from "@/lib/board-layout";
 import { BoardTracer } from "./board-tracer";
+import { Part } from "./parts-sketch";
 
 /*
   The home-page board, drawn as SVG on the server from the layout in
@@ -45,46 +46,6 @@ function Frame({ n }: { n: BoardNode }) {
       className="wb-frame"
       d={`M${x + r} ${y + j(1)} L${x + w - r} ${y + j(2)} Q${x + w} ${y} ${x + w} ${y + r} L${x + w + j(3)} ${y + h - r} Q${x + w} ${y + h} ${x + w - r} ${y + h} L${x + r} ${y + h + j(4)} Q${x} ${y + h} ${x} ${y + h - r} L${x + j(5)} ${y + r} Q${x} ${y} ${x + r} ${y + j(1)} Z`}
     />
-  );
-}
-
-function Part({ p, top }: { p: BoardPart; top: number }) {
-  const cx = p.x + p.w / 2;
-  if (p.kind === "db") {
-    const l = p.x + 6, r = p.x + p.w - 6;
-    return (
-      <>
-        <path
-          className="wb-line"
-          d={`M${l} ${top + 8} C${l} ${top - 4} ${r} ${top - 4} ${r} ${top + 8} C${r} ${top + 20} ${l} ${top + 20} ${l} ${top + 8} L${l} ${top + 54} C${l} ${top + 66} ${r} ${top + 66} ${r} ${top + 54} L${r} ${top + 8}`}
-        />
-        <text x={cx} y={top + 92} fontSize={18} textAnchor="middle" fill={ink} style={hand}>
-          {p.label}
-        </text>
-      </>
-    );
-  }
-  if (p.kind === "queue") {
-    const l = p.x + 6, r = p.x + p.w - 6;
-    return (
-      <>
-        <path
-          className="wb-line"
-          d={[0, 14, 28, 42, 56].map((o) => `M${l} ${top + o} L${r} ${top + o}`).join(" ") + ` M${l - 2} ${top - 6} L${l - 2} ${top + 62} M${r + 2} ${top - 6} L${r + 2} ${top + 62}`}
-        />
-        <text x={cx} y={top + 92} fontSize={18} textAnchor="middle" fill={ink} style={hand}>
-          {p.label}
-        </text>
-      </>
-    );
-  }
-  return (
-    <>
-      <path className="wb-line" d={`M${p.x} ${top + 2} L${p.x + p.w} ${top} L${p.x + p.w + 1} ${top + 58} L${p.x + 1} ${top + 60} Z`} />
-      <text x={cx} y={top + 36} fontSize={p.fontSize} textAnchor="middle" fill={ink} style={hand}>
-        {p.label}
-      </text>
-    </>
   );
 }
 
