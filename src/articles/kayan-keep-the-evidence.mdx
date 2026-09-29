@@ -1,0 +1,126 @@
+---
+title: "Keep the evidence: catching stolen refresh tokens"
+description: "Refresh token rotation doesn't detect theft on its own. The fix is counterintuitive: stop deleting the tokens you've already used."
+date: "2026-09-29"
+tags: ["security", "oauth", "go", "kayan"]
+related: ["kayan"]
+draft: true
+---
+
+*Part of a series on building [Kayan](/work/kayan), a headless identity
+library for Go.*
+
+OAuth gives an app two tokens. The **access token** is short-lived (in Kayan, an
+hour) and gets attached to every request. The **refresh token** lives much
+longer (a week) and is used to get new access tokens without making the user log
+in again.
+
+That long life makes the refresh token the valuable one to steal. So the
+standard advice is **rotation**: every time a refresh token is used, issue a new
+one and throw the old one away. A stolen token becomes useless after a single
+use.
+
+Except it doesn't quite work that way. Rotation limits how long a stolen token
+is useful. It doesn't tell you it was stolen.
+
+## Why rotation alone isn't enough
+
+Walk through it. An attacker copies Alice's refresh token.
+
+1. The attacker uses it first. The server rotates: it issues a fresh token to the
+   attacker and deletes the old one.
+2. A while later, Alice's app tries to refresh with the token it has, which is
+   the old one.
+3. The server looks it up, finds nothing, and rejects it.
+
+From the server's point of view, step 3 is just "an unknown token", the same as a
+typo or an expired session. Alice's app shows her the login screen, she signs in
+again, and carries on. Meanwhile the attacker holds a perfectly valid token
+chain and keeps refreshing it for as long as they like.
+
+Rotation worked as designed. The theft went completely unnoticed.
+
+## The counterintuitive fix
+
+The signal was in step 3 all along. A token that was *already used* being
+presented again is not the same thing as an unknown token. It means two
+different parties held the same token, and that should never happen.
+
+But you can only tell the difference if you still have the old token. So Kayan
+**keeps used refresh tokens** instead of deleting them, and records when they
+were used:
+
+```go
+// FamilyID links every token descended from one authorization. Rotation
+// issues a new token in the same family, so presenting a token that was
+// already redeemed can revoke the whole chain.
+FamilyID string `json:"family_id"`
+
+// UsedAt records when the token was redeemed. A redeemed token is kept
+// rather than deleted: deleting it makes a replay indistinguishable from
+// an unknown token, and the difference is what detects theft.
+UsedAt *time.Time `json:"used_at,omitempty"`
+```
+
+Every token from one login shares a **family ID**. When a used token shows up
+again, the whole family is revoked:
+
+```go
+// Reuse detection. A token presented twice means two parties hold it, so
+// every token descended from the same authorization is revoked and the
+// legitimate client is forced to re-authenticate.
+if gr.IsUsed() {
+	p.logAudit(ctx, "oauth2.refresh.reuse", clientID, gr.IdentityID, "failure",
+		"refresh token replayed; revoking the token family")
+	if hasFamily && gr.FamilyID != "" {
+		if err := family.RevokeFamily(ctx, gr.FamilyID); err != nil {
+			return nil, ErrServerError.WithCause(err)
+		}
+	}
+	return nil, ErrInvalidGrant.WithDescription("invalid refresh token")
+}
+```
+
+Replay the scenario. The attacker refreshes first, and the old token is now
+marked as used. When Alice's app presents it, the server sees a *used* token,
+revokes the entire family (including the attacker's fresh token), and writes an
+audit event. The attacker is locked out, and there's a record that it happened.
+
+## It doesn't matter who gets caught
+
+There's a neat property here. The server can't tell which request came from the
+attacker and which from Alice, and it doesn't need to.
+
+Whichever one presents the spent token proves the chain is compromised. If the
+attacker refreshed first, Alice's replay trips it. If Alice refreshed first, the
+attacker's replay trips it. Either way, revoking the whole family is the right
+call, and the worst case for Alice is signing in again, which is a very cheap
+price for ending a session she didn't know was stolen.
+
+## The part that's easy to get wrong
+
+Detection only works if the storage can do it. Kayan's plain refresh token store
+still rotates, but it deletes spent tokens, so a replay just looks invalid and
+the thief's own token keeps working. Reuse detection needs a store that
+implements the family interface.
+
+Kayan documents this degradation right on the function, instead of silently
+doing the weaker thing:
+
+```go
+// With a plain [RefreshTokenStore] the redeemed token is deleted instead, so a
+// replay is reported as invalid but the thief's token continues to work.
+```
+
+I think that's the right way to handle a security property that depends on
+configuration. Don't pretend it's always there. Say exactly when it isn't, in
+the place people will read.
+
+## The general lesson
+
+Security designs often tidy up after themselves too early. Deleting a used
+token *feels* safer, since less data is lying around. But the used token was the
+evidence. Keeping it is what turns "an unknown token" into "a stolen one".
+
+Before you throw something away, ask whether its absence will later look like
+something harmless. If it will, keep it.

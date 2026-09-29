@@ -1,0 +1,153 @@
+---
+title: "A test that can't fail is just documentation"
+description: "Some of Kayan's security tests passed without testing anything. The fix was one habit: revert the fix, and watch the test go red."
+date: "2026-09-29"
+tags: ["testing", "security", "go", "kayan"]
+related: ["kayan"]
+draft: true
+---
+
+*Part of a series on building [Kayan](/work/kayan), a headless identity
+library for Go.*
+
+Here's a bug that really existed in Kayan's OAuth provider. A confidential
+client (a backend app with a secret) authenticates by sending its client ID and
+secret. The check had this shape (simplified):
+
+```go
+if clientSecret != "" {
+	if !p.hasher.Compare(clientSecret, client.SecretHash) {
+		return nil, ErrInvalidClient
+	}
+}
+return client, nil
+```
+
+Read it twice. If you send the *wrong* secret, you're refused. If you send
+*no secret at all*, the comparison is skipped and you're let in.
+
+The fixed version, with a comment left behind on purpose:
+
+```go
+// Confidential client: a secret is mandatory. Previously an empty secret
+// skipped verification entirely, so omitting it authenticated the client.
+if clientSecret == "" {
+	return nil, ErrInvalidClient.WithDescription("client authentication failed")
+}
+```
+
+The bug is obvious once you see it. What's more interesting is why a normal-looking
+test suite wouldn't catch it.
+
+## Tests that pass for the wrong reason
+
+A typical security test for this looks sensible:
+
+```go
+_, err := provider.ValidateClient(ctx, clientID, "wrong-secret")
+if err == nil {
+	t.Fatal("expected an error")
+}
+```
+
+It's green. It stays green. And it proves much less than it looks like.
+
+**It tests the wrong input.** A wrong secret was always refused. The hole was
+the *empty* secret, which nobody thought to try, because "no secret" doesn't
+feel like an attack.
+
+**It checks for any error.** `err != nil` passes when the request fails for
+*any* reason: an unknown client ID, a missing mock, a typo in the test setup. So
+the test can stop testing the defense entirely while staying green, the moment
+something unrelated around it changes.
+
+Both problems have the same result: a test that has never actually been seen
+catching the thing it's named after.
+
+## The habit: revert the fix, watch it fail
+
+Kayan's contributor rules have one line I'd put in every project:
+
+> For a security fix, also revert it and confirm the test fails. A test that
+> passes either way proves nothing.
+
+The workflow is simple:
+
+1. Write the fix and the test.
+2. Undo the fix, leaving the test in place.
+3. Run the test. **It must go red.** If it stays green, it isn't testing the fix.
+4. Put the fix back.
+
+It takes a minute, and it's the only way to know the test does anything. Every
+security fix in Kayan was checked like this, and several tests turned out to be
+worthless when it was. The reasons are always mundane: the hostile input was
+malformed and got rejected by a parser before it ever reached the check, or a
+mock returned an error no matter what.
+
+## Two rules that make tests honest
+
+**1. Assert the specific error.** Not "some error", but *the* error the defense
+produces:
+
+```go
+t.Run("empty secret is refused", func(t *testing.T) {
+	provider, _ := newSecureProvider(t)
+	if _, err := provider.ValidateClient(ctx, testClientID, ""); !errors.Is(err, ErrInvalidClient) {
+		t.Fatalf("error = %v, want ErrInvalidClient for an empty secret", err)
+	}
+})
+```
+
+If this test ever passes because of something unrelated, it'll be the wrong
+error, and it'll fail.
+
+**2. Always include a positive control.** Next to the hostile cases, check that
+the *legitimate* request still works:
+
+```go
+t.Run("correct secret is accepted", func(t *testing.T) {
+	provider, _ := newSecureProvider(t)
+	if _, err := provider.ValidateClient(ctx, testClientID, testClientSecret); err != nil {
+		t.Fatalf("the correct secret was rejected: %v", err)
+	}
+})
+```
+
+Without it, a provider that refuses *everyone* passes every security test you
+write.
+
+## Test the attacker's ideas, not yours
+
+The empty secret slipped through because it wasn't an input anyone imagined.
+The cure is to test lists of hostile inputs, not one example. Here's part of
+Kayan's `redirect_uri` test, where each entry is a real trick for making a
+malicious URL look like the registered one:
+
+```go
+hostile := []string{
+	"https://app.example.test.evil.test/callback",    // suffix on the host
+	"https://app.example.test@evil.test/callback",    // userinfo confusion
+	"https://app.example.test/callback/../../evil",   // path traversal
+	"https://app.example.test:8443/callback",         // different port
+	"http://app.example.test/callback",               // downgraded scheme
+	"https://аpp.example.test/callback",              // Cyrillic 'а' homoglyph
+	"https://app.example.test/callback/",             // trailing slash
+	// ...
+}
+```
+
+Each one gets the same two checks: rejected, and rejected with the right
+error. Then the real registered URL is tested to make sure it still works.
+
+For inputs too varied to list by hand, Kayan also runs fuzz tests on the
+parsers that read untrusted data, on every push.
+
+## The general lesson
+
+A test's job is to fail when the code is wrong. A test you've only ever seen
+pass hasn't shown it can do that job. It might be protecting you, or it might be
+documentation with `func Test` in front of it, and from the green checkmark
+alone you can't tell which.
+
+So watch it fail once. Revert the fix, see the red, put the fix back. It's the
+cheapest proof in software.

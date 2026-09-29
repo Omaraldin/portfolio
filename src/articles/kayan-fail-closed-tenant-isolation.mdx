@@ -1,0 +1,158 @@
+---
+title: "Fail closed: tenant isolation you can't forget"
+description: "The most common multi-tenant data leak isn't a hack. It's one query that forgot its WHERE clause. Here's how Kayan makes that query fail instead of leak."
+date: "2026-09-29"
+tags: ["security", "go", "databases", "kayan"]
+related: ["kayan"]
+draft: true
+---
+
+*Part of a series on building [Kayan](/work/kayan), a headless identity
+library for Go.*
+
+Almost every multi-tenant app starts the same way. There's a `tenant_id` column
+on the shared tables, and every repository method filters by it:
+
+```go
+func (r *Repo) ListUsers(ctx context.Context, tenantID string) ([]User, error) {
+	var users []User
+	err := r.db.WithContext(ctx).
+		Where("tenant_id = ?", tenantID).
+		Find(&users).Error
+	return users, err
+}
+```
+
+It works. It passes review. And it has a flaw that no test catches: it only
+protects the queries that remember to include it.
+
+## How the leak actually happens
+
+Nobody writes `SELECT * FROM users` on purpose. The leak is always an
+omission:
+
+- a new repository method, copied from another one, and the `Where` got lost in
+  the edit;
+- a raw SQL query written quickly for an admin report;
+- a preload that pulls in a related table nobody remembered was also scoped;
+- a background job that runs without a request, so there's no tenant to pass.
+
+Here's what makes it dangerous: **the broken query looks exactly like a working
+one.** It returns rows. No error, no failing test, no log line. It just returns
+more rows than it should, from customers who aren't the caller. You find out
+when one of them emails you a screenshot.
+
+You can't review your way out of this. The rule "always filter by tenant" has to
+be remembered by every person, in every query, forever. People forget.
+
+## Move the rule to where it can't be skipped
+
+Kayan doesn't ask repository methods to remember anything. One call at startup
+installs a callback that runs on every query:
+
+```go
+if err := gormstore.RegisterTenantIsolation(db); err != nil {
+	return err
+}
+```
+
+Under the hood, it hooks GORM's query, update, delete and raw-row paths, plus
+inserts:
+
+```go
+callbacks := []struct {
+	name     string
+	register func(string, func(*gorm.DB)) error
+}{
+	{"kayan:tenant_query", db.Callback().Query().Before("gorm:query").Register},
+	{"kayan:tenant_update", db.Callback().Update().Before("gorm:update").Register},
+	{"kayan:tenant_delete", db.Callback().Delete().Before("gorm:delete").Register},
+	{"kayan:tenant_row", db.Callback().Row().Before("gorm:row").Register},
+}
+```
+
+After that, any model that says it's tenant-scoped gets a `tenant_id` filter on
+reads, updates and deletes, and new rows are stamped with the current tenant.
+Tables without a tenant dimension are left alone. The repository method goes
+back to asking the question it actually cares about:
+
+```go
+err := r.db.WithContext(ctx).Find(&users).Error
+```
+
+## The important part: what happens with no tenant
+
+Automatic scoping is only half of it. The other half is what the callback does
+when the context has *no* tenant in it, which is exactly the background-job
+case from the list above.
+
+There are three choices:
+
+1. **Run the query unscoped.** This is the breach: every tenant's rows go to a
+   caller who thought they were asking a narrow question.
+2. **Return nothing.** This sounds safe, and it's arguably worse, because it's a
+   silent wrong answer. "This customer has no users" is a believable result.
+   Someone will act on it.
+3. **Fail.**
+
+Kayan fails:
+
+```go
+id, ok := tenant.RequireID(ctx)
+if !ok {
+	// Fail the query rather than run it unscoped. An adapter that
+	// silently drops the predicate returns every tenant's rows.
+	_ = db.AddError(tenant.ErrNoTenant)
+	return
+}
+```
+
+This is what "fail closed" means. When the system doesn't have enough
+information to be safe, it stops, loudly, instead of guessing.
+
+## The escape hatch has to be written down
+
+Sometimes you genuinely need to cross tenants: a migration, a billing job, an
+internal admin screen. Kayan allows it, but you have to say so explicitly:
+
+```go
+ctx = tenant.WithSystemContext(ctx)
+```
+
+That line shows up in code review. It's greppable. It inverts which mistake is
+possible: **forgetting the tenant produces an error, and crossing a boundary
+requires a sentence.** The old design had it the other way round: crossing a
+boundary was silent, and staying inside it required effort.
+
+## Test it in your own app
+
+If you use this pattern, with Kayan or without it, the test is short. Just make
+it assert two things:
+
+```go
+func TestScopedQueryWithoutTenantFails(t *testing.T) {
+	ctx := context.Background() // deliberately no tenant
+
+	var users []User
+	err := db.WithContext(ctx).Find(&users).Error
+
+	if err == nil {
+		t.Fatal("scoped query with no tenant returned no error")
+	}
+	if len(users) != 0 {
+		t.Fatalf("scoped query with no tenant returned %d rows", len(users))
+	}
+}
+```
+
+Check both the error *and* the row count. A test that only checks `err != nil`
+can pass because of some unrelated failure, and then it keeps passing after the
+protection is gone.
+
+## The general lesson
+
+Row-level tenancy isn't unsafe. What's unsafe is a safety rule that lives in
+people's heads instead of in the one code path every query has to pass through.
+Put the check there, make the missing-information case an error, and make the
+exception something you have to type out. Then the most common data leak in
+multi-tenant software stops being possible to write by accident.

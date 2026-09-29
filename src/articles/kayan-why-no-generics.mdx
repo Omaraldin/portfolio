@@ -1,0 +1,144 @@
+---
+title: "Why my Go library doesn't use generics"
+description: "Generics would have made Kayan's API more type-safe at every call site. I left them out on purpose, because a type parameter never stays where you put it."
+date: "2026-09-29"
+tags: ["go", "api-design", "kayan"]
+related: ["kayan"]
+draft: true
+---
+
+*Part of a series on building [Kayan](/work/kayan), a headless identity
+library for Go.*
+
+When people read Kayan's storage interface for the first time, the reaction is
+usually the same: "why isn't this generic?"
+
+```go
+type IdentityStorage interface {
+	CreateIdentity(ctx context.Context, ident any) error
+	GetIdentity(ctx context.Context, factory func() any, id any) (any, error)
+	FindIdentity(ctx context.Context, factory func() any, query map[string]any) (any, error)
+	// ...
+}
+```
+
+`any` in, `any` out, and a strange `factory func() any` argument. It looks like
+Go from 2019. Generics landed in Go 1.18, so why would a library written in
+2026 ignore them?
+
+Because I tried the generic version on paper first, and watched it spread.
+
+## The problem Kayan has to solve
+
+Kayan is an identity library that doesn't own your user model. Your `User`
+struct stays yours: your fields, your ID type, your table. Kayan just needs to
+create one, load one, and read a few fields off it.
+
+That's exactly the job generics were made for. The obvious design:
+
+```go
+type Storage[T Identity] interface {
+	CreateIdentity(ctx context.Context, ident T) error
+	GetIdentity(ctx context.Context, id any) (T, error)
+}
+```
+
+Type-safe, no casts, no factory. It's genuinely better *in isolation*. The
+trouble is that nothing in a library is in isolation.
+
+## A type parameter never stays put
+
+The login manager uses storage, so it needs `T` too:
+
+```go
+type LoginManager[T Identity] struct {
+	storage Storage[T]
+}
+```
+
+Strategies are plugged into the manager, so they need it:
+
+```go
+type Strategy[T Identity] interface {
+	Authenticate(ctx context.Context, identifier, secret string) (T, error)
+}
+```
+
+Hooks run before and after login and receive the identity, so they need it.
+Options configure the manager, so they need it. Audit events carry the identity,
+so they need it. The session manager wants to know who logged in.
+
+Within a few files, `[T Identity]` is written on nearly every exported type.
+That's not a style problem; it changes what users can build.
+
+## Where it actually breaks
+
+Real services often have more than one kind of identity. A `User` who logs in
+with a password, and a `ServiceAccount` that authenticates with an API key.
+
+With the generic design, those are two unrelated instantiations of the entire
+library: a `LoginManager[User]` and a `LoginManager[ServiceAccount]`, with
+separate strategies, separate hooks and separate audit plumbing. Any code that
+wants to handle "whoever just logged in", like a rate limiter or an audit log,
+can't accept both. So it needs a non-generic interface that erases `T` again,
+which is exactly the `any` you were trying to avoid, now bolted on at the
+edges.
+
+Generics didn't remove the type assertion. They moved it from one place to
+everywhere that two identity types meet.
+
+## What Kayan does instead
+
+Storage takes and returns `any`, and a factory tells it what to allocate:
+
+```go
+factory := func() any { return &User{} }
+
+ident, err := repo.GetIdentity(ctx, factory, "user-123")
+user := ident.(*User)
+```
+
+The factory is how Kayan creates your type without knowing it. The only thing
+it requires of your model is an ID:
+
+```go
+type FlowIdentity interface {
+	GetID() any
+	SetID(any)
+}
+```
+
+Everything else, like which field holds the email or the password hash, is
+mapped by name, so your struct never has to embed anything from Kayan.
+
+The cost is real: one type assertion, `ident.(*User)`, at the boundary. But you
+pay it once, in your own code, at the exact point where you already know which
+type you asked for. The generic design would have charged every layer of the
+library, and every user with a second identity type, forever.
+
+## Write the decision down
+
+The most important part of this decision isn't the code; it's a sentence in the
+repository's contributor rules:
+
+> **Do NOT use Go generics** (type parameters `[T any]`). Kayan uses interfaces
+> \+ `any` + factory functions.
+
+It's a rule and not a preference because this is the kind of decision that gets
+reversed one signature at a time. Someone adds a helper, notices it could be
+generic, and it's a nice local improvement. Then the next function needs to call
+it, and it's generic too. Nobody ever decides to make the library generic; it
+just becomes generic, one reasonable pull request at a time.
+
+## When I would use generics
+
+This isn't an argument against generics. I'd reach for them without hesitation
+for code where the type parameter *ends*: a `Set[T]`, a `Cache[K, V]`, a
+`Map(slice, fn)` helper. Those are leaves. Their `T` doesn't flow into anything
+else.
+
+The question to ask before adding a type parameter to a library's API isn't
+"would this be more type-safe here?" It almost always would. The question is:
+**how far will this travel?** If the answer is "into every type a user
+touches", the safety you gain at one call site is paid for by everyone, at
+every other one.
