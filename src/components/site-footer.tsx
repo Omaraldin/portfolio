@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BoardFrame } from "./board/board-frame";
 import { site } from "@/content/site";
 
 /*
@@ -23,10 +24,11 @@ export function SiteFooter() {
       */}
       <div className="relative mx-auto w-full max-w-[1240px]">
         {/*
-          A chalkboard in both themes: the home page hangs a whiteboard, the
-          footer closes on its dark sibling, framed the same way.
+          A chalkboard in both themes, in a wooden frame with a chalk ledge:
+          the home page hangs a whiteboard, the footer closes on its sibling.
         */}
-        <div className="relative rounded-[22px] border-[6px] border-[#34443b] bg-[#1f2b25] px-6 py-14 text-[#ecebe3] sm:px-12 sm:py-16">
+        <BoardFrame variant="chalk">
+        <div className="relative px-6 py-14 text-[#ecebe3] sm:px-12 sm:py-16">
 
           <div className="relative grid gap-12 lg:grid-cols-[1.4fr_1fr]">
             <div>
@@ -95,6 +97,7 @@ export function SiteFooter() {
             <span>problem first, tools second.</span>
           </div>
         </div>
+        </BoardFrame>
       </div>
     </footer>
   );

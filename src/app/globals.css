@@ -244,6 +244,99 @@ body {
 .wb-board[data-tracing] .wb-item:not([data-lit]) {
   opacity: 0.15;
 }
+/*
+  Board frames. Whiteboard: a brushed-aluminium rim and a marker tray.
+  Chalkboard: a stained-wood rim and a chalk ledge. Tray items are drawn in
+  CSS and only the ones that belong to the current material are shown.
+*/
+.board-frame {
+  /* Brushed aluminium: a bright top edge falling off to a darker base. */
+  --frame: linear-gradient(180deg, #f3f4f2 0%, #c9cdc6 18%, #aeb3ab 60%, #8f958c 100%);
+  --frame-edge: #7f857c;
+  --tray: linear-gradient(180deg, #b9bdb5, #8f958c);
+  --surface: #f9faf7;
+  position: relative;
+  border-radius: 14px;
+  padding: 13px 13px 0;
+  background: var(--frame);
+  border: 1px solid var(--frame-edge);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.7),
+    0 18px 40px -22px rgb(0 0 0 / 0.45),
+    0 2px 6px -2px rgb(0 0 0 / 0.18);
+}
+.board-surface {
+  position: relative;
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.18),
+    inset 0 0 0 1px rgb(0 0 0 / 0.06);
+}
+/* Chalkboard: wood rim, slate surface. "auto" becomes this in dark mode. */
+.board-frame-chalk,
+.dark .board-frame-auto {
+  --frame: linear-gradient(180deg, #8b5d3b 0%, #6f4729 45%, #573620 100%);
+  --frame-edge: #3f2716;
+  --tray: linear-gradient(180deg, #7a5033, #5c3a22);
+  --surface: #1f2b25;
+}
+.board-frame-chalk .board-surface,
+.dark .board-frame-auto .board-surface {
+  box-shadow:
+    inset 0 2px 10px rgb(0 0 0 / 0.45),
+    inset 0 0 0 1px rgb(0 0 0 / 0.3);
+}
+.board-tray {
+  position: relative;
+  height: 24px;
+  height: 26px;
+  margin: 0 -13px;
+  border-radius: 0 0 13px 13px;
+  background: var(--tray);
+  box-shadow: inset 0 3px 4px -2px rgb(0 0 0 / 0.35);
+}
+.tray-item {
+  position: absolute;
+  bottom: 7px;
+}
+/* A dry-erase marker: white barrel, coloured cap. */
+.tray-marker {
+  width: 58px;
+  height: 9px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--cap) 0 22%, #f4f4f0 22% 100%);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.3);
+}
+.tray-chalk {
+  width: 40px;
+  height: 7px;
+  border-radius: 3px;
+  background: #ecebe3;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.35);
+}
+.tray-chalk-short {
+  width: 24px;
+  background: #f1d98a;
+}
+.tray-eraser {
+  width: 70px;
+  height: 14px;
+  bottom: 5px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #3a3d42 0 55%, #b8b2a5 55% 100%);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+}
+/* Markers on a whiteboard, chalk on a chalkboard. */
+.board-frame-auto .tray-chalk,
+.board-frame-chalk .tray-marker,
+.dark .board-frame-auto .tray-marker {
+  display: none;
+}
+.dark .board-frame-auto .tray-chalk {
+  display: block;
+}
+
 /* The one orchestrated moment: each dependency line draws itself once. */
 .wb-draw {
   stroke-dasharray: 1;
@@ -287,6 +380,12 @@ summary::-webkit-details-marker {
   Handwriting (var(--font-hand)) is kept for annotations and the board; mono
   for code only.
 */
+/*
+  In Tailwind's components layer, so a utility on the element (a colour, a
+  size) always wins over these defaults. Outside a layer they would beat every
+  utility and silently ignore per-use overrides.
+*/
+@layer components {
 .surface {
   background: var(--wb-bg);
   border: 1px solid var(--rule);
@@ -386,6 +485,7 @@ button.chip:hover {
   font-size: 14px;
   font-weight: 600;
   color: var(--ink-muted);
+}
 }
 
 /* Every loop and spring stops for visitors who asked for less motion. */

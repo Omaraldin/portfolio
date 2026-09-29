@@ -8,6 +8,7 @@ import { CertificationChip } from "@/components/certification-row";
 import { Chibi } from "@/components/chibi";
 import { Whiteboard } from "@/components/board/whiteboard";
 import { BoardFlow } from "@/components/board/board-flow";
+import { BoardFrame } from "@/components/board/board-frame";
 import { EmptyState, SpecHeader } from "@/components/ui";
 
 export default function Home() {
@@ -82,14 +83,16 @@ export default function Home() {
         a whiteboard (a chalkboard in dark mode) hanging on the site.
       */}
       <section aria-label="Projects board" className="relative left-1/2 mt-10 w-[min(100vw-24px,1600px)] -translate-x-1/2">
-        <div className="rounded-[22px] border-[6px] border-[color:var(--wb-frame)] bg-[color:var(--wb-bg)] px-3 py-6 shadow-[inset_0_2px_12px_rgb(0_0_0/0.06)] sm:px-6">
-          <div className="hidden md:block">
-            <Whiteboard board={board} />
+        <BoardFrame>
+          <div className="px-3 py-6 sm:px-6">
+            <div className="hidden md:block">
+              <Whiteboard board={board} />
+            </div>
+            <div className="px-2 md:hidden">
+              <BoardFlow board={board} />
+            </div>
           </div>
-          <div className="px-2 md:hidden">
-            <BoardFlow board={board} />
-          </div>
-        </div>
+        </BoardFrame>
         <p className="mt-3 hidden text-center text-[18px] text-ink-muted md:block" style={{ fontFamily: "var(--font-hand)" }}>
           hover or tab to a project to trace what it connects to
         </p>
