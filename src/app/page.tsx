@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { site, now } from "@/content/site";
 import { projects } from "@/content/projects";
 import { certifications, featuredCertifications } from "@/content/certifications";
@@ -31,7 +32,7 @@ export default function Home() {
   return (
     <>
       {/* ───────────── Intro ───────────── */}
-      <section className="grid gap-10 pt-10 sm:pt-14 lg:grid-cols-[1fr_auto] lg:items-end">
+      <section className="pt-10 sm:pt-14">
         <div className="flex items-end gap-5">
           <Chibi className="h-28 shrink-0 sm:h-36" sizes="110px" priority />
           <div>
@@ -50,31 +51,21 @@ export default function Home() {
               Software engineer in {site.location.split(",")[0]}. I work out how
               the pieces fit before I build them. This is my board.
             </p>
+            {now ? (
+              <p className="mt-2 text-[16px] text-ink-muted">
+                Currently building{" "}
+                <Link
+                  href={`/work/${now.slug}`}
+                  className="font-semibold text-ink underline decoration-rule decoration-2 underline-offset-4 hover:decoration-[color:var(--wb-red)]"
+                >
+                  {now.label}
+                </Link>
+                , {now.note}.
+              </p>
+            ) : null}
           </div>
         </div>
 
-        {/* What's done and what's next, in the board's handwriting. */}
-        <div style={{ fontFamily: "var(--font-hand)" }} aria-label="To do">
-          <p className="inline-block text-[30px] leading-none font-bold underline decoration-[color:var(--wb-red)] decoration-2 underline-offset-8">
-            TODO
-          </p>
-          <ul className="mt-4 space-y-1.5 text-[20px]">
-            {now.map((item) => (
-              <li key={item.text} className="flex items-center gap-2.5">
-                <span
-                  aria-hidden
-                  className="grid h-5 w-5 shrink-0 place-items-center rounded-[3px] border-2 border-ink text-[15px] leading-none text-[color:var(--wb-green)]"
-                >
-                  {item.done ? "✓" : ""}
-                </span>
-                <span className={item.done ? "text-ink-muted line-through" : ""}>
-                  {item.text}
-                  <span className="sr-only">{item.done ? " (done)" : " (to do)"}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
       </section>
 
       {/* ───────────── The board ───────────── */}

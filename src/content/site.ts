@@ -66,14 +66,11 @@ export const nav = [
 ] as const;
 
 /**
- * The TODO corner of the home-page board: what's done and what's next, in
- * plain words. Keep it honest and current — it is what makes the board feel
- * like a working surface rather than a brochure.
+ * One line under the home-page intro: what's on the bench right now. Keep it
+ * current, or set it to null to hide the line.
  */
-export const now: { text: string; done: boolean }[] = [
-  { text: "ship Kayan v0.3", done: true },
-  { text: "GDGoC certificates live", done: true },
-  { text: "fix the issuance queue", done: false },
-  { text: "OAuth device flow", done: false },
-  { text: "Kayan 1.0 + security review", done: false },
-];
+export const now: { label: string; slug: string; note: string } | null = {
+  label: "Ankhimate",
+  slug: "ankhimate",
+  note: "a 2D animation editor in Rust",
+};

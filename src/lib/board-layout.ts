@@ -45,6 +45,11 @@ const ZONE_BY_DOMAIN: Record<Domain, string> = {
   games: "Games",
 };
 
+/** The board area a project sits in: its own `zone`, else one from its first domain. */
+export function zoneOf(project: Project): string {
+  return project.board?.zone ?? ZONE_BY_DOMAIN[project.domains[0]] ?? "Other work";
+}
+
 export type PartKind = "box" | "db" | "queue";
 
 export type BoardPart = { label: string; kind: PartKind; x: number; w: number; fontSize: number };
@@ -155,7 +160,7 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
   const zoneOrder: string[] = [];
   const byZone = new Map<string, Project[]>();
   for (const p of projects) {
-    const zone = p.board?.zone ?? ZONE_BY_DOMAIN[p.domains[0]] ?? "Other work";
+    const zone = zoneOf(p);
     if (!byZone.has(zone)) {
       byZone.set(zone, []);
       zoneOrder.push(zone);

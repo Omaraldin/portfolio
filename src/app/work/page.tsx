@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { projects } from "@/content/projects";
-import { WorkIndex } from "@/components/work-index";
+import { WorkList } from "@/components/work-list";
 import { PageTitle } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Work",
   description:
-    "Projects across embedded, web, mobile, desktop, backend, and automation.",
+    "Systems I've designed and shipped: platforms, libraries, tools and devices.",
 };
 
 export default function WorkPage() {
@@ -15,9 +15,9 @@ export default function WorkPage() {
       <PageTitle
         index="work"
         title="Things I've built"
-        intro="Filter by where the work happened, or by what it required. The second axis is usually the more useful one."
+        intro="Systems I've designed and shipped, grouped the way they sit on my board."
       />
-      <WorkIndex projects={projects} />
+      <WorkList projects={projects} />
     </>
   );
 }
