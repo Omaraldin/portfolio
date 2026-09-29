@@ -65,6 +65,8 @@ export type Project = {
    * stickers. 16:10 crops best (e.g. 1600×1000).
    */
   thumbnail?: ProjectMedia;
+  /** How the project is drawn on the home-page board. Optional. */
+  board?: ProjectBoard;
   /** Surfaces on the home page. Choose for spread across domains, not recency. */
   featured: boolean;
 };
@@ -106,4 +108,48 @@ export type ArticleMeta = {
 export type Article = ArticleMeta & {
   /** Raw MDX body, without frontmatter. */
   body: string;
+};
+
+/**
+ * A link between two projects on the board. Declared by hand, never inferred:
+ * the board draws only what is actually true.
+ */
+export type BoardLink = {
+  /** Slug of the other project. */
+  project: string;
+  /** Handwritten on the line, e.g. "signs people in". Keep it short. */
+  label: string;
+};
+
+export type ProjectBoard = {
+  /**
+   * The board area this project sits in. Defaults to a zone derived from the
+   * project's first domain, so unrelated work groups itself without setup.
+   */
+  zone?: string;
+  /**
+   * Which diagram symbol to draw: a library is a tabbed package, a service a
+   * rounded box. Defaults to "service".
+   */
+  shape?: "service" | "library";
+  /** The inside of the sketch, left to right, e.g. ["Go API", "queue", "Postgres"]. Up to four. */
+  parts?: string[];
+  /**
+   * Projects this one depends on. Drawn as a solid arrow from the dependency to
+   * this project, labelled with what the dependency does for it.
+   */
+  uses?: BoardLink[];
+  /**
+   * Projects that faced the same underlying problem in a different setting.
+   * Drawn as a dashed line. Only for a genuine shared problem.
+   */
+  sameProblem?: BoardLink[];
+  /** One muted line at the bottom of the sketch, e.g. "design → issue → email → verify". Defaults to the stack. */
+  caption?: string;
+  /** A short red annotation under the box, e.g. "live in prod!". */
+  note?: string;
+  /** Who uses it, drawn as stick figures below the box, e.g. "20+ chapters, Egypt". */
+  audience?: string;
+  /** Written on the arrow to the audience, e.g. "1,000+ certificates". */
+  audienceLabel?: string;
 };

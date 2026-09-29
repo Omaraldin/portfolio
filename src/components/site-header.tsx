@@ -24,7 +24,9 @@ export function SiteHeader() {
         {/* Hangs from the bar's underside on the right, where page content
             leaves room. Desktop only — on phones the bar wraps to two rows
             and he would cover the nav. */}
-        <ChibiPeek className="right-44 hidden md:block" />
+        {pathname !== "/" ? (
+          <ChibiPeek className="right-44 hidden md:block" />
+        ) : null}
 
         <Link
           href="/"

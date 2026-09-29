@@ -3,6 +3,7 @@ import { assertLocalOnly } from "@/lib/admin-guard";
 import { assertSafeSlug, readProjects, writeProjects } from "@/lib/admin-store";
 import { CAPABILITIES, DOMAINS } from "@/content/taxonomy";
 import type { Project } from "@/content/types";
+import { normaliseBoard } from "@/content/projects";
 
 /**
  * Validates a project submitted from the panel. The panel is the only caller,
@@ -146,6 +147,8 @@ function parseProject(input: unknown): Project {
     media,
     // Omitted when absent, so the JSON stays free of empty placeholders.
     ...(thumbnail ? { thumbnail } : {}),
+    // Board data is carried through, or every save from the panel would wipe it.
+    ...(normaliseBoard(p.board) ? { board: normaliseBoard(p.board) } : {}),
     featured: Boolean(p.featured),
   };
 }

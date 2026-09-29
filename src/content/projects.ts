@@ -1,5 +1,5 @@
 import raw from "@/data/projects.json";
-import type { Project, ProjectMedia, ProjectSection } from "./types";
+import type { BoardLink, Project, ProjectBoard, ProjectMedia, ProjectSection } from "./types";
 import { CAPABILITIES, DOMAINS } from "./taxonomy";
 
 /**
@@ -20,6 +20,39 @@ function isMedia(m: unknown): m is ProjectMedia {
     typeof (m as ProjectMedia).width === "number" &&
     typeof (m as ProjectMedia).height === "number"
   );
+}
+
+/**
+ * Board data is optional and purely presentational, so anything malformed is
+ * dropped field by field rather than rejecting the whole project.
+ */
+export function normaliseBoard(value: unknown): ProjectBoard | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const b = value as Record<string, unknown>;
+  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+  const links = (v: unknown): BoardLink[] | undefined => {
+    if (!Array.isArray(v)) return undefined;
+    const out = v
+      .map((l) => l as Record<string, unknown>)
+      .filter((l) => str(l?.project) && str(l?.label))
+      .map((l) => ({ project: str(l.project)!, label: str(l.label)! }));
+    return out.length ? out : undefined;
+  };
+  const parts = Array.isArray(b.parts)
+    ? b.parts.map(str).filter((p): p is string => Boolean(p)).slice(0, 4)
+    : undefined;
+
+  return {
+    zone: str(b.zone),
+    shape: b.shape === "library" ? "library" : "service",
+    parts: parts?.length ? parts : undefined,
+    uses: links(b.uses),
+    sameProblem: links(b.sameProblem),
+    caption: str(b.caption),
+    note: str(b.note),
+    audience: str(b.audience),
+    audienceLabel: str(b.audienceLabel),
+  };
 }
 
 function isProject(value: unknown): value is Project {
@@ -101,6 +134,7 @@ export const projects: Project[] = (raw as unknown[])
       ...project,
       media: project.media ?? [],
       sections: project.sections ?? [],
+      board: normaliseBoard(project.board),
     };
   });
 

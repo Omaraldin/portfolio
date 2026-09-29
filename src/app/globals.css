@@ -60,6 +60,32 @@
   --shadow: #1a1a14;
 }
 
+/*
+  The home-page board is a physical object on the page: a whiteboard in light
+  mode, a chalkboard in dark. Its colours are its own, so it reads as a board
+  hanging on the site rather than as more page.
+*/
+:root {
+  --wb-bg: #f7f8f5;
+  --wb-frame: #d9dcd4;
+  --wb-ink: #1f2326;
+  --wb-muted: #61686c;
+  --wb-green: #2f6b45; /* the sweater: data flow */
+  --wb-red: #c23a2e; /* the tie: annotations */
+  --wb-blue: #2957a4;
+  --wb-note: #ffe27a;
+  --wb-on-note: #2a2a22;
+}
+.dark {
+  --wb-bg: #1f2b25;
+  --wb-frame: #34443b;
+  --wb-ink: #ecebe3;
+  --wb-muted: #a9b3ad;
+  --wb-green: #9fd4a2;
+  --wb-red: #f2917f;
+  --wb-blue: #9cc3f0;
+}
+
 .dark {
   --paper: #0f1612;
   --paper-raised: #161d18;
@@ -115,6 +141,8 @@
   /* Headlines, card titles, big numerals. Never body copy. */
   --font-display:
     var(--font-display-face), ui-sans-serif, system-ui, sans-serif;
+  --font-hand: var(--font-hand-face), cursive;
+  --font-arabic: var(--font-arabic-face), sans-serif;
 
   --animate-float: float 6s ease-in-out infinite;
   --animate-pulse-dot: pulse-dot 2s ease-out infinite;
@@ -193,6 +221,61 @@ body {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
   border-radius: 8px;
+}
+
+/* ───────────── Home-page board ───────────── */
+.wb-frame,
+.wb-line {
+  fill: none;
+  stroke: var(--wb-ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.wb-frame {
+  stroke-width: 3.2;
+}
+.wb-line {
+  stroke-width: 2.4;
+}
+.wb-line.wb-green {
+  stroke: var(--wb-green);
+}
+.wb-node {
+  cursor: pointer;
+  outline: none;
+}
+.wb-node:focus-visible .wb-frame {
+  stroke: var(--wb-blue);
+  stroke-width: 4.5;
+}
+.wb-item,
+.wb-board [data-edge] {
+  transition: opacity 220ms ease;
+}
+/* Tracing: the hovered project and what it connects to stay; the rest fades. */
+.wb-board[data-tracing] [data-edge]:not([data-lit]),
+.wb-board[data-tracing] .wb-item:not([data-lit]) {
+  opacity: 0.15;
+}
+/* The one orchestrated moment: each dependency line draws itself once. */
+.wb-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: wb-draw 800ms cubic-bezier(0.5, 0, 0.3, 1) 300ms forwards;
+}
+@keyframes wb-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* The global rule stops the animation, so the line must start drawn. */
+  .wb-draw {
+    stroke-dashoffset: 0 !important;
+  }
+  .wb-packet {
+    display: none;
+  }
 }
 
 /* Numbers that sit in columns must not jitter between values. */

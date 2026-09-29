@@ -86,6 +86,23 @@
       "width": 1280,
       "height": 638
     },
+    "board": {
+      "parts": [
+        "Go API",
+        "queue",
+        "Postgres"
+      ],
+      "uses": [
+        {
+          "project": "kayan",
+          "label": "signs people in"
+        }
+      ],
+      "caption": "design → issue → email → verify",
+      "note": "live in prod!",
+      "audience": "20+ chapters, Egypt",
+      "audienceLabel": "1,000+ certificates"
+    },
     "featured": true
   },
   {
@@ -178,6 +195,17 @@
       "width": 1038,
       "height": 649
     },
+    "board": {
+      "shape": "library",
+      "parts": [
+        "core",
+        "OIDC",
+        "SAML",
+        "SCIM"
+      ],
+      "caption": "auth · sessions · roles · tenants",
+      "note": "no generics, on purpose"
+    },
     "featured": true
   },
   {
@@ -230,6 +258,21 @@
     ],
     "links": [],
     "media": [],
+    "board": {
+      "parts": [
+        "ESP32",
+        "MQTT buffer",
+        "ingest",
+        "dashboard"
+      ],
+      "caption": "keeps readings when the uplink drops",
+      "sameProblem": [
+        {
+          "project": "offline-first-mobile-app",
+          "label": "which copy is the truth?"
+        }
+      ]
+    },
     "featured": true
   },
   {
@@ -274,8 +317,16 @@
     "role": "Mobile and API",
     "timeline": "2024 — 2025",
     "links": [],
-    "featured": true,
-    "media": []
+    "media": [],
+    "board": {
+      "parts": [
+        "Flutter app",
+        "SQLite",
+        "sync API"
+      ],
+      "caption": "works with no signal, reconciles later"
+    },
+    "featured": true
   },
   {
     "slug": "data-extraction-pipeline",
@@ -322,8 +373,16 @@
     "role": "Sole engineer",
     "timeline": "2024",
     "links": [],
-    "featured": true,
-    "media": []
+    "media": [],
+    "board": {
+      "parts": [
+        "scraper",
+        "normaliser",
+        "Postgres"
+      ],
+      "caption": "sites that fight back"
+    },
+    "featured": true
   },
   {
     "slug": "desktop-inventory-tool",
@@ -361,6 +420,13 @@
     ],
     "links": [],
     "media": [],
+    "board": {
+      "parts": [
+        "Electron UI",
+        "SQLite"
+      ],
+      "caption": "stock control with no internet"
+    },
     "featured": false
   }
 ]

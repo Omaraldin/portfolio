@@ -3,6 +3,8 @@ import {
   Bricolage_Grotesque,
   DM_Sans,
   JetBrains_Mono,
+  Kalam,
+  Readex_Pro,
 } from "next/font/google";
 import { site } from "@/content/site";
 import { SiteHeader } from "@/components/site-header";
@@ -37,6 +39,22 @@ const body = DM_Sans({
 const mono = JetBrains_Mono({
   variable: "--font-mono-face",
   subsets: ["latin"],
+  display: "swap",
+});
+
+/* Marker handwriting: everything written on the home-page board. */
+const hand = Kalam({
+  variable: "--font-hand-face",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
+
+/* The Arabic name. Loaded for that one line, so only the Arabic subset. */
+const arabic = Readex_Pro({
+  variable: "--font-arabic-face",
+  subsets: ["arabic"],
+  weight: ["600"],
   display: "swap",
 });
 
@@ -109,7 +127,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} ${mono.variable} h-full antialiased`}
+      className={`${display.variable} ${body.variable} ${mono.variable} ${hand.variable} ${arabic.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

@@ -301,6 +301,17 @@ export function WorkEditor({ projects }: { projects: Project[] }) {
           />
         </Field>
 
+        <Field
+          label="Board"
+          hint='JSON. Keys: zone, shape ("service" | "library"), parts, caption, note, audience, audienceLabel, uses and sameProblem ([{ "project": slug, "label": text }]). Leave empty for defaults.'
+        >
+          <BoardField
+            key={`board-${selected ?? "new"}`}
+            value={draft.board}
+            onChange={(board) => update("board", board)}
+          />
+        </Field>
+
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -325,6 +336,48 @@ export function WorkEditor({ projects }: { projects: Project[] }) {
           <SaveState state={status} />
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Board settings as raw JSON. Only valid JSON is applied, so a half-typed edit
+ * never reaches the draft; the line under the box says which state it is in.
+ */
+function BoardField({
+  value,
+  onChange,
+}: {
+  value: Project["board"];
+  onChange: (board: Project["board"]) => void;
+}) {
+  const [text, setText] = useState(value ? JSON.stringify(value, null, 2) : "");
+  const [valid, setValid] = useState(true);
+
+  return (
+    <div>
+      <MonoArea
+        rows={10}
+        value={text}
+        onChange={(e) => {
+          const next = e.target.value;
+          setText(next);
+          if (!next.trim()) {
+            setValid(true);
+            onChange(undefined);
+            return;
+          }
+          try {
+            onChange(JSON.parse(next));
+            setValid(true);
+          } catch {
+            setValid(false);
+          }
+        }}
+      />
+      <p className="mt-1 font-mono text-[10px] tracking-[0.08em] text-ink-muted">
+        {valid ? "valid — applied" : "not valid JSON yet — last valid value kept"}
+      </p>
     </div>
   );
 }

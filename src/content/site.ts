@@ -5,6 +5,8 @@ export const site = {
     `name` so the two never drift apart.
   */
   handle: "omaraldin",
+  /** The name in Arabic, shown beside the Latin one on the home page. */
+  nameAr: "عمر الخشاب",
   role: "Software Engineer",
   /** The thesis. Everything on the site is arguing this. */
   thesis:
@@ -62,3 +64,16 @@ export const nav = [
   { label: "Certs", href: "/certifications" },
   { label: "About", href: "/about" },
 ] as const;
+
+/**
+ * The TODO corner of the home-page board: what's done and what's next, in
+ * plain words. Keep it honest and current — it is what makes the board feel
+ * like a working surface rather than a brochure.
+ */
+export const now: { text: string; done: boolean }[] = [
+  { text: "ship Kayan v0.3", done: true },
+  { text: "GDGoC certificates live", done: true },
+  { text: "fix the issuance queue", done: false },
+  { text: "OAuth device flow", done: false },
+  { text: "Kayan 1.0 + security review", done: false },
+];
