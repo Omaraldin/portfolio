@@ -7,13 +7,16 @@ import { useEffect, useRef } from "react";
  * stays lit while the rest fades back. Plain DOM work on the server-rendered
  * SVG: no state, so tracing never re-renders the board.
  *
- * More behaviours ride on the same tracing:
+ * Three more behaviours ride on the same tracing:
  *
  * - The first time the board scrolls into view it traces one connection on
  *   its own, so visitors see that the board responds. Skipped entirely for
  *   anyone who asked for reduced motion.
  * - The project under the pointer or focus is marked `data-hot`, which lifts
  *   it and shows its "case study →" label (see globals.css).
+ * - Touch has no hover, so on a touch tap the first tap on a project traces it
+ *   and shows the label; a second tap on it follows the link. Mouse clicks and
+ *   the keyboard go straight through.
  */
 export function BoardTracer({
   children,
@@ -32,6 +35,7 @@ export function BoardTracer({
     const nodes = [...root.querySelectorAll<SVGElement>("[data-node]")];
     const items = [...root.querySelectorAll<SVGGElement>(".wb-item")];
     let armed: string | null = null;
+    let touched = false;
     let interacted = false;
 
     const light = (ids: Set<string>, onEdge: (e: SVGGElement) => boolean) => {
@@ -87,7 +91,27 @@ export function BoardTracer({
         armed = null;
         clear();
       });
+      on(n, "pointerdown", (e) => {
+        touched = e.pointerType === "touch";
+      });
+      on(n, "click", (e) => {
+        if (!touched) return;
+        touched = false;
+        if (armed === id) return; // second tap: follow the link
+        e.preventDefault();
+        armed = id;
+        interacted = true;
+        trace(id);
+      });
     }
+
+    // A tap anywhere else on the board puts it back.
+    on(root, "pointerdown", (e) => {
+      if (!(e.target as Element).closest("[data-node]")) {
+        armed = null;
+        clear();
+      }
+    });
 
     // ── The one-time demonstration ──
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
