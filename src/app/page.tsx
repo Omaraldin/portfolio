@@ -86,10 +86,14 @@ export default function Home() {
       <section aria-label="Projects board" className="relative left-1/2 mt-10 w-[min(100vw-24px,1600px)] -translate-x-1/2">
         <BoardFrame>
           <div className="px-3 py-6 sm:px-6">
-            <div className="hidden md:block">
+            {/*
+              The diagram from 1024px up. Narrower, a 1600-unit drawing would
+              put its writing under 11px, so tablets get the list as well.
+            */}
+            <div className="hidden lg:block">
               <Whiteboard board={board} />
             </div>
-            <div className="px-2 md:hidden">
+            <div className="px-2 lg:hidden">
               <BoardFlow board={board} />
             </div>
           </div>
