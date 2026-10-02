@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { site, now } from "@/content/site";
 import { projects } from "@/content/projects";
-import { certifications, featuredCertifications } from "@/content/certifications";
 import { getArticles } from "@/lib/articles";
 import { layoutBoard } from "@/lib/board-layout";
 import { PinnedPosts } from "@/components/pinned-posts";
-import { CertificationChip } from "@/components/certification-row";
 import { Chibi } from "@/components/chibi";
 import { Whiteboard } from "@/components/board/whiteboard";
 import { BoardFlow } from "@/components/board/board-flow";
@@ -18,7 +16,6 @@ export const metadata: Metadata = pageMetadata({ path: "/" });
 
 export default function Home() {
   const articles = getArticles();
-  const [latest, ...moreArticles] = articles;
 
   /*
     Every project goes on the board, featured ones first. Grouping into zones
@@ -29,9 +26,6 @@ export default function Home() {
     ...projects.filter((p) => !p.featured),
   ];
   const board = layoutBoard(ordered, articles);
-
-  const certs =
-    featuredCertifications.length > 0 ? featuredCertifications : certifications;
 
   return (
     <>
@@ -109,28 +103,13 @@ export default function Home() {
           href="/writing"
           hrefLabel="All posts"
         />
-        {latest ? (
-          <PinnedPosts articles={[latest, ...moreArticles.slice(0, 3)]} />
+        {/* Up to three; one post shows on its own, with no empty slots. */}
+        {articles.length > 0 ? (
+          <PinnedPosts articles={articles.slice(0, 3)} />
         ) : (
           <EmptyState>First post is on its way ✍️</EmptyState>
         )}
       </section>
-
-      {/* ───────────── Certifications ───────────── */}
-      {certs.length > 0 ? (
-        <section>
-          <SpecHeader
-            title="Certifications"
-            href="/certifications"
-            hrefLabel="All certificates"
-          />
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {certs.slice(0, 6).map((certification, i) => (
-              <CertificationChip key={certification.slug} certification={certification} index={i} />
-            ))}
-          </div>
-        </section>
-      ) : null}
     </>
   );
 }
