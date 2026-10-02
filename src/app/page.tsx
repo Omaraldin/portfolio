@@ -67,6 +67,18 @@ export default function Home() {
                 , {now.note}.
               </p>
             ) : null}
+            {/* The next step: the work, the CV, or a message. Same buttons as the footer. */}
+            <div className="mt-5 flex flex-wrap items-center gap-2.5">
+              <Link href="/work" className="btn btn-primary btn-sm">
+                Work
+              </Link>
+              <Link href="/cv" className="btn btn-sm">
+                CV
+              </Link>
+              <a href={`mailto:${site.email}`} className="btn btn-sm">
+                Get in touch
+              </a>
+            </div>
           </div>
         </div>
 
