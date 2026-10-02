@@ -20,6 +20,21 @@ export type ShareImage = {
   alt: string;
 };
 
+/** The size of a generated share card (see app/og). */
+export const OG_SIZE = { width: 1200, height: 630 } as const;
+
+/**
+ * The generated share card for a project or post with no cover of its own:
+ * its title on a whiteboard, rendered by app/og/[section]/[slug].
+ */
+export function generatedImage(
+  section: "work" | "writing",
+  slug: string,
+  title: string,
+): ShareImage {
+  return { url: `/og/${section}/${slug}`, ...OG_SIZE, alt: title };
+}
+
 export const defaultTitle = `${site.name} — ${site.role}`;
 
 /** An absolute URL on this site, for a path like "/work/kayan". */

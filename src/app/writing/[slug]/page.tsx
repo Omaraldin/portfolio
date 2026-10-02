@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pageMetadata } from "@/lib/metadata";
+import { generatedImage, pageMetadata } from "@/lib/metadata";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -26,8 +26,8 @@ export async function generateMetadata(
   if (!article) return {};
 
   // Without an image a shared link renders as bare text, which is what kills
-  // click-through, so an article with no cover of its own falls back to the
-  // site card.
+  // click-through, so an article with no cover of its own gets a card
+  // generated from its title.
   const image = article.cover
     ? {
         url: article.cover,
@@ -35,7 +35,7 @@ export async function generateMetadata(
         height: 900,
         alt: article.coverAlt ?? article.title,
       }
-    : site.ogImage;
+    : generatedImage("writing", slug, article.title);
 
   return {
     ...pageMetadata({

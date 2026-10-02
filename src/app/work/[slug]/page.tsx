@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { pageMetadata } from "@/lib/metadata";
+import { generatedImage, pageMetadata } from "@/lib/metadata";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProject, projects } from "@/content/projects";
-import { site } from "@/content/site";
 import type { Project } from "@/content/types";
 import {
   CAPABILITY_LABELS,
@@ -31,8 +30,7 @@ export async function generateMetadata(
 
   /*
     A shared link previews with the project's own cover when it has one, else
-    the site card. The fallback has to be explicit: a page's openGraph object
-    replaces the layout's wholesale, images included.
+    a card generated from its title — never the home-page screenshot.
   */
   const image = project.thumbnail
     ? {
@@ -41,7 +39,7 @@ export async function generateMetadata(
         height: project.thumbnail.height,
         alt: project.thumbnail.alt || project.title,
       }
-    : site.ogImage;
+    : generatedImage("work", slug, project.title);
 
   return pageMetadata({
     path: `/work/${slug}`,
