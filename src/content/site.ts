@@ -35,9 +35,8 @@ export const site = {
     alt: "Omar El-Khashab — Software Engineer",
   },
   socials: [
-    // TODO: real URLs still needed.
-    { label: "GitHub", href: "https://github.com/" },
-    { label: "LinkedIn", href: "https://linkedin.com/in/" },
+    { label: "GitHub", href: "https://github.com/omaraldin" },
+    { label: "LinkedIn", href: "https://linkedin.com/in/omaraldin" },
   ],
 } as const;
 
