@@ -80,9 +80,11 @@ export function SiteHeader() {
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 md:ml-0">
           <ThemeToggle />
+          {/* Labelled for what it is: the feed, not an email signup. */}
           <a
             href="/rss.xml"
             className="btn btn-primary btn-sm hidden sm:inline-flex"
+            aria-label="RSS feed"
           >
             <svg
               aria-hidden
@@ -94,7 +96,7 @@ export function SiteHeader() {
               <circle cx="5" cy="19" r="2.5" />
               <path d="M2.5 9.5a12 12 0 0 1 12 12h-3.2a8.8 8.8 0 0 0-8.8-8.8zM2.5 2.5a19 19 0 0 1 19 19h-3.2A15.8 15.8 0 0 0 2.5 5.7z" />
             </svg>
-            Subscribe
+            RSS
           </a>
         </div>
       </div>
