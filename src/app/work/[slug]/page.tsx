@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -42,21 +43,12 @@ export async function generateMetadata(
       }
     : site.ogImage;
 
-  return {
+  return pageMetadata({
+    path: `/work/${slug}`,
     title: project.title,
     description: project.summary,
-    openGraph: {
-      title: project.title,
-      description: project.summary,
-      images: [image],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: project.title,
-      description: project.summary,
-      images: [{ url: image.url, alt: image.alt }],
-    },
-  };
+    image,
+  });
 }
 
 export default async function ProjectPage(props: PageProps<"/work/[slug]">) {

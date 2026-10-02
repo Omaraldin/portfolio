@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { site, now } from "@/content/site";
 import { projects } from "@/content/projects";
@@ -11,6 +12,9 @@ import { Whiteboard } from "@/components/board/whiteboard";
 import { BoardFlow } from "@/components/board/board-flow";
 import { BoardFrame } from "@/components/board/board-frame";
 import { EmptyState, SpecHeader } from "@/components/ui";
+import { pageMetadata } from "@/lib/metadata";
+
+export const metadata: Metadata = pageMetadata({ path: "/" });
 
 export default function Home() {
   const articles = getArticles();

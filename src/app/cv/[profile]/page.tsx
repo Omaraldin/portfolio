@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
 import { cvs, getCV } from "@/content/cvs";
 import { CVDocument } from "@/components/cv-document";
@@ -16,10 +17,11 @@ export async function generateMetadata(
   const cv = getCV(profile);
   if (!cv) return {};
 
-  return {
+  return pageMetadata({
+    path: `/cv/${profile}`,
     title: `CV — ${cv.title}`,
     description: cv.summary,
-  };
+  });
 }
 
 export default async function CVProfilePage(

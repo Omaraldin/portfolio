@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import { getArticles } from "@/lib/articles";
 import { WritingIndex } from "@/components/writing-index";
 import { EmptyState, PageTitle } from "@/components/ui";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/writing",
   title: "Blog",
-  description: "Notes on system design, data flow, and building across stacks.",
-};
+  description:
+    "Notes on system design, data flow, and building across stacks.",
+});
 
 export default function WritingPage() {
   const articles = getArticles();

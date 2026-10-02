@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import Image from "next/image";
 import { about } from "@/content/about";
 import { certifications } from "@/content/certifications";
@@ -8,11 +9,12 @@ import { site } from "@/content/site";
 import { CertificationChip } from "@/components/certification-row";
 import { MarkerUnderline, PillLink, SpecHeader } from "@/components/ui";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/about",
   title: "About",
   description:
     "Who I am, how I got here, and how I approach problems.",
-};
+});
 
 export default function AboutPage() {
   const school = education[0];

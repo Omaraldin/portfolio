@@ -85,7 +85,6 @@ export const metadata: Metadata = {
     siteName: site.name,
     title: `${site.name} — ${site.role}`,
     description: site.thesis,
-    url: site.url,
     images: [site.ogImage],
   },
   twitter: {
@@ -94,8 +93,11 @@ export const metadata: Metadata = {
     description: site.thesis,
     images: [{ url: site.ogImage.url, alt: site.ogImage.alt }],
   },
+  /*
+    No canonical here: every page that forgot its own would inherit this one.
+    Each page sets its canonical URL through pageMetadata in lib/metadata.
+  */
   alternates: {
-    canonical: "/",
     types: { "application/rss+xml": `${site.url}/rss.xml` },
   },
   robots: {

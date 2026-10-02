@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -24,7 +25,6 @@ export async function generateMetadata(
   const article = getArticle(slug);
   if (!article) return {};
 
-  const url = `${site.url}/writing/${slug}`;
   // Without an image a shared link renders as bare text, which is what kills
   // click-through, so an article with no cover of its own falls back to the
   // site card.
@@ -38,30 +38,20 @@ export async function generateMetadata(
     : site.ogImage;
 
   return {
-    title: article.title,
-    description: article.description,
-    // Tells search engines which URL is authoritative when the same article is
-    // reachable through more than one path.
-    alternates: { canonical: url },
+    ...pageMetadata({
+      path: `/writing/${slug}`,
+      title: article.title,
+      description: article.description,
+      image,
+      openGraph: {
+        type: "article",
+        publishedTime: article.date,
+        modifiedTime: article.updated ?? article.date,
+        authors: [author.name],
+        tags: article.tags,
+      },
+    }),
     authors: [{ name: author.name, url: site.url }],
-    openGraph: {
-      type: "article",
-      title: article.title,
-      description: article.description,
-      url,
-      siteName: site.name,
-      publishedTime: article.date,
-      modifiedTime: article.updated ?? article.date,
-      authors: [author.name],
-      tags: article.tags,
-      images: [image],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: article.title,
-      description: article.description,
-      images: [image],
-    },
   };
 }
 
