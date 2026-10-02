@@ -83,7 +83,7 @@ function Node({ n }: { n: BoardNode }) {
             </g>
           ))}
         </g>
-        <text className="wb-caption" x={n.x + 26} y={n.y + n.h - 16} fontSize={19} fill="var(--wb-muted)" style={hand}>
+        <text className="wb-caption" x={n.x + 26} y={n.y + n.h - 16} fontSize={22}>
           {n.caption}
         </text>
         {/* Takes the caption's place on hover and focus, so the box reads as a link. */}

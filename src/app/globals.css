@@ -70,6 +70,8 @@
   --wb-frame: #d9dcd4;
   --wb-ink: #1f2326;
   --wb-muted: #61686c;
+  /* The smallest writing on the board, a step darker than --wb-muted (8:1). */
+  --wb-caption: #474d51;
   --wb-green: #2f6b45; /* the sweater: data flow */
   --wb-red: #c23a2e; /* the tie: annotations */
   --wb-blue: #2957a4;
@@ -82,6 +84,7 @@
   --wb-frame: #34443b;
   --wb-ink: #ecebe3;
   --wb-muted: #a9b3ad;
+  --wb-caption: #c4ccc7;
   --wb-green: #9fd4a2;
   --wb-red: #f2917f;
   --wb-blue: #9cc3f0;
@@ -260,6 +263,21 @@ body {
 .wb-cta,
 .wb-caption {
   transition: opacity 160ms ease;
+}
+/*
+  A box's one-line caption is the smallest text on the board. It is marker
+  handwriting at full size; once the board is scaled down far enough that a
+  caption renders below ~15px, plain sans reads better than a hand.
+*/
+.wb-caption {
+  fill: var(--wb-caption);
+  font-family: var(--font-hand);
+}
+@media (max-width: 1279px) {
+  .wb-caption {
+    font-family: var(--font-sans);
+    font-size: 21px;
+  }
 }
 .wb-cta {
   opacity: 0;
