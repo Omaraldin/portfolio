@@ -12,6 +12,8 @@ import { useEffect, useRef } from "react";
  * - The first time the board scrolls into view it traces one connection on
  *   its own, so visitors see that the board responds. Skipped entirely for
  *   anyone who asked for reduced motion.
+ * - The project under the pointer or focus is marked `data-hot`, which lifts
+ *   it and shows its "case study →" label (see globals.css).
  */
 export function BoardTracer({
   children,
@@ -48,6 +50,7 @@ export function BoardTracer({
       });
       // Items are lit after the edges have added their far ends.
       for (const item of items) item.toggleAttribute("data-lit", lit.has(item.dataset.item ?? ""));
+      for (const item of items) item.toggleAttribute("data-hot", item.dataset.item === id);
     };
 
     const clear = () => {

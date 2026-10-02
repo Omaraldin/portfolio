@@ -235,7 +235,46 @@ body {
 }
 .wb-node:focus-visible .wb-frame {
   stroke: var(--wb-blue);
-  stroke-width: 4.5;
+}
+/* The board draws its own focus ring round the box; the browser's would hug the text. */
+.wb-focus {
+  fill: none;
+  stroke: var(--wb-blue);
+  stroke-width: 4;
+  opacity: 0;
+}
+.wb-node:focus-visible .wb-focus {
+  opacity: 1;
+}
+/*
+  The project under the pointer or focus lifts a little and swaps its caption
+  for "case study →", so the box reads as something to open.
+*/
+.wb-item > .wb-node {
+  transition: transform 200ms ease;
+}
+.wb-item[data-hot] > .wb-node,
+.wb-node:focus-visible {
+  transform: translateY(-6px);
+}
+.wb-cta,
+.wb-caption {
+  transition: opacity 160ms ease;
+}
+.wb-cta {
+  opacity: 0;
+}
+.wb-item[data-hot] .wb-cta,
+.wb-node:focus-visible .wb-cta {
+  opacity: 1;
+}
+.wb-item[data-hot] .wb-caption,
+.wb-node:focus-visible .wb-caption {
+  opacity: 0;
+}
+.wb-more:hover .wb-frame,
+.wb-more:focus-visible .wb-frame {
+  stroke-dasharray: none;
 }
 .wb-item,
 .wb-board [data-edge] {
@@ -498,7 +537,8 @@ button.chip:hover {
     animation: none !important;
     transition-duration: 1ms !important;
   }
-  .card:hover {
+  .card:hover,
+  .wb-node {
     transform: none !important;
   }
 }

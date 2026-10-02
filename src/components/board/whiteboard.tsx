@@ -53,9 +53,11 @@ function Node({ n }: { n: BoardNode }) {
   const partsTop = n.y + 74;
   return (
     <g className="wb-item" data-item={n.slug}>
-      <Link href={n.href} className="wb-node" data-node={n.slug} aria-label={n.title}>
+      <Link href={n.href} className="wb-node" data-node={n.slug} aria-label={`${n.title}: case study`}>
         {/* Transparent fill so the whole box, not just its outline, is the link. */}
         <rect x={n.x} y={n.y} width={n.w} height={n.h} fill="transparent" />
+        {/* Keyboard focus ring, drawn clear of the box. */}
+        <rect className="wb-focus" x={n.x - 10} y={n.y - 10} width={n.w + 20} height={n.h + 20} rx={22} />
         <Frame n={n} />
         {/* The zone's marker: a short tick round the bottom-right corner. */}
         <path
@@ -81,8 +83,12 @@ function Node({ n }: { n: BoardNode }) {
             </g>
           ))}
         </g>
-        <text x={n.x + 26} y={n.y + n.h - 16} fontSize={19} fill="var(--wb-muted)" style={hand}>
+        <text className="wb-caption" x={n.x + 26} y={n.y + n.h - 16} fontSize={19} fill="var(--wb-muted)" style={hand}>
           {n.caption}
+        </text>
+        {/* Takes the caption's place on hover and focus, so the box reads as a link. */}
+        <text className="wb-cta" aria-hidden="true" x={n.x + n.w - 26} y={n.y + n.h - 16} fontSize={23} fontWeight={700} textAnchor="end" fill={ink} style={hand}>
+          case study →
         </text>
       </Link>
 
@@ -174,7 +180,7 @@ export function Whiteboard({ board }: { board: Board }) {
       <svg
         viewBox={`0 0 ${board.width} ${board.height}`}
         className="block h-auto w-full overflow-visible"
-        role="img"
+        role="group"
         aria-label="A whiteboard of Omar's projects, grouped by area, with lines only where one project really uses another or shares a problem with it."
       >
         <defs>
