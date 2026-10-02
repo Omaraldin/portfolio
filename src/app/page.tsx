@@ -88,9 +88,6 @@ export default function Home() {
             </div>
           </div>
         </BoardFrame>
-        <p className="mt-3 hidden text-center text-[18px] text-ink-muted md:block" style={{ fontFamily: "var(--font-hand)" }}>
-          hover or tab to a project to trace what it connects to
-        </p>
       </section>
 
       {/* ───────────── Writing ───────────── */}

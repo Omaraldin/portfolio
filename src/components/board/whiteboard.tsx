@@ -180,7 +180,7 @@ export function Whiteboard({ board }: { board: Board }) {
         <defs>
           {(["ink", "green"] as const).map((c) => (
             <marker key={c} id={`wb-arrow-${c}`} viewBox="0 0 12 12" refX="10" refY="6" markerWidth="11" markerHeight="11" orient="auto-start-reverse">
-              <path d="M1 1 L10 6 L1 11" fill="none" stroke={c === "ink" ? ink : "var(--wb-green)"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M1 1 L10 6 L1 11" fill="none" stroke={c === "ink" ? ink : `var(--wb-${c})`} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             </marker>
           ))}
         </defs>
@@ -229,6 +229,18 @@ export function Whiteboard({ board }: { board: Board }) {
         ))}
 
         {board.more ? <More {...board.more} /> : null}
+
+        {/*
+          How to use the board, as a handwritten note at the top left, where it
+          is read before the boxes rather than after them.
+        */}
+        {hasUses || hasSame ? (
+          <g transform="rotate(-1.5 48 46)">
+            <text x={48} y={46} fontSize={23} fill={ink} style={hand}>
+              hover, tab or tap a project to trace what it connects to
+            </text>
+          </g>
+        ) : null}
 
         {/* Legend, only for the line types actually on the board. */}
         {hasUses || hasSame ? (
