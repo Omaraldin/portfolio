@@ -22,15 +22,16 @@ export const BOARD_WIDTH = 1600;
 const PAD_X = 48;
 const COLS = 3;
 const BOX_W = 452;
-const BOX_H = 250;
+const BOX_H = 210;
 const GAP_X = (BOARD_WIDTH - PAD_X * 2 - BOX_W * COLS) / (COLS - 1);
-const ZONE_HEAD = 64;
-const ARC_ROOM = 96; // space above a row for a dependency arc and its label
+const HEADER = 84; // the legend strip across the top
+const ZONE_HEAD = 40; // a band's zone labels
+const ARC_ROOM = 70; // space above a band for a dependency arc and its label
 const TAB_ROOM = 34; // a library's "pkg" tab sticks up above its box
-const AUDIENCE_ROOM = 170; // arrow + stick figures + caption under a box
-const NOTE_ROOM = 56; // a red annotation under a box
-const SAME_ROOM = 120; // a dashed "same problem" dip under a row
-const ROW_GAP = 40;
+const AUDIENCE_ROOM = 112; // arrow + stick figures + caption under a box
+const NOTE_ROOM = 50; // a red annotation under a box
+const SAME_ROOM = 100; // a dashed "same problem" dip under a band
+const ROW_GAP = 28;
 
 /** Where a project goes when it doesn't name a zone. */
 const ZONE_BY_DOMAIN: Record<Domain, string> = {
@@ -69,6 +70,8 @@ export type BoardNode = {
   flow: boolean;
   caption: string;
   note?: string;
+  /** Which end of the box a note hangs from: away from any line under it. */
+  noteAnchor: "start" | "end";
   audience?: { label: string; arrowLabel?: string; x: number; y: number };
   posts: { count: number; href: string } | null;
 };
@@ -85,14 +88,22 @@ export type BoardEdge = {
   anchor?: "middle" | "start" | "end";
 };
 
-export type BoardZone = { name: string; y: number };
+export type BoardZone = { name: string };
+
+/** A zone's handwritten heading, at the top of each band it appears in. */
+export type BoardLabel = { name: string; x: number; y: number };
 
 export type Board = {
   width: number;
   height: number;
   zones: BoardZone[];
+  labels: BoardLabel[];
+  /** Dashed lines between bands, and between zones sharing a band. */
+  dividers: string[];
   nodes: BoardNode[];
   edges: BoardEdge[];
+  /** The slot that points to /work when the last band is short. */
+  more: { x: number; y: number; w: number; h: number } | null;
 };
 
 function partKind(label: string): PartKind {
@@ -155,6 +166,92 @@ function mid(p0: number[], p1: number[], p2: number[], p3: number[]) {
   ];
 }
 
+/** Every ordering of a short list. Bands hold at most COLS items, so this stays tiny. */
+function permutations<T>(items: T[]): T[][] {
+  if (items.length <= 1) return [items];
+  return items.flatMap((item, i) =>
+    permutations([...items.slice(0, i), ...items.slice(i + 1)]).map((rest) => [item, ...rest]),
+  );
+}
+
+type Segment = { zone: string; items: Project[] };
+
+/*
+  Packs zones into bands of COLS boxes, in order, so no row is left mostly
+  empty: a zone that doesn't fit in what's left of a band carries on in the
+  next one. When a zone is split, the projects linked to something already in
+  the band go first, so a line stays inside one band where it can.
+*/
+function packBands(
+  zoneOrder: string[],
+  byZone: Map<string, Project[]>,
+  linked: (a: string, b: string) => boolean,
+): Segment[][] {
+  const bands: Segment[][] = [];
+  let band: Segment[] = [];
+  let fill = 0;
+  for (const zone of zoneOrder) {
+    let items = orderZone(byZone.get(zone)!);
+    while (items.length) {
+      if (fill === COLS) {
+        bands.push(band);
+        band = [];
+        fill = 0;
+      }
+      const free = COLS - fill;
+      if (items.length > free) {
+        const inBand = band.flatMap((s) => s.items);
+        const pull = (p: Project) => (inBand.some((q) => linked(p.slug, q.slug)) ? 0 : 1);
+        items = [...items].sort((a, b) => pull(a) - pull(b));
+      }
+      const take = items.slice(0, free);
+      items = items.slice(free);
+      band.push({ zone, items: take });
+      fill += take.length;
+    }
+  }
+  if (band.length) bands.push(band);
+  return bands;
+}
+
+/*
+  Orders one band so connected projects sit side by side: tries every order
+  that keeps each zone together and picks the one with the shortest lines,
+  preferring dependencies left of their users. Ties keep the original order.
+*/
+function arrangeBand(
+  band: Segment[],
+  linked: (a: string, b: string) => boolean,
+  uses: (user: string, dep: string) => boolean,
+): Segment[] {
+  const original = band.flatMap((s) => s.items.map((p) => p.slug));
+  let best = band;
+  let bestCost = Infinity;
+  for (const order of permutations(band)) {
+    const options = order.reduce<Segment[][]>(
+      (acc, seg) =>
+        acc.flatMap((prefix) =>
+          permutations(seg.items).map((items) => [...prefix, { zone: seg.zone, items }]),
+        ),
+      [[]],
+    );
+    for (const option of options) {
+      const slugs = option.flatMap((s) => s.items.map((p) => p.slug));
+      let cost = 0;
+      slugs.forEach((a, i) =>
+        slugs.forEach((b, j) => {
+          if (i < j && linked(a, b)) cost += j - i;
+          // A dependency to the right of its user reads backwards.
+          if (i < j && uses(a, b)) cost += 0.5;
+        }),
+      );
+      slugs.forEach((s, i) => (cost += Math.abs(i - original.indexOf(s)) * 0.01));
+      if (cost < bestCost) [best, bestCost] = [option, cost];
+    }
+  }
+  return best;
+}
+
 export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board {
   // ── Group into zones, in the order projects first appear ──
   const zoneOrder: string[] = [];
@@ -171,41 +268,62 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
   const slugs = new Set(projects.map((p) => p.slug));
   const validLinks = (links: { project: string; label: string }[] | undefined) =>
     (links ?? []).filter((l) => slugs.has(l.project));
+  const bySlug = new Map(projects.map((p) => [p.slug, p]));
+  const uses = (user: string, dep: string) =>
+    validLinks(bySlug.get(user)?.board?.uses).some((l) => l.project === dep);
+  const same = (a: string, b: string) =>
+    validLinks(bySlug.get(a)?.board?.sameProblem).some((l) => l.project === b) ||
+    validLinks(bySlug.get(b)?.board?.sameProblem).some((l) => l.project === a);
+  const linked = (a: string, b: string) => uses(a, b) || uses(b, a) || same(a, b);
 
-  // Who is depended on by someone in the same row matters for the arc room.
-  const usesTargets = new Set<string>();
-  for (const p of projects) {
-    for (const l of validLinks(p.board?.uses)) usesTargets.add(p.slug), usesTargets.add(l.project);
-  }
-  const samePairs = projects.flatMap((p) =>
-    validLinks(p.board?.sameProblem).map((l) => [p.slug, l.project] as const),
-  );
+  const bands = packBands(zoneOrder, byZone, linked).map((b) => arrangeBand(b, linked, uses));
 
   const nodes: BoardNode[] = [];
-  const zones: BoardZone[] = [];
-  let y = 24;
+  const labels: BoardLabel[] = [];
+  const dividers: string[] = [];
+  let more: Board["more"] = null;
+  let y = HEADER;
 
-  for (const zone of zoneOrder) {
-    zones.push({ name: zone, y: y + 36 });
+  bands.forEach((band, bandIndex) => {
+    const items = band.flatMap((s) => s.items);
+    const inBand = new Set(items.map((p) => p.slug));
+    const top = y;
+    if (bandIndex > 0) {
+      dividers.push(
+        `M24 ${top - 8} C${BOARD_WIDTH * 0.3} ${top - 18} ${BOARD_WIDTH * 0.6} ${top + 2} ${BOARD_WIDTH - 24} ${top - 10}`,
+      );
+    }
     y += ZONE_HEAD;
+    const hasArc = items.some((p) => validLinks(p.board?.uses).some((l) => inBand.has(l.project)));
+    if (hasArc) y += ARC_ROOM;
+    else if (items.some((p) => p.board?.shape === "library")) y += TAB_ROOM;
 
-    const items = orderZone(byZone.get(zone)!);
-    for (let r = 0; r < items.length; r += COLS) {
-      const row = items.slice(r, r + COLS);
-      const hasArc = row.some((p) => usesTargets.has(p.slug));
-      if (hasArc) y += ARC_ROOM;
-      else if (row.some((p) => p.board?.shape === "library")) y += TAB_ROOM;
+    /*
+      A short last band would leave most of a row empty. Instead it is
+      centred, with a link to the full work page in the next slot.
+    */
+    const short = bandIndex === bands.length - 1 && items.length < COLS;
+    let col = short ? (COLS - items.length - 1) / 2 : 0;
 
-      row.forEach((p, c) => {
+    band.forEach((seg, segIndex) => {
+      const segX = PAD_X + col * (BOX_W + GAP_X);
+      labels.push({ name: seg.zone, x: segX, y: top + 30 });
+      if (segIndex > 0) {
+        // Stops at the boxes' bottom edge, so lines under the band cross clean.
+        const dx = segX - GAP_X / 2;
+        dividers.push(`M${dx} ${top + 6} C${dx - 4} ${top + 60} ${dx + 4} ${y + BOX_H * 0.6} ${dx - 2} ${y + BOX_H}`);
+      }
+      seg.items.forEach((p) => {
         const b = p.board;
         const flow = (b?.shape ?? "service") === "service";
         const posts = articles.filter((a) => a.related?.includes(p.slug));
-        const x = PAD_X + c * (BOX_W + GAP_X);
+        const x = PAD_X + col * (BOX_W + GAP_X);
+        col += 1;
         nodes.push({
           slug: p.slug,
           title: p.title,
           href: `/work/${p.slug}`,
-          zone,
+          zone: seg.zone,
           shape: b?.shape ?? "service",
           x,
           y,
@@ -215,33 +333,35 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
           flow,
           caption: b?.caption ?? p.stack.slice(0, 4).join(" · "),
           note: b?.note,
+          noteAnchor: "start",
           audience: b?.audience
-            ? { label: b.audience, arrowLabel: b.audienceLabel, x: x + BOX_W * 0.74, y: y + BOX_H }
+            ? { label: b.audience, arrowLabel: b.audienceLabel, x: x + BOX_W * 0.62, y: y + BOX_H }
             : undefined,
           posts: posts.length
             ? { count: posts.length, href: `/writing/${posts[0].slug}` }
             : null,
         });
       });
+    });
 
-      // Room under the row for whatever hangs below its boxes.
-      const below = Math.max(
-        0,
-        ...row.map((p) =>
-          p.board?.audience ? AUDIENCE_ROOM : p.board?.note ? NOTE_ROOM : 0,
-        ),
-      );
-      const inRow = new Set(row.map((p) => p.slug));
-      // A same-row pair needs a dip under the row; a pair across rows needs a
-      // clear run from this row's bottom to the next one's top.
-      const same = samePairs.some(([a, b]) => inRow.has(a) && inRow.has(b))
-        ? SAME_ROOM
-        : samePairs.some(([a, b]) => inRow.has(a) !== inRow.has(b) && (inRow.has(a) || inRow.has(b)))
-          ? SAME_ROOM - 40
-          : 0;
-      y += BOX_H + Math.max(below, same) + ROW_GAP;
-    }
-  }
+    if (short) more = { x: PAD_X + col * (BOX_W + GAP_X), y, w: BOX_W, h: BOX_H };
+
+    // Room under the band for whatever hangs below its boxes.
+    const below = Math.max(
+      0,
+      ...items.map((p) => (p.board?.audience ? AUDIENCE_ROOM : p.board?.note ? NOTE_ROOM : 0)),
+    );
+    // A same-band pair needs a dip under the boxes; a pair across bands
+    // needs a clear run from this band's bottom to the next one's top.
+    const dip = items.some((a) => items.some((b) => a !== b && same(a.slug, b.slug)))
+      ? SAME_ROOM
+      : items.some((a) => projects.some((b) => !inBand.has(b.slug) && same(a.slug, b.slug)))
+        ? SAME_ROOM - 40
+        : 0;
+    y += BOX_H + Math.max(below, dip) + ROW_GAP;
+  });
+
+  const zones: BoardZone[] = zoneOrder.map((name) => ({ name }));
 
   // ── Lines: only what projects declare ──
   const at = new Map(nodes.map((n) => [n.slug, n]));
@@ -322,13 +442,19 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
       const id = `same-${[p.slug, other.slug].sort().join("-")}`;
       if (edges.some((e) => e.id === id)) continue;
       let p0: number[], p1: number[], p2: number[], p3: number[];
-      let labelX: number, labelY: number, anchor: "middle" | "start";
+      let labelX: number, labelY: number, anchor: "middle" | "start" | "end";
+      const label = `same problem: ${link.label}`;
       if (Math.abs(target.y - other.y) < 1) {
-        // Same row: a dip under both boxes, labelled underneath.
+        /*
+          Same band: a dip under both boxes, labelled underneath. It leaves
+          the left box near its right end and meets the right box near its
+          left end, so the right box's note moves to its right-hand end.
+        */
         const [a, b] = target.x <= other.x ? [target, other] : [other, target];
-        const depth = a.y + a.h + SAME_ROOM - 30;
-        p0 = [a.x + a.w * 0.62, a.y + a.h + 4];
-        p3 = [b.x + b.w * 0.38, b.y + b.h + 4];
+        b.noteAnchor = "end";
+        const depth = a.y + a.h + SAME_ROOM - 44;
+        p0 = [a.x + a.w * 0.8, a.y + a.h + 4];
+        p3 = [b.x + b.w * 0.2, b.y + b.h + 4];
         p1 = [p0[0], depth];
         p2 = [p3[0], depth];
         const m = mid(p0, p1, p2, p3);
@@ -347,7 +473,11 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
         const bend = (p3[1] - p0[1]) * 0.5;
         p1 = [p0[0] + 50, p0[1] + bend];
         p2 = [p3[0] + 50, p3[1] - bend];
-        [labelX, labelY, anchor] = [p3[0] + 30, p3[1] - 6, "start"];
+        // Written to the right of the line, unless that runs off the board.
+        [labelX, labelY, anchor] =
+          p3[0] + 30 + textWidth(label, 22) < BOARD_WIDTH
+            ? [p3[0] + 30, p3[1] - 6, "start"]
+            : [p3[0] - 10, p3[1] - 6, "end"];
       }
       edges.push({
         id,
@@ -355,7 +485,7 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
         from: target.slug,
         to: other.slug,
         d: `M${p0} C${p1} ${p2} ${p3}`,
-        label: `same problem: ${link.label}`,
+        label,
         labelX,
         labelY,
         anchor,
@@ -363,7 +493,7 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
     }
   }
 
-  return { width: BOARD_WIDTH, height: y + 10, zones, nodes, edges };
+  return { width: BOARD_WIDTH, height: y + 10, zones, labels, dividers, nodes, edges, more };
 }
 
 /** A project's parts laid out on their own, for a card cover. */

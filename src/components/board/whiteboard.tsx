@@ -50,14 +50,14 @@ function Frame({ n }: { n: BoardNode }) {
 }
 
 function Node({ n }: { n: BoardNode }) {
-  const partsTop = n.y + 94;
+  const partsTop = n.y + 74;
   return (
     <g className="wb-item" data-item={n.slug}>
       <Link href={n.href} className="wb-node" data-node={n.slug} aria-label={n.title}>
         {/* Transparent fill so the whole box, not just its outline, is the link. */}
         <rect x={n.x} y={n.y} width={n.w} height={n.h} fill="transparent" />
         <Frame n={n} />
-        <text x={n.x + 26} y={n.y + 56} fontSize={38} fontWeight={700} fill={ink} style={hand}>
+        <text x={n.x + 26} y={n.y + 50} fontSize={38} fontWeight={700} fill={ink} style={hand}>
           {n.title}
         </text>
         <g transform={`translate(${n.x} 0)`}>
@@ -74,7 +74,7 @@ function Node({ n }: { n: BoardNode }) {
             </g>
           ))}
         </g>
-        <text x={n.x + 26} y={n.y + n.h - 22} fontSize={19} fill="var(--wb-muted)" style={hand}>
+        <text x={n.x + 26} y={n.y + n.h - 16} fontSize={19} fill="var(--wb-muted)" style={hand}>
           {n.caption}
         </text>
       </Link>
@@ -90,11 +90,15 @@ function Node({ n }: { n: BoardNode }) {
         </Link>
       ) : null}
 
-      {n.note ? (
-        <text x={n.x + 22} y={n.y + n.h + 36} fontSize={22} fill="var(--wb-red)" transform={`rotate(-2 ${n.x + 22} ${n.y + n.h + 36})`} style={hand}>
-          {n.note}
-        </text>
-      ) : null}
+      {n.note ? (() => {
+        const nx = n.noteAnchor === "end" ? n.x + n.w - 22 : n.x + 22;
+        const ny = n.y + n.h + 34;
+        return (
+          <text x={nx} y={ny} fontSize={22} textAnchor={n.noteAnchor} fill="var(--wb-red)" transform={`rotate(-2 ${nx} ${ny})`} style={hand}>
+            {n.note}
+          </text>
+        );
+      })() : null}
 
       {n.audience ? <Audience n={n} /> : null}
     </g>
@@ -105,12 +109,12 @@ function Node({ n }: { n: BoardNode }) {
 function Audience({ n }: { n: BoardNode }) {
   const a = n.audience!;
   const fx = a.x - 40;
-  const fy = a.y + 96;
+  const fy = a.y + 62;
   return (
     <g>
-      <path className="wb-line wb-green" markerEnd="url(#wb-arrow-green)" d={`M${a.x} ${a.y + 6} C${a.x + 6} ${a.y + 30} ${a.x + 10} ${a.y + 48} ${a.x + 12} ${a.y + 66}`} />
+      <path className="wb-line wb-green" markerEnd="url(#wb-arrow-green)" d={`M${a.x} ${a.y + 6} C${a.x + 4} ${a.y + 20} ${a.x + 6} ${a.y + 30} ${a.x + 8} ${a.y + 40}`} />
       {a.arrowLabel ? (
-        <text x={a.x + 28} y={a.y + 42} fontSize={21} fill="var(--wb-green)" style={hand}>
+        <text x={a.x + 26} y={a.y + 32} fontSize={21} fill="var(--wb-green)" style={hand}>
           {a.arrowLabel}
         </text>
       ) : null}
@@ -126,10 +130,31 @@ function Audience({ n }: { n: BoardNode }) {
           );
         })}
       </g>
-      <text x={fx - 10} y={fy + 74} fontSize={22} fontWeight={700} fill={ink} style={hand}>
+      <text x={fx - 18} y={fy + 30} fontSize={22} fontWeight={700} textAnchor="end" fill={ink} style={hand}>
         {a.label}
       </text>
     </g>
+  );
+}
+
+/** An empty slot drawn in dashed marker, pointing to the full work page. */
+function More({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
+  return (
+    <Link href="/work" className="wb-node wb-more">
+      <rect x={x} y={y} width={w} height={h} fill="transparent" />
+      <path
+        className="wb-frame"
+        strokeDasharray="12 12"
+        strokeWidth={2.4}
+        d={`M${x + 16} ${y + 2} L${x + w - 16} ${y} Q${x + w} ${y} ${x + w} ${y + 16} L${x + w + 2} ${y + h - 16} Q${x + w} ${y + h} ${x + w - 16} ${y + h} L${x + 16} ${y + h + 1} Q${x} ${y + h} ${x} ${y + h - 16} L${x + 1} ${y + 16} Q${x} ${y} ${x + 16} ${y + 2} Z`}
+      />
+      <text x={x + w / 2} y={y + h / 2 - 8} fontSize={32} fontWeight={700} textAnchor="middle" fill={ink} style={hand}>
+        every project, written up →
+      </text>
+      <text x={x + w / 2} y={y + h / 2 + 28} fontSize={21} textAnchor="middle" fill="var(--wb-muted)" style={hand}>
+        the full case studies, in one list
+      </text>
+    </Link>
   );
 }
 
@@ -153,17 +178,17 @@ export function Whiteboard({ board }: { board: Board }) {
           ))}
         </defs>
 
-        {/* Zones: a handwritten heading, and a dashed divider between areas. */}
-        {board.zones.map((z, i) => (
-          <g key={z.name} aria-hidden="true">
-            {i > 0 ? (
-              <path className="wb-line" stroke="var(--wb-muted)" strokeDasharray="10 12" strokeWidth={2} d={`M24 ${z.y - 60} C${board.width * 0.3} ${z.y - 70} ${board.width * 0.6} ${z.y - 50} ${board.width - 24} ${z.y - 62}`} />
-            ) : null}
-            <text x={48} y={z.y} fontSize={26} fill="var(--wb-muted)" style={hand}>
-              {z.name}
+        {/* Zones: dashed dividers between areas, and a handwritten heading for each. */}
+        <g aria-hidden="true">
+          {board.dividers.map((d) => (
+            <path key={d} className="wb-line" stroke="var(--wb-muted)" strokeDasharray="10 12" strokeWidth={2} d={d} />
+          ))}
+          {board.labels.map((l) => (
+            <text key={`${l.name}-${l.y}`} x={l.x} y={l.y} fontSize={26} fill="var(--wb-muted)" style={hand}>
+              {l.name}
             </text>
-          </g>
-        ))}
+          ))}
+        </g>
 
         {/* Lines first, so boxes sit on top of them. */}
         {board.edges.map((e) => (
@@ -196,22 +221,24 @@ export function Whiteboard({ board }: { board: Board }) {
           <Node key={n.slug} n={n} />
         ))}
 
+        {board.more ? <More {...board.more} /> : null}
+
         {/* Legend, only for the line types actually on the board. */}
         {hasUses || hasSame ? (
-          <g aria-hidden="true" transform={`translate(${board.width - 400} ${board.zones[0].y - 14})`}>
-            {hasUses ? (
-              <>
-                <path className="wb-line wb-green" strokeWidth={3} d="M0 0 L56 -2" />
-                <text x={70} y={7} fontSize={19} fill={ink} style={hand}>uses</text>
-              </>
-            ) : null}
+          <g aria-hidden="true" transform={`translate(${board.width - 48} 40)`}>
+            <text x={0} y={7} fontSize={19} textAnchor="end" fill="var(--wb-muted)" style={hand}>no line = stands on its own</text>
             {hasSame ? (
               <>
-                <path className="wb-line" strokeWidth={2.6} strokeDasharray="7 9" d="M0 34 L56 32" />
-                <text x={70} y={41} fontSize={19} fill={ink} style={hand}>same problem, different project</text>
+                <path className="wb-line" strokeWidth={2.6} strokeDasharray="7 9" d="M-690 0 L-634 -2" />
+                <text x={-620} y={7} fontSize={19} fill={ink} style={hand}>same problem, different project</text>
               </>
             ) : null}
-            <text x={0} y={hasSame ? 76 : 42} fontSize={18} fill="var(--wb-muted)" style={hand}>no line = stands on its own</text>
+            {hasUses ? (
+              <>
+                <path className="wb-line wb-green" strokeWidth={3} d="M-820 0 L-764 -2" />
+                <text x={-750} y={7} fontSize={19} fill={ink} style={hand}>uses</text>
+              </>
+            ) : null}
           </g>
         ) : null}
       </svg>
