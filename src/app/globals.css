@@ -73,6 +73,7 @@
   --wb-green: #2f6b45; /* the sweater: data flow */
   --wb-red: #c23a2e; /* the tie: annotations */
   --wb-blue: #2957a4;
+  --wb-purple: #6b3fa0;
   --wb-note: #ffe27a;
   --wb-on-note: #2a2a22;
 }
@@ -84,6 +85,7 @@
   --wb-green: #9fd4a2;
   --wb-red: #f2917f;
   --wb-blue: #9cc3f0;
+  --wb-purple: #c9a7f2;
 }
 
 .dark {

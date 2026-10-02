@@ -46,6 +46,26 @@ const ZONE_BY_DOMAIN: Record<Domain, string> = {
   games: "Games",
 };
 
+/*
+  Each zone writes in one of the markers on the tray. Only its heading and a
+  small corner tick on each box take the colour; outlines stay ink.
+*/
+const ZONE_MARKER: Record<string, string> = {
+  "Platforms & web": "var(--wb-green)",
+  "Creative tools": "var(--wb-red)",
+  "Devices & data": "var(--wb-blue)",
+  Apps: "var(--wb-purple)",
+};
+const SPARE_MARKERS = ["var(--wb-blue)", "var(--wb-purple)", "var(--wb-green)", "var(--wb-red)"];
+
+/** The marker colour a zone is written in. Zones without one get a spare, by name. */
+export function markerOf(zone: string): string {
+  if (ZONE_MARKER[zone]) return ZONE_MARKER[zone];
+  let h = 0;
+  for (const c of zone) h = (h * 31 + c.charCodeAt(0)) | 0;
+  return SPARE_MARKERS[Math.abs(h) % SPARE_MARKERS.length];
+}
+
 /** The board area a project sits in: its own `zone`, else one from its first domain. */
 export function zoneOf(project: Project): string {
   return project.board?.zone ?? ZONE_BY_DOMAIN[project.domains[0]] ?? "Other work";
@@ -60,6 +80,8 @@ export type BoardNode = {
   title: string;
   href: string;
   zone: string;
+  /** The zone's marker colour, for the box's corner tick. */
+  color: string;
   shape: "service" | "library";
   x: number;
   y: number;
@@ -88,10 +110,10 @@ export type BoardEdge = {
   anchor?: "middle" | "start" | "end";
 };
 
-export type BoardZone = { name: string };
+export type BoardZone = { name: string; color: string };
 
 /** A zone's handwritten heading, at the top of each band it appears in. */
-export type BoardLabel = { name: string; x: number; y: number };
+export type BoardLabel = { name: string; color: string; x: number; y: number };
 
 export type Board = {
   width: number;
@@ -307,7 +329,7 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
 
     band.forEach((seg, segIndex) => {
       const segX = PAD_X + col * (BOX_W + GAP_X);
-      labels.push({ name: seg.zone, x: segX, y: top + 30 });
+      labels.push({ name: seg.zone, color: markerOf(seg.zone), x: segX, y: top + 30 });
       if (segIndex > 0) {
         // Stops at the boxes' bottom edge, so lines under the band cross clean.
         const dx = segX - GAP_X / 2;
@@ -324,6 +346,7 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
           title: p.title,
           href: `/work/${p.slug}`,
           zone: seg.zone,
+          color: markerOf(seg.zone),
           shape: b?.shape ?? "service",
           x,
           y,
@@ -361,7 +384,7 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
     y += BOX_H + Math.max(below, dip) + ROW_GAP;
   });
 
-  const zones: BoardZone[] = zoneOrder.map((name) => ({ name }));
+  const zones: BoardZone[] = zoneOrder.map((name) => ({ name, color: markerOf(name) }));
 
   // ── Lines: only what projects declare ──
   const at = new Map(nodes.map((n) => [n.slug, n]));

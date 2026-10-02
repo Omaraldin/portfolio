@@ -23,6 +23,7 @@ export function BoardFrame({
         <span className="tray-item tray-marker" style={{ ["--cap" as string]: "#2f6b45", left: "12%" }} />
         <span className="tray-item tray-marker" style={{ ["--cap" as string]: "#c23a2e", left: "19%" }} />
         <span className="tray-item tray-marker" style={{ ["--cap" as string]: "#2957a4", left: "25%" }} />
+        <span className="tray-item tray-marker" style={{ ["--cap" as string]: "#6b3fa0", left: "31%" }} />
         <span className="tray-item tray-chalk" style={{ left: "14%" }} />
         <span className="tray-item tray-chalk tray-chalk-short" style={{ left: "21%" }} />
         <span className="tray-item tray-eraser" style={{ right: "10%" }} />

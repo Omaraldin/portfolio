@@ -57,6 +57,13 @@ function Node({ n }: { n: BoardNode }) {
         {/* Transparent fill so the whole box, not just its outline, is the link. */}
         <rect x={n.x} y={n.y} width={n.w} height={n.h} fill="transparent" />
         <Frame n={n} />
+        {/* The zone's marker: a short tick round the bottom-right corner. */}
+        <path
+          className="wb-line"
+          // Inline: .wb-line's stroke rules would beat presentation attributes.
+          style={{ stroke: n.color, strokeWidth: 4 }}
+          d={`M${n.x + n.w - 44} ${n.y + n.h + 9} L${n.x + n.w + 8} ${n.y + n.h + 8} L${n.x + n.w + 9} ${n.y + n.h - 44}`}
+        />
         <text x={n.x + 26} y={n.y + 50} fontSize={38} fontWeight={700} fill={ink} style={hand}>
           {n.title}
         </text>
@@ -184,7 +191,7 @@ export function Whiteboard({ board }: { board: Board }) {
             <path key={d} className="wb-line" stroke="var(--wb-muted)" strokeDasharray="10 12" strokeWidth={2} d={d} />
           ))}
           {board.labels.map((l) => (
-            <text key={`${l.name}-${l.y}`} x={l.x} y={l.y} fontSize={26} fill="var(--wb-muted)" style={hand}>
+            <text key={`${l.name}-${l.y}`} x={l.x} y={l.y} fontSize={26} fill={l.color} style={hand}>
               {l.name}
             </text>
           ))}

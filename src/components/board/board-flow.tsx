@@ -13,7 +13,7 @@ export function BoardFlow({ board }: { board: Board }) {
     <div className="space-y-8" style={{ fontFamily: "var(--font-hand)" }}>
       {board.zones.map((zone) => (
         <section key={zone.name}>
-          <h3 className="text-[22px] text-[color:var(--wb-muted)]">{zone.name}</h3>
+          <h3 className="text-[22px]" style={{ color: zone.color }}>{zone.name}</h3>
           <div className="mt-3 space-y-3">
             {board.nodes
               .filter((n) => n.zone === zone.name)
@@ -27,6 +27,7 @@ export function BoardFlow({ board }: { board: Board }) {
                     <Link
                       href={n.href}
                       className="block rounded-[14px_18px_12px_16px] border-[3px] border-[color:var(--wb-ink)] px-4 py-3 text-[color:var(--wb-ink)]"
+                      style={{ borderLeftColor: zone.color }}
                     >
                       <span className="block text-[25px] leading-tight font-bold">{n.title}</span>
                       <span className="mt-1 block text-[17px] text-[color:var(--wb-muted)]">
