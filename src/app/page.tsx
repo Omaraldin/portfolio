@@ -5,7 +5,7 @@ import { projects } from "@/content/projects";
 import { certifications, featuredCertifications } from "@/content/certifications";
 import { getArticles } from "@/lib/articles";
 import { layoutBoard } from "@/lib/board-layout";
-import { ArticleRow } from "@/components/article-row";
+import { PinnedPosts } from "@/components/pinned-posts";
 import { CertificationChip } from "@/components/certification-row";
 import { Chibi } from "@/components/chibi";
 import { Whiteboard } from "@/components/board/whiteboard";
@@ -110,12 +110,7 @@ export default function Home() {
           hrefLabel="All posts"
         />
         {latest ? (
-          <div className="border-b border-rule">
-            <ArticleRow article={latest} lead />
-            {moreArticles.slice(0, 3).map((article) => (
-              <ArticleRow key={article.slug} article={article} />
-            ))}
-          </div>
+          <PinnedPosts articles={[latest, ...moreArticles.slice(0, 3)]} />
         ) : (
           <EmptyState>First post is on its way ✍️</EmptyState>
         )}

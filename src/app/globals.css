@@ -417,6 +417,25 @@ body {
   }
 }
 
+/*
+  Posts pinned up beside the board: a sticky note or index card at its own
+  slight angle, which straightens and lifts when pointed at.
+*/
+.pinned {
+  transform: rotate(var(--tilt, 0deg));
+}
+.pinned:hover,
+.pinned:focus-visible {
+  transform: translateY(-3px) rotate(0deg);
+}
+/*
+  An index card's red header rule, under the date. Its blue lines are left
+  off: they could never sit under text that wraps at any width.
+*/
+.pinned-card {
+  background-image: linear-gradient(transparent 58px, rgb(194 58 46 / 0.45) 58px 60px, transparent 60px);
+}
+
 /* Numbers that sit in columns must not jitter between values. */
 .tabular {
   font-variant-numeric: tabular-nums;
