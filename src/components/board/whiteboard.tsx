@@ -177,7 +177,7 @@ export function Whiteboard({ board }: { board: Board }) {
                     <mpath href={`#${e.id}`} />
                   </animateMotion>
                 </circle>
-                <text x={e.labelX} y={e.labelY} fontSize={23} textAnchor="middle" fill="var(--wb-green)" style={hand}>
+                <text x={e.labelX} y={e.labelY} fontSize={23} textAnchor={e.anchor ?? "middle"} fill="var(--wb-green)" style={hand}>
                   {e.label}
                 </text>
               </>

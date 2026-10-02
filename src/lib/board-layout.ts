@@ -82,7 +82,7 @@ export type BoardEdge = {
   label: string;
   labelX: number;
   labelY: number;
-  anchor?: "middle" | "start";
+  anchor?: "middle" | "start" | "end";
 };
 
 export type BoardZone = { name: string; y: number };
@@ -253,11 +253,43 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
     for (const link of validLinks(p.board?.uses)) {
       const source = at.get(link.project)!;
       let p0: number[], p1: number[], p2: number[], p3: number[];
-      if (Math.abs(source.y - target.y) < 1) {
-        // Same row: an arc over the gap, from the dependency to its user.
+      const adjacent = Math.abs(source.x - target.x) < source.w + GAP_X + 1;
+      if (Math.abs(source.y - target.y) < 1 && adjacent) {
+        /*
+          Neighbours in a row: out of the dependency's side, up over the gap
+          and down into its user's top. Leaving from the side keeps the start
+          visibly on the box — the top right corner is where a posts note
+          sits, and a line leaving there looked like it began in mid-air.
+        */
         const leftToRight = source.x < target.x;
-        const sx = leftToRight ? source.x + source.w * 0.78 : source.x + source.w * 0.22;
-        const tx = leftToRight ? target.x + target.w * 0.22 : target.x + target.w * 0.78;
+        const dir = leftToRight ? 1 : -1;
+        const sx = leftToRight ? source.x + source.w + 4 : source.x - 4;
+        const tx = leftToRight ? target.x + target.w * 0.2 : target.x + target.w * 0.8;
+        // Two curves: rise through the gap to just above the target's
+        // corner, then over and down into its top.
+        const corner = [leftToRight ? target.x + 6 : target.x + target.w - 6, target.y - 36];
+        p0 = [sx, source.y + 48];
+        p1 = [sx + dir * GAP_X * 0.8, p0[1]];
+        p2 = [corner[0] - dir * 34, corner[1]];
+        p3 = [tx, target.y - 10];
+        edges.push({
+          id: `uses-${source.slug}-${target.slug}`,
+          kind: "uses",
+          from: source.slug,
+          to: target.slug,
+          d: `M${p0} C${p1} ${p2} ${corner} C${[corner[0] + dir * 40, corner[1] - 26]} ${[tx, target.y - 52]} ${p3}`,
+          label: link.label,
+          labelX: tx + 18 * dir,
+          labelY: target.y - 52,
+          anchor: leftToRight ? "start" : "end",
+        });
+        continue;
+      } else if (Math.abs(source.y - target.y) < 1) {
+        // Further apart in a row: an arc over whatever is between them, from
+        // the middle of each box's top, clear of the posts notes.
+        const leftToRight = source.x < target.x;
+        const sx = source.x + source.w * (leftToRight ? 0.55 : 0.2);
+        const tx = target.x + target.w * (leftToRight ? 0.2 : 0.55);
         p0 = [sx, source.y - 4];
         p1 = [sx, source.y - ARC_ROOM];
         p2 = [tx, target.y - ARC_ROOM];
