@@ -53,7 +53,8 @@ export function ChibiDock() {
         aria-hidden
         className="no-print pointer-events-none sticky bottom-0 z-40 h-28 overflow-hidden px-3 sm:h-36 sm:px-6 md:static"
       >
-        <div className="relative mx-auto h-full w-full max-w-[1240px]">
+        {/* Matches the footer board's width, so he stands near its right end. */}
+        <div className="relative mx-auto h-full w-[min(100vw-24px,1600px)]">
           <div className="absolute right-6 bottom-0 flex items-end gap-2 sm:right-16">
             <p
               style={{ fontFamily: "var(--font-hand)" }}

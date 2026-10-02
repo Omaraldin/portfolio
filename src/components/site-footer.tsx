@@ -16,19 +16,24 @@ const MORE = [
 
 export function SiteFooter() {
   return (
-    <footer className="no-print px-3 pb-3 sm:px-6 sm:pb-6">
+    <footer className="no-print pb-3 sm:pb-6">
       {/*
         The chibi who stands on this card lives in ChibiDock, rendered just
         above the footer in the root layout: on phones he rides along the
         bottom of the screen and lands here.
       */}
-      <div className="relative mx-auto w-full max-w-[1240px]">
+      {/*
+        The same width as the home-page board, so the page hangs two matching
+        boards: the whiteboard at the top and this chalkboard at the bottom.
+        The writing inside keeps to the content column.
+      */}
+      <div className="relative mx-auto w-[min(100vw-24px,1600px)]">
         {/*
           A chalkboard in both themes, in a wooden frame with a chalk ledge:
           the home page hangs a whiteboard, the footer closes on its sibling.
         */}
         <BoardFrame variant="chalk">
-        <div className="relative px-6 py-14 text-[#ecebe3] sm:px-12 sm:py-16">
+        <div className="relative mx-auto max-w-[1240px] px-6 py-14 text-[#ecebe3] sm:px-12 sm:py-16 lg:px-6">
 
           <div className="relative grid gap-12 lg:grid-cols-[1.4fr_1fr]">
             <div>
