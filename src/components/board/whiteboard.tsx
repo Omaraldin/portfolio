@@ -170,7 +170,7 @@ export function Whiteboard({ board }: { board: Board }) {
   const hasSame = board.edges.some((e) => e.kind === "same");
 
   return (
-    <BoardTracer>
+    <BoardTracer demo={board.edges.find((e) => e.kind === "uses")?.id}>
       <svg
         viewBox={`0 0 ${board.width} ${board.height}`}
         className="block h-auto w-full overflow-visible"
@@ -204,7 +204,9 @@ export function Whiteboard({ board }: { board: Board }) {
               <>
                 <path id={e.id} className="wb-line wb-green wb-draw" strokeWidth={3} pathLength={1} markerEnd="url(#wb-arrow-green)" d={e.d} />
                 {/* A dot of data travelling the dependency. */}
-                <circle r={6} fill="var(--wb-green)" className="wb-packet">
+                {/* Hidden until it starts moving: before that it sits at the board's corner. */}
+                <circle r={6} fill="var(--wb-green)" className="wb-packet" visibility="hidden">
+                  <set attributeName="visibility" to="visible" begin="1.6s" />
                   <animateMotion dur="2.8s" begin="1.6s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear">
                     <mpath href={`#${e.id}`} />
                   </animateMotion>
