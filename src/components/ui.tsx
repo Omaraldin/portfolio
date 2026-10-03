@@ -6,7 +6,14 @@ import { EmojiText } from "./emoji";
  * A red marker stroke under a heading — the same hand that writes on the
  * home-page board. Decorative, and dropped in print.
  */
-export function MarkerUnderline({ className = "" }: { className?: string }) {
+export function MarkerUnderline({
+  className = "",
+  color = "var(--wb-red)",
+}: {
+  className?: string;
+  /** Red by default; a board zone heading uses its zone's marker. */
+  color?: string;
+}) {
   return (
     <svg
       aria-hidden
@@ -17,7 +24,7 @@ export function MarkerUnderline({ className = "" }: { className?: string }) {
       <path
         d="M2 8 C 40 3, 90 10, 140 5 S 190 6, 198 4"
         fill="none"
-        stroke="var(--wb-red)"
+        stroke={color}
         strokeWidth="3"
         strokeLinecap="round"
       />

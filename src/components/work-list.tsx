@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Project } from "@/content/types";
 import { DOMAIN_LABELS } from "@/content/taxonomy";
-import { sketchOf, zoneOf } from "@/lib/board-layout";
+import { markerOf, sketchOf, zoneOf } from "@/lib/board-layout";
 import { PartsSketch } from "./board/parts-sketch";
 import { MarkerUnderline } from "./ui";
 
@@ -30,17 +30,18 @@ export function WorkList({ projects }: { projects: Project[] }) {
     <div className="space-y-16 pt-6">
       {zones.map((zone) => (
         <section key={zone.name} aria-labelledby={`zone-${zone.name}`}>
+          {/* Written in the zone's marker, as on the home-page board. */}
           <h2
             id={`zone-${zone.name}`}
-            className="inline-block text-[26px] text-ink-muted"
-            style={{ fontFamily: "var(--font-hand)" }}
+            className="inline-block text-[26px]"
+            style={{ fontFamily: "var(--font-hand)", color: markerOf(zone.name) }}
           >
             {zone.name}
-            <MarkerUnderline className="w-full" />
+            <MarkerUnderline className="w-full" color={markerOf(zone.name)} />
           </h2>
           <div className="mt-4 border-b border-rule">
             {zone.items.map((project) => (
-              <WorkRow key={project.slug} project={project} />
+              <WorkRow key={project.slug} project={project} color={markerOf(zone.name)} />
             ))}
           </div>
         </section>
@@ -49,7 +50,7 @@ export function WorkList({ projects }: { projects: Project[] }) {
   );
 }
 
-function WorkRow({ project }: { project: Project }) {
+function WorkRow({ project, color }: { project: Project; color: string }) {
   const sketch = sketchOf(project);
   const metric = project.metrics[0];
   const note = project.board?.note;
@@ -60,7 +61,13 @@ function WorkRow({ project }: { project: Project }) {
       className="group grid gap-6 border-t border-rule py-8 md:grid-cols-[minmax(0,380px)_1fr] md:gap-10"
     >
       {/* The system, drawn the way the board draws it. */}
-      <div className="surface grid aspect-[16/9] place-items-center transition-colors group-hover:border-accent">
+      <div className="surface relative grid aspect-[16/9] place-items-center transition-colors group-hover:border-accent">
+        {/* The zone's corner tick, as on the board's boxes. */}
+        <span
+          aria-hidden
+          className="absolute -right-1.5 -bottom-1.5 h-8 w-8 rounded-br-[10px] border-r-[3px] border-b-[3px]"
+          style={{ borderColor: color }}
+        />
         <PartsSketch
           parts={sketch.parts}
           flow={sketch.flow}
