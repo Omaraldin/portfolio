@@ -3,10 +3,12 @@
 import { useMemo, useState } from "react";
 import type { ArticleMeta } from "@/content/types";
 import { ArticleRow } from "./article-row";
+import { Pinned } from "./pinned-posts";
 
 /**
- * The blog index: every post as an editorial row, newest first with a larger
- * title, filterable by tag. Filtering is client-side over the already
+ * The blog index: the newest post pinned up as a sticky note, as on the home
+ * page, then every other post as an editorial row, filterable by tag. Rows
+ * suit a long archive better than a wall of notes. Filtering is client-side over the already
  * rendered list, so it is instant and needs no navigation.
  */
 export function WritingIndex({ articles }: { articles: ArticleMeta[] }) {
@@ -40,12 +42,18 @@ export function WritingIndex({ articles }: { articles: ArticleMeta[] }) {
         </div>
       ) : null}
 
-      <div className="border-b border-rule">
-        {feature ? <ArticleRow article={feature} lead /> : null}
-        {rest.map((article) =>
-          article ? <ArticleRow key={article.slug} article={article} /> : null,
-        )}
-      </div>
+      {feature ? (
+        <div className="max-w-xl pt-3 pb-12">
+          <Pinned article={feature} sticky tilt="-1deg" />
+        </div>
+      ) : null}
+      {rest.some(Boolean) ? (
+        <div className="border-b border-rule">
+          {rest.map((article) =>
+            article ? <ArticleRow key={article.slug} article={article} /> : null,
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

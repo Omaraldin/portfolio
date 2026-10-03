@@ -20,7 +20,7 @@ function Tape() {
   );
 }
 
-function Pinned({ article, sticky, tilt }: { article: ArticleMeta; sticky: boolean; tilt: string }) {
+export function Pinned({ article, sticky, tilt }: { article: ArticleMeta; sticky: boolean; tilt: string }) {
   return (
     <Link
       href={`/writing/${article.slug}`}
