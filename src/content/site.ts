@@ -14,14 +14,15 @@ export const site = {
   location: "New Cairo, Egypt",
   email: "omar@khashab.horusbyte.com",
   /*
-    TODO: replace with the real number.
+    TODO: set the real number. Until then it is null, and the CV and its PDF
+    leave the phone out rather than print a placeholder someone might dial.
 
     Written in full international form because that is what a parser stores and
     what an overseas recruiter can dial without editing. It appears on the CV
     and its PDF only — publishing a personal number on every page of a public
     site invites scrapers.
   */
-  phone: "+20 100 000 0000",
+  phone: null as string | null,
   url: "https://khashab.horusbyte.com",
   /*
     The card a shared link previews with (X/Twitter, Discord, WhatsApp, Slack…)
