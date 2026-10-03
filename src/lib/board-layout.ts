@@ -519,6 +519,48 @@ export function layoutBoard(projects: Project[], articles: ArticleMeta[]): Board
   return { width: BOARD_WIDTH, height: y + 10, zones, labels, dividers, nodes, edges, more };
 }
 
+export type Connection = {
+  kind: "uses" | "usedBy" | "same";
+  project: Project;
+  label: string;
+};
+
+/**
+ * Every declared link touching one project, from either end: what it uses,
+ * what uses it, and what shares its problem. Same rule as the board — only
+ * declared links, never inferred ones.
+ */
+export function connectionsOf(project: Project, all: Project[]): Connection[] {
+  const bySlug = new Map(all.map((p) => [p.slug, p]));
+  const out: Connection[] = [];
+  for (const l of project.board?.uses ?? []) {
+    const other = bySlug.get(l.project);
+    if (other) out.push({ kind: "uses", project: other, label: l.label });
+  }
+  for (const other of all) {
+    for (const l of other.board?.uses ?? []) {
+      if (l.project === project.slug) out.push({ kind: "usedBy", project: other, label: l.label });
+    }
+  }
+  const same = new Set<string>();
+  for (const l of project.board?.sameProblem ?? []) {
+    const other = bySlug.get(l.project);
+    if (other && !same.has(other.slug)) {
+      same.add(other.slug);
+      out.push({ kind: "same", project: other, label: l.label });
+    }
+  }
+  for (const other of all) {
+    for (const l of other.board?.sameProblem ?? []) {
+      if (l.project === project.slug && !same.has(other.slug)) {
+        same.add(other.slug);
+        out.push({ kind: "same", project: other, label: l.label });
+      }
+    }
+  }
+  return out;
+}
+
 /** A project's parts laid out on their own, for a card cover. */
 export function sketchOf(project: Project): { parts: BoardPart[]; flow: boolean } {
   const flow = (project.board?.shape ?? "service") === "service";

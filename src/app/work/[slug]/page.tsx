@@ -15,7 +15,7 @@ import { mdxComponents } from "@/components/mdx-components";
 import { MarkerUnderline, StatBlock, TagChip } from "@/components/ui";
 import { ProjectMediaGallery } from "@/components/project-media";
 import { PartsSketch } from "@/components/board/parts-sketch";
-import { sketchOf } from "@/lib/board-layout";
+import { connectionsOf, markerOf, sketchOf, zoneOf } from "@/lib/board-layout";
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -169,8 +169,10 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           The facts panel. Sticky on wide screens so the stack and links stay in
           reach while reading; on narrow screens it simply follows the write-up.
         */}
-        <aside className="lg:sticky lg:top-28 lg:self-start">
+        {/* Capped to the viewport so a tall panel never pins its end off screen. */}
+        <aside className="space-y-5 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:self-start lg:overflow-y-auto">
           <Facts project={project} />
+          <OnTheBoard project={project} />
         </aside>
       </div>
 
@@ -236,6 +238,47 @@ function Facts({ project }: { project: Project }) {
           ))}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Where this project sits on the home-page board and what it is linked to
+ * there, so the connections are visible from the case study too.
+ */
+function OnTheBoard({ project }: { project: Project }) {
+  const links = connectionsOf(project, projects);
+  if (links.length === 0) return null;
+  const zone = zoneOf(project);
+  const hand = { fontFamily: "var(--font-hand)" };
+  return (
+    <div className="surface p-6">
+      <p className="text-[20px]" style={hand}>
+        on the board, in <span style={{ color: markerOf(zone) }}>{zone}</span>
+      </p>
+      <ul className="mt-3 space-y-2">
+        {links.map((c) => (
+          <li key={`${c.kind}-${c.project.slug}`}>
+            <Link
+              href={`/work/${c.project.slug}`}
+              className={`block rounded-md border-2 px-3 py-1.5 text-[17px] leading-snug transition-colors hover:bg-paper-raised ${
+                c.kind === "same"
+                  ? "border-dashed border-[color:var(--wb-ink)] text-ink"
+                  : "border-[color:var(--wb-green)] text-[color:var(--wb-green)]"
+              }`}
+              style={hand}
+            >
+              {c.kind === "uses" ? (
+                <>uses <strong>{c.project.title}</strong>: {c.label}</>
+              ) : c.kind === "usedBy" ? (
+                <><strong>{c.project.title}</strong> uses it: {c.label}</>
+              ) : (
+                <>same problem as <strong>{c.project.title}</strong>: {c.label}</>
+              )}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
